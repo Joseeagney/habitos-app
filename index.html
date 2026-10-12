@@ -309,7 +309,7 @@ const SV=d=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+d+'</svg>',IC={moon:S
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['D','L','M','M','J','V','S'],ORDER=[1,2,3,4,5,6,0];
 const STAGES=['Semilla','Brote','Espiga','Cosecha'],MOMENTS=[['manana','Mañana','09:00'],['tarde','Tarde','15:00'],['noche','Noche','23:30']];
 const SEED={habitos:[
- {id:'gym',name:'Gimnasio',days:[1,2,4],from:'2026-10-12',active:true,time:'08:30',moment:'manana',min:'Ir igual y hacer 20 min',goal:'g_fisico',num:null},
+ {id:'gym',name:'Gimnasio',days:[1,2,3,4],perWeek:3,from:'2026-10-12',active:true,time:'08:30',moment:'manana',min:'Ir igual y hacer 20 min',goal:'g_fisico',num:null},
  {id:'estudio',name:'Estudio autodidacta',days:[1,2,3,4,6],from:'2026-10-12',active:true,time:'10:00',moment:'manana',min:'15 min de agro',goal:'g_facu',num:{label:'Tiempo de estudio',unit:'min',step:15,autoDone:true}},
  {id:'innova',name:'Innova con Juan',days:[1,2,3,4,5,6],from:'2026-10-12',active:true,time:'15:00',moment:'tarde',min:'1 tarea concreta (publicar, responder o reponer)',goal:'g_innova',num:null},
  {id:'gastos',name:'Anotar gastos',days:[0,1,2,3,4,5,6],from:'2026-10-12',active:true,time:'',moment:'noche',min:'Anotar al menos el total del día',goal:'g_fin',num:null},
@@ -323,14 +323,15 @@ const SEED={habitos:[
  {id:'g_lectura',title:'Leer 1 libro cada 4 a 6 semanas',why:'Ser autodidacta: aprender todos los días por mi cuenta.',deadline:'2026-12-31',metrics:[{id:'m6',label:'Libros terminados',type:'counter',target:2,unit:'',scale:1,cur:0}],hitos:[{id:'t6',t:'Elegir el primer libro',done:false}]},
  {id:'g_mente',title:'Claridad mental',why:'Dormir 7 a 8 horas, sin celular antes de dormir.',deadline:'',metrics:[{id:'m7',label:'Noches sin celular',type:'count',habit:'sueno',target:null,unit:'',scale:1}],hitos:[]}],
  fijos:[{id:'f1',name:'Trabajo en las canchas',time:'19:00',days:[1,2,3,4,5,6],until:''},{id:'f2',name:'Facultad',time:'08:30',days:[5],until:'2026-11-13'}],
- dias:{},semanas:{},backup:'',seedV:2};
+ dias:{},semanas:{},backup:'',seedV:3};
 
 /* ---------- estado y guardado local ---------- */
 let S;
 function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):JSON.parse(JSON.stringify(SEED));}catch(e){S=JSON.parse(JSON.stringify(SEED));}
   ['habitos','objetivos','fijos'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(SEED[k]));});S.dias=S.dias||{};S.semanas=S.semanas||{};}
 let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('No se pudo guardar: el celular no tiene espacio');}},150);}
-load();if(S.seedV!==2){if(!Object.keys(S.dias).length){['habitos','objetivos','fijos'].forEach(k=>S[k]=JSON.parse(JSON.stringify(SEED[k])));}S.seedV=2;save();}
+load();if((S.seedV||0)<2){if(!Object.keys(S.dias).length){['habitos','objetivos','fijos'].forEach(k=>S[k]=JSON.parse(JSON.stringify(SEED[k])));}S.seedV=2;save();}
+if(S.seedV<3){const g=S.habitos.find(h=>h.id==='gym');if(g&&!g.perWeek){g.days=[1,2,3,4];g.perWeek=3;}S.seedV=3;save();}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -347,7 +348,10 @@ const st=(s,k)=>{const v=S.dias[s]&&S.dias[s][k];return typeof v==='number'?v:0;
 const nv=(s,k)=>{const v=S.dias[s]&&S.dias[s]['n_'+k];return typeof v==='number'?v:0;};
 const started=(h,s)=>h.active!==false&&(!h.from||s>=h.from);
 const sched=(h,s)=>started(h,s)&&(h.days||[]).includes(dow(s));
-const counts=(h,s)=>sched(h,s)&&st(s,h.id)!==-1;
+const quotaFree=(h,s)=>{if(!h.perWeek||st(s,h.id)>0)return false;const m=mondayOf(s),T=todayStr(),ds=[0,1,2,3,4,5,6].map(k=>add(m,k)).filter(d=>sched(h,d));
+  if(ds.filter(d=>d!==s&&st(d,h.id)>0).length>=h.perWeek)return true;if(s>=T)return false;
+  return ds.filter(d=>d<=s&&st(d,h.id)===0).length<=ds.length-h.perWeek;};
+const counts=(h,s)=>sched(h,s)&&st(s,h.id)!==-1&&!quotaFree(h,s);
 const goalById=id=>GOALS().find(g=>g.id===id);
 const uid=p=>p+Math.random().toString(36).slice(2,8);
 const round1=x=>Math.round(x*10)/10;
@@ -389,7 +393,7 @@ function renderHeader(){const t=todayStr(),hr=Number(new Date().toLocaleString('
   document.getElementById('dateline').textContent=fmt(t,{weekday:'long',day:'numeric',month:'long'});}
 function renderHoy(){const T=todayStr(),todays=HABS().filter(h=>sched(h,T));
   // E3
-  const req=todays.filter(h=>st(T,h.id)!==-1),dn=req.filter(h=>st(T,h.id)>0).length,ds=dayStreak();
+  const req=todays.filter(h=>counts(h,T)),dn=req.filter(h=>st(T,h.id)>0).length,ds=dayStreak();
   document.getElementById('sumBig').innerHTML=req.length?`${dn}<small> / ${req.length}</small>`:'—';
   document.getElementById('sumFire').textContent=ds;document.getElementById('sumFireTxt').textContent=ds===1?'día seguido':'días seguidos';
   const sg=document.getElementById('sumSegs');sg.innerHTML='';todays.forEach(h=>{const v=st(T,h.id),i=document.createElement('i');i.className=v===2?'on':v===1?'half':v===-1?'free':'';i.title=h.name;sg.appendChild(i);});sg.hidden=!todays.length;
@@ -400,10 +404,10 @@ function renderHoy(){const T=todayStr(),todays=HABS().filter(h=>sched(h,T));
     if(s===T)d.className='t';d.appendChild(i);d.append(DL[ORDER[k]]);d.title=fmt(s,{weekday:'long'})+(r===null?'':' · '+Math.round(r*100)+'%');wk.appendChild(d);}
   // avisos (suaves, sin botones repetidos)
   const bn=document.getElementById('banner'),miss=[],stuck=[];
-  HABS().forEach(h=>{if(!sched(h,T)||st(T,h.id)!==0)return;let s=add(T,-1),k=0,z=0;
+  HABS().forEach(h=>{if(!counts(h,T)||st(T,h.id)!==0)return;let s=add(T,-1),k=0,z=0;
     for(let i=0;i<60&&s>=firstDate();i++,s=add(s,-1)){if(!counts(h,s))continue;if(st(s,h.id)===0)z++;else break;}
     if(z>=3)stuck.push([h,z]);else if(z>=1)miss.push(h.name);});
-  const hr=Number(new Date().toLocaleString('en-US',{timeZone:TZ,hour:'numeric',hour12:false})),left=hr>=20?todays.filter(h=>st(T,h.id)===0):[];
+  const hr=Number(new Date().toLocaleString('en-US',{timeZone:TZ,hour:'numeric',hour12:false})),left=hr>=20?todays.filter(h=>counts(h,T)&&st(T,h.id)===0):[];
   bn.innerHTML='';bn.hidden=!(left.length||miss.length||stuck.length);
   const say=(ic,html,lk)=>{bn.innerHTML=`<span class="ic">${ic}</span><div><p>${html}</p></div>`;if(lk){const b=document.createElement('button');b.type='button';b.className='link';b.textContent=lk[0];b.onclick=lk[1];bn.lastChild.appendChild(b);}};
   if(left.length)say(IC.moon,`<b>Te ${left.length===1?'falta':'faltan'} ${left.length}:</b> ${esc(left.map(h=>h.name).join(', '))}. El mínimo también salva la racha.`);
@@ -414,7 +418,7 @@ function renderHoy(){const T=todayStr(),todays=HABS().filter(h=>sched(h,T));
   const items=todays.map(h=>({k:'h',time:htime(h),h}));
   S.fijos.forEach(f=>{if((f.days||[]).includes(dow(T))&&(!f.until||T<=f.until))items.push({k:'e',time:f.time||'00:00',f});});
   items.sort((a,b)=>a.time.localeCompare(b.time));
-  const focus=items.find(it=>it.k==='h'&&st(T,it.h.id)===0);
+  const focus=items.find(it=>it.k==='h'&&st(T,it.h.id)===0&&counts(it.h,T));
   const tl=document.getElementById('tl');tl.innerHTML='';
   if(!items.length){tl.innerHTML='<p class="empty">'+(HABS().some(h=>h.from&&h.from>T)?'Tus hábitos arrancan el '+fmt(HABS().map(h=>h.from).filter(Boolean).sort()[0],{weekday:'long',day:'numeric',month:'long'})+'.':'Hoy no toca ningún hábito.')+'</p>';}
   const hm=nowHM();
@@ -426,7 +430,7 @@ function renderHoy(){const T=todayStr(),todays=HABS().filter(h=>sched(h,T));
     const tm0=h.time||(MOMENTS.find(m=>m[0]===(h.moment||'manana'))||MOMENTS[0])[1],tm=tm0===prevTm?'':tm0;prevTm=tm0;
     el.innerHTML=`<span class="tm">${esc(tm)}</span><span class="rail"></span><div class="body"><button class="hb" type="button"><span class="nm"></span><span class="mt"></span></button></div>`;
     el.querySelector('.nm').textContent=h.name;
-    const meta=[];if(v===2)meta.push('Hecho');if(v===1)meta.push('Mínimo');if(v===-1)meta.push('Libre');if(h.num&&n)meta.push(round1(n)+(h.num.unit?' '+h.num.unit:' '+h.num.label.toLowerCase()));if(sk)meta.push('racha '+sk);if(!v&&!isF&&h.min)meta.push('Mín: '+h.min);
+    const meta=[];if(v===2)meta.push('Hecho');if(v===1)meta.push('Mínimo');if(v===-1)meta.push('Libre');if(h.num&&n)meta.push(round1(n)+(h.num.unit?' '+h.num.unit:' '+h.num.label.toLowerCase()));if(sk)meta.push('racha '+sk);if(!v&&quotaFree(h,T))meta.push('Ya hiciste las '+h.perWeek+' de la semana, hoy es opcional');else if(!v&&!isF&&h.min)meta.push('Mín: '+h.min);
     const mt=el.querySelector('.mt');mt.textContent=meta.join(' · ');if(v>0)mt.classList.add('ok');if(!meta.length)mt.remove();
     el.querySelector('.hb').onclick=()=>openHabitSheet(h,T);el.querySelector('.hb').setAttribute('aria-label',h.name+'. Ver opciones');
     el.querySelector('.rail').appendChild(checkBtn(T,h,v));
@@ -578,12 +582,13 @@ function openHab(h){const isNew=!h;h=h?JSON.parse(JSON.stringify(h)):{id:uid('h'
    <div class="two"><label class="fl"><span>Hora (opcional)</span><input id="tm" type="time" value="${esc(h.time||'')}"></label><label class="fl"><span>Si no tiene hora</span><select id="mo">${MOMENTS.map(m=>`<option value="${m[0]}" ${(h.moment||'manana')===m[0]?'selected':''}>${m[1]}</option>`).join('')}</select></label></div>
    <div class="two"><label class="fl"><span>Arranca el</span><input id="fr" type="date" value="${esc(h.from||'')}"></label><label class="fl"><span>Objetivo</span><select id="go"><option value="">Ninguno</option>${GOALS().map(g=>`<option value="${esc(g.id)}" ${g.id===h.goal?'selected':''}>${esc(g.title)}</option>`).join('')}</select></label></div>
    <label class="fl"><span>Versión mínima</span><input id="mi" value="${esc(h.min)}" placeholder="Para días malos"></label>
+   <label class="fl"><span>Veces por semana (opcional)</span><input id="pw" inputmode="numeric" value="${esc(h.perWeek||'')}" placeholder="Vacío = todos los días marcados"></label>
    <details class="mbox" ${h.num?'open':''}><summary style="cursor:pointer;font-weight:700">Número del día (opcional)</summary><div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
      <div class="two"><label class="fl"><span>Qué contás</span><input id="nl" value="${esc(h.num&&h.num.label||'')}" placeholder="Ej: Postulaciones"></label><label class="fl"><span>Unidad</span><input id="nu" value="${esc(h.num&&h.num.unit||'')}" placeholder="Ej: min"></label></div>
      <label class="fl"><span>Cuánto suma cada +</span><input id="ns" inputmode="decimal" value="${esc(h.num&&h.num.step||1)}"></label>
      <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="ad" ${!h.num||h.num.autoDone!==false?'checked':''}> Anotar un número lo marca como hecho</label></div></details>
    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ac" ${h.active!==false?'checked':''}> Activo (destildá para pausarlo)</label>${foot(isNew)}</form>`;
-  const f=SI.querySelector('#f');f.onsubmit=e=>{e.preventDefault();const q=id=>f.querySelector('#'+id);h.name=q('nm').value.trim()||'Hábito';h.days=[...f.querySelectorAll('input[name=d]:checked')].map(x=>Number(x.value));h.time=q('tm').value||'';h.moment=q('mo').value;h.from=q('fr').value||'';h.goal=q('go').value;h.min=q('mi').value.trim();h.active=q('ac').checked;
+  const f=SI.querySelector('#f');f.onsubmit=e=>{e.preventDefault();const q=id=>f.querySelector('#'+id);h.name=q('nm').value.trim()||'Hábito';h.days=[...f.querySelectorAll('input[name=d]:checked')].map(x=>Number(x.value));h.time=q('tm').value||'';h.moment=q('mo').value;h.from=q('fr').value||'';h.goal=q('go').value;h.min=q('mi').value.trim();const pw=parseInt(q('pw').value,10);h.perWeek=pw>0&&pw<h.days.length?pw:null;h.active=q('ac').checked;
     const nl=q('nl').value.trim();h.num=nl?{label:nl,unit:q('nu').value.trim(),step:parseFloat(q('ns').value.replace(',','.'))||1,autoDone:q('ad').checked}:null;
     const i=HABS().findIndex(x=>x.id===h.id);if(i>=0)S.habitos[i]=h;else S.habitos.push(h);save();sheet.close();toast(isNew?'Hábito creado':'Guardado');};
   wire(f,()=>{S.habitos=S.habitos.filter(x=>x.id!==h.id);});if(!sheet.open)sheet.showModal();}
