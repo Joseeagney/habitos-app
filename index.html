@@ -291,7 +291,7 @@ dialog .grab{width:40px;height:4px;border-radius:9px;background:var(--line);marg
       <li><b style="color:var(--fg)">Nunca fallar dos veces seguidas.</b> Si ayer no salió, hoy va aunque sea el mínimo.</li>
       <li><b style="color:var(--fg)">Día malo = versión mínima.</b> Cuenta igual.</li>
       <li><b style="color:var(--fg)">Imprevisto real = libre.</b> No suma ni resta.</li>
-      <li><b style="color:var(--fg)">Domingo 20:00:</b> elegí las prioridades de la semana.</li></ol></section>
+      <li><b style="color:var(--fg)">Domingo a la noche:</b> 15 min para mirar la semana y elegir 3 prioridades.</li><li><b style="color:var(--fg)">Al volver de las canchas:</b> gastos, celular afuera, lectura y a dormir. Despertarte = acostarte + 7 h 30.</li></ol></section>
   </main>
 </div>
 
@@ -309,27 +309,29 @@ const SV=d=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+d+'</svg>',IC={moon:S
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['D','L','M','M','J','V','S'],ORDER=[1,2,3,4,5,6,0];
 const STAGES=['Semilla','Brote','Espiga','Cosecha'],MOMENTS=[['manana','Mañana','09:00'],['tarde','Tarde','15:00'],['noche','Noche','23:30']];
 const SEED={habitos:[
- {id:'gym',name:'Gimnasio',days:[1,2,3,4,6],from:'2026-10-12',active:true,time:'08:15',moment:'manana',min:'Ir igual y hacer 20 min',goal:'g_fisico',num:null},
- {id:'estudio',name:'Estudio facultad',days:[1,2,3,4,6],from:'2026-10-12',active:true,time:'10:00',moment:'manana',min:'15 min de la materia intensiva',goal:'g_facu',num:{label:'Tiempo de estudio',unit:'min',step:15,autoDone:true}},
- {id:'trabajo',name:'Búsqueda de trabajo',days:[1,2,3,4],from:'2026-10-12',active:true,time:'14:00',moment:'tarde',min:'1 postulación',goal:'g_trabajo',num:{label:'Postulaciones',unit:'',step:1,autoDone:true}},
- {id:'aprender',name:'Aprender',days:[1,2,3,4,6],from:'2026-10-26',active:true,time:'15:00',moment:'tarde',min:'10 min de lectura',goal:'g_aprender',num:null},
- {id:'proyectos',name:'Proyectos',days:[1,3],from:'2026-11-09',active:true,time:'15:30',moment:'tarde',min:'Anotar 1 idea o avanzar 25 min',goal:'g_ingresos',num:null},
- {id:'sueno',name:'Dormir sin celular',days:[0,1,2,3,4,5,6],from:'2026-10-12',active:true,time:'',moment:'noche',min:'Dejar el celular afuera de la pieza',goal:'g_fisico',num:{label:'Horas dormidas',unit:'h',step:.5,autoDone:false}}],
+ {id:'gym',name:'Gimnasio',days:[1,2,4],from:'2026-10-12',active:true,time:'08:30',moment:'manana',min:'Ir igual y hacer 20 min',goal:'g_fisico',num:null},
+ {id:'estudio',name:'Estudio autodidacta',days:[1,2,3,4,6],from:'2026-10-12',active:true,time:'10:00',moment:'manana',min:'15 min de agro',goal:'g_facu',num:{label:'Tiempo de estudio',unit:'min',step:15,autoDone:true}},
+ {id:'innova',name:'Innova con Juan',days:[1,2,3,4,5,6],from:'2026-10-12',active:true,time:'15:00',moment:'tarde',min:'1 tarea concreta (publicar, responder o reponer)',goal:'g_innova',num:null},
+ {id:'gastos',name:'Anotar gastos',days:[0,1,2,3,4,5,6],from:'2026-10-12',active:true,time:'',moment:'noche',min:'Anotar al menos el total del día',goal:'g_fin',num:null},
+ {id:'leer',name:'Leer',days:[0,1,2,3,4,5,6],from:'2026-10-12',active:true,time:'',moment:'noche',min:'5 páginas',goal:'g_lectura',num:{label:'Minutos de lectura',unit:'min',step:5,autoDone:true}},
+ {id:'sueno',name:'Dormir sin celular',days:[0,1,2,3,4,5,6],from:'2026-10-12',active:true,time:'',moment:'noche',min:'Celular afuera y 5 min de meditación',goal:'g_mente',num:{label:'Horas dormidas',unit:'h',step:.5,autoDone:false}}],
  objetivos:[
- {id:'g_trabajo',title:'Conseguir trabajo',why:'Tener ingresos fijos y experiencia en atención al cliente, ventas o administración.',deadline:'2026-12-31',metrics:[{id:'m1',label:'Postulaciones (5 por semana)',type:'sum',habit:'trabajo',target:57,unit:'',scale:1},{id:'m7',label:'Entrevistas',type:'counter',target:null,unit:'',scale:1,cur:0}],hitos:[{id:'t1',t:'CV profesional listo (con y sin foto)',done:true},{id:'t2',t:'Perfil de Computrabajo al 100%',done:false},{id:'t3',t:'Crear cuenta de Indeed y subir el CV',done:false},{id:'t4',t:'Primera entrevista',done:false}]},
- {id:'g_fisico',title:'Recomposición corporal',why:'Ganar músculo y bajar grasa con constancia.',deadline:'2026-12-31',metrics:[{id:'m2',label:'Entrenamientos (5 por semana)',type:'count',habit:'gym',target:57,unit:'',scale:1},{id:'m3',label:'Peso',type:'log',target:null,unit:'kg',scale:1,log:[]}],hitos:[{id:'t5',t:'Registrar el peso inicial',done:false}]},
- {id:'g_facu',title:'Facultad al día',why:'Aprobar la materia intensiva sin estudiar todo a último momento.',deadline:'',metrics:[{id:'m4',label:'Horas de estudio',type:'sum',habit:'estudio',target:null,unit:'h',scale:60}],hitos:[{id:'t6',t:'Averiguar la fecha del examen',done:false}]},
- {id:'g_aprender',title:'Aprender todos los días',why:'Finanzas e inversiones, libros e IA: sumar conocimiento cada día.',deadline:'2026-12-31',metrics:[{id:'m5',label:'Días de aprendizaje (desde el 26/10)',type:'count',habit:'aprender',target:48,unit:'',scale:1}],hitos:[{id:'t7',t:'Elegir el primer libro o curso',done:false}]},
- {id:'g_ingresos',title:'Ingresos extra con proyectos',why:'Convertir las ideas que vayamos teniendo en proyectos que generen plata.',deadline:'2026-12-31',metrics:[{id:'m6',label:'Proyectos lanzados',type:'counter',target:null,unit:'',scale:1,cur:0}],hitos:[{id:'t8',t:'Elegir el primer proyecto',done:false},{id:'t9',t:'Definir qué se ofrece y a quién',done:false},{id:'t10',t:'Primer cobro',done:false}]}],
- fijos:[{id:'f1',name:'Trabajo · Pádel',time:'19:00',days:[1,2,3,4,5,6],until:''},{id:'f2',name:'Facultad',time:'08:30',days:[5],until:'2026-11-13'}],
- dias:{},semanas:{},backup:''};
+ {id:'g_facu',title:'Terminar la tecnicatura',why:'Aprobar el 100% de las materias en fecha y poder explicar con claridad la producción agropecuaria.',deadline:'2026-12-31',metrics:[{id:'m1',label:'Horas de estudio (1 por día)',type:'sum',habit:'estudio',target:50,unit:'h',scale:60}],hitos:[{id:'t1',t:'Averiguar la fecha del examen de la intensiva',done:false}]},
+ {id:'g_innova',title:'Hacer crecer Innova con Juan',why:'Emprender en serio: que el negocio crezca y genere ingresos.',deadline:'2026-12-31',metrics:[{id:'m2',label:'Días trabajados en Innova',type:'count',habit:'innova',target:null,unit:'',scale:1}],hitos:[{id:'t2',t:'Cargar todo el stock en la app',done:false},{id:'t3',t:'Terminar la Etapa E de la app',done:false}]},
+ {id:'g_fisico',title:'Un cuerpo que me represente',why:'Constancia con el gimnasio y comida casera y sana.',deadline:'2026-12-31',metrics:[{id:'m3',label:'Entrenamientos (3 por semana)',type:'count',habit:'gym',target:34,unit:'',scale:1},{id:'m4',label:'Peso',type:'log',target:null,unit:'kg',scale:1,log:[]}],hitos:[{id:'t4',t:'Registrar el peso inicial',done:false}]},
+ {id:'g_fin',title:'Crecimiento financiero',why:'Saber en qué se va la plata, ahorrar e invertir pensando en el corto y el largo plazo.',deadline:'2026-12-31',metrics:[{id:'m5',label:'Días con gastos anotados',type:'count',habit:'gastos',target:null,unit:'',scale:1}],hitos:[{id:'t5',t:'Elegir dónde invertir los ahorros',done:false}]},
+ {id:'g_lectura',title:'Leer 1 libro cada 4 a 6 semanas',why:'Ser autodidacta: aprender todos los días por mi cuenta.',deadline:'2026-12-31',metrics:[{id:'m6',label:'Libros terminados',type:'counter',target:2,unit:'',scale:1,cur:0}],hitos:[{id:'t6',t:'Elegir el primer libro',done:false}]},
+ {id:'g_mente',title:'Claridad mental',why:'Dormir 7 a 8 horas, sin celular antes de dormir.',deadline:'',metrics:[{id:'m7',label:'Noches sin celular',type:'count',habit:'sueno',target:null,unit:'',scale:1}],hitos:[]}],
+ fijos:[{id:'f1',name:'Trabajo en las canchas',time:'19:00',days:[1,2,3,4,5,6],until:''},{id:'f2',name:'Facultad',time:'08:30',days:[5],until:'2026-11-13'}],
+ dias:{},semanas:{},backup:'',seedV:2};
 
 /* ---------- estado y guardado local ---------- */
 let S;
 function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):JSON.parse(JSON.stringify(SEED));}catch(e){S=JSON.parse(JSON.stringify(SEED));}
   ['habitos','objetivos','fijos'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(SEED[k]));});S.dias=S.dias||{};S.semanas=S.semanas||{};}
 let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('No se pudo guardar: el celular no tiene espacio');}},150);}
-load();try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+load();if(S.seedV!==2){if(!Object.keys(S.dias).length){['habitos','objetivos','fijos'].forEach(k=>S[k]=JSON.parse(JSON.stringify(SEED[k])));}S.seedV=2;save();}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const todayStr=()=>new Date().toLocaleDateString('en-CA',{timeZone:TZ});
@@ -416,11 +418,12 @@ function renderHoy(){const T=todayStr(),todays=HABS().filter(h=>sched(h,T));
   const tl=document.getElementById('tl');tl.innerHTML='';
   if(!items.length){tl.innerHTML='<p class="empty">'+(HABS().some(h=>h.from&&h.from>T)?'Tus hábitos arrancan el '+fmt(HABS().map(h=>h.from).filter(Boolean).sort()[0],{weekday:'long',day:'numeric',month:'long'})+'.':'Hoy no toca ningún hábito.')+'</p>';}
   const hm=nowHM();
+  let prevTm='';
   items.forEach(it=>{const el=document.createElement('div');
     if(it.k==='e'){el.className='it ev';el.innerHTML=`<span class="tm">${esc(it.time)}</span><span class="rail"><span class="dot"></span></span><div class="body"><span class="nm"></span></div>`;el.querySelector('.nm').textContent=it.f.name;tl.appendChild(el);return;}
     const h=it.h,v=st(T,h.id),isF=focus===it,sk=streak(h),n=nv(T,h.id);
     el.className='it'+(v===2?' done':v===1?' half':v===-1?' free':'')+(isF?' focus':'');
-    const tm=h.time||(MOMENTS.find(m=>m[0]===(h.moment||'manana'))||MOMENTS[0])[1];
+    const tm0=h.time||(MOMENTS.find(m=>m[0]===(h.moment||'manana'))||MOMENTS[0])[1],tm=tm0===prevTm?'':tm0;prevTm=tm0;
     el.innerHTML=`<span class="tm">${esc(tm)}</span><span class="rail"></span><div class="body"><button class="hb" type="button"><span class="nm"></span><span class="mt"></span></button></div>`;
     el.querySelector('.nm').textContent=h.name;
     const meta=[];if(v===2)meta.push('Hecho');if(v===1)meta.push('Mínimo');if(v===-1)meta.push('Libre');if(h.num&&n)meta.push(round1(n)+(h.num.unit?' '+h.num.unit:' '+h.num.label.toLowerCase()));if(sk)meta.push('racha '+sk);if(!v&&!isF&&h.min)meta.push('Mín: '+h.min);
