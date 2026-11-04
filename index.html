@@ -520,6 +520,62 @@ body::before{display:none}html{background:var(--bg)}
 #v-hoy .evr{grid-template-columns:36px 1fr auto;padding:12px 0}
 #v-hoy .revrow{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0;background:none!important;color:var(--fg)!important}
 #v-hoy .revrow.hot b{color:var(--olive)}
+
+/* ================= v3: estilo Things en toda la app ================= */
+.view{gap:34px}
+.bat,.slp,.mom,.revrow,.gcard,.icard,.lock,.week,.tile,.note,.hint,#v-rev>section,#v-aj>section,#v-hist>section,#v-prog>section{background:none!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-radius:0!important;padding:0!important}
+.icard,.lock,.note,.hint,.callout{background:var(--soft)!important;border-radius:10px!important;padding:14px 16px!important}
+h2,.view h2{font-family:var(--sans);text-transform:none;letter-spacing:-.02em;font-size:20px;font-weight:700;color:var(--fg)}
+.view>section>h2:first-child,.view>section>.spread:first-child{padding-bottom:8px;border-bottom:1px solid var(--fg)}
+.view>section>.spread:first-child h2{border:0;padding:0}
+#v-hoy .bat .k,.bs2 .k{font-family:var(--sans)}
+.btn{border-radius:10px}.seg button{border-radius:10px}
+.back{font-size:15px;color:var(--olive)}
+.view>div>h1,.view>h1{font-size:32px;font-weight:700;letter-spacing:-.04em}
+dialog{border-radius:16px 16px 0 0;background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}
+/* resumen */
+.sum4{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:end;padding-top:6px}
+.sum4 .k{font-size:13px;color:var(--muted);font-weight:600}
+.sum4 .score{font-size:72px;font-weight:700;letter-spacing:-.06em;line-height:.95}
+.sum4 .score small{font-size:22px;color:var(--muted);margin-left:2px;letter-spacing:0}
+.sum4 .dl{font-size:13px;font-weight:600;color:var(--muted)}.sum4 .dl.up{color:var(--olive)}.sum4 .dl.dn{color:var(--warn)}
+.b14{height:72px;display:grid;grid-template-columns:repeat(14,1fr);gap:3px;align-items:end}
+.b14 i{display:block;border-radius:2px;background:color-mix(in srgb,var(--olive) 70%,var(--bg))}.b14 i.t{background:var(--fg)}
+/* lista de hábitos */
+.hlst{display:flex;flex-direction:column}
+.hlr{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;border:0;background:none;text-align:left;padding:12px 0;cursor:pointer;width:100%;color:var(--fg)}
+.hlr+.hlr{border-top:1px solid var(--line)}
+.hlr:active{opacity:.6}
+.hlr .mr{position:relative;width:40px;height:40px}.mring{width:40px;height:40px;transform:rotate(-90deg)}
+.mring .rbg{stroke:color-mix(in srgb,var(--olive) 14%,transparent)}.mring .rfg{stroke:var(--olive);transition:stroke-dashoffset 1s cubic-bezier(.2,.7,.2,1)}
+.hlr .mr b{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:700}
+.hlr .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.hlr .tx b{font-size:16px;font-weight:500}.hlr .tx span{font-size:12.5px;color:var(--muted)}
+.hlr .td{font-size:12px;color:var(--muted)}.hlr .td.up{color:var(--olive)}.hlr .td.dn{color:var(--warn)}
+/* salud / tablas */
+.cmp{border-top:0}
+.miles span{border-radius:8px}
+/* historial */
+#v-hist .bigp,#v-hist .goalwrap,#v-hist #monSub{display:none}
+.gcard{border-bottom:1px solid var(--line)!important;padding:14px 0!important;gap:8px}
+.gcard .gp{font-size:22px}
+/* repaso */
+#v-rev .week .kp div{background:var(--soft);border-radius:10px}
+#v-rev #weekBox{border-top:1px solid var(--fg)!important;padding-top:12px!important}
+/* filas y botones de navegación */
+.revrow{border-top:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important;padding:16px 0!important;color:var(--fg)!important}
+.revrow.hot b{color:var(--olive)}
+.lst button.r{padding:14px 0}
+/* ayuda plegable */
+details.help{border-top:1px solid var(--line);padding-top:10px}
+details.help summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.help summary::after{content:"+";font-size:20px;color:var(--muted);font-weight:400}
+details.help[open] summary::after{content:"−"}
+details.help ol{margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)}
+details.help ol b{color:var(--fg)}
+details.help p{margin-top:8px}
+
+.miles{gap:14px}.miles span{flex:0 0 auto;background:none!important;padding:0;border-radius:0;font-size:12.5px;color:var(--faint);box-shadow:none!important}
+.miles span.ok{color:var(--olive)}.miles span.ok::before{content:"✓ "}.miles span.now{color:var(--fg);font-weight:800}
 </style>
 </head>
 <body>
@@ -540,7 +596,7 @@ body::before{display:none}html{background:var(--bg)}
   </main>
 
   <main id="v-rev" class="view" hidden>
-    <button class="back" type="button" data-back>‹ Volver</button>
+    <button class="back" type="button" data-back="hoy">‹ Hoy</button>
     <div><span id="revDate" hidden></span><h1>Repaso de la semana</h1><p class="sub small">Un minuto, una vez por semana. El domingo a la noche es ideal.</p></div>
     <section id="weekBox" class="week" hidden></section>
     <section id="feelBox"></section>
@@ -552,9 +608,16 @@ body::before{display:none}html{background:var(--bg)}
 
   <main id="v-prog" class="view" hidden>
     <section id="campo"></section>
-    <section id="salud" class="tile"></section>
+    <section id="habl"></section>
+    <section id="salud"></section>
     <section id="insights"></section>
-    <section class="tile">
+    <button type="button" class="revrow" id="histRow"><div><b>Historial y objetivos</b><br><span>Calendario para corregir días y tus objetivos</span></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+  </main>
+
+  <main id="v-hist" class="view" hidden>
+    <button class="back" type="button" data-back="prog">‹ Progreso</button>
+    <h1>Historial</h1>
+    <section>
       <div class="spread"><h2 id="calTitle">Mes</h2><div class="calnav"><button type="button" id="mPrev" aria-label="Mes anterior">‹</button><button type="button" id="mNext" aria-label="Mes siguiente">›</button></div></div>
       <div class="spread" style="align-items:flex-end"><span class="bigp num" id="monPct">0%</span><span class="sub small" id="monSub" style="text-align:right">Meta: 80%</span></div>
       <div class="goalwrap"><div class="track" id="monTrack"><i id="monBar" style="width:0"></i></div><span class="mk" aria-hidden="true"></span></div>
@@ -566,7 +629,7 @@ body::before{display:none}html{background:var(--bg)}
   </main>
 
   <main id="v-aj" class="view" hidden>
-    <button class="back" type="button" id="backBtn">‹ Volver</button>
+    <button class="back" type="button" id="backBtn">‹ Hoy</button>
     <h1>Ajustes</h1>
     <section><div class="spread"><h2>Hábitos</h2><button class="link" type="button" id="newHab">Nuevo hábito</button></div><div class="lst" id="habs"></div></section>
     <section><h2>Sueño</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p></section>
@@ -575,11 +638,22 @@ body::before{display:none}html{background:var(--bg)}
       <p class="sub small">Tus datos se guardan en este celular. Hacé una copia de vez en cuando por si cambiás de teléfono o borrás Safari.</p>
       <div class="inl"><button class="btn" type="button" id="expBtn">Guardar copia</button><button class="btn" type="button" id="impBtn">Restaurar copia</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>
       <p class="sub small" id="lastBk"></p></section>
-    <section><h2>Reglas</h2><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)">
+    <section><h2>Recordatorios</h2>
+      <p class="sub small">El iPhone no deja que esta app mande avisos sola. La forma gratis y confiable es con la app <b>Atajos</b> (5 minutos, una sola vez):</p>
+      <details class="help"><summary>Ver los pasos</summary><ol>
+        <li>Abrí <b>Atajos</b> → pestaña <b>Automatización</b> → <b>+</b> → <b>Hora del día</b>.</li>
+        <li>Elegí la hora (ej. <b>08:45</b>), <b>Diariamente</b> y <b>Ejecutar inmediatamente</b>. Tocá <b>Siguiente</b>.</li>
+        <li><b>Nueva automatización en blanco</b> → buscá la acción <b>Mostrar notificación</b>.</li>
+        <li>Escribí el texto: <b>"Anotá cómo dormiste (10 s)"</b> y tocá <b>OK</b>.</li>
+        <li>Repetí con <b>13:30</b> "Después de almorzar: 10 min caminando" y <b>23:45</b> "Cierre del día: gastos, baño, celular afuera".</li>
+      </ol><p class="sub small">Tip: tocá la notificación y abrí la app desde el ícono de inicio.</p></details></section>
+    <section><h2>Ayuda</h2><details class="help"><summary>¿Cómo funciona la app?</summary><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)">
       <li><b style="color:var(--fg)">Nunca fallar dos veces seguidas.</b> Si ayer no salió, hoy va aunque sea el mínimo.</li>
       <li><b style="color:var(--fg)">Día malo = versión mínima.</b> Cuenta igual.</li>
       <li><b style="color:var(--fg)">Imprevisto real = libre.</b> No suma ni resta.</li>
-      <li><b style="color:var(--fg)">Domingo a la noche:</b> 15 min para mirar la semana y elegir 3 prioridades.</li><li><b style="color:var(--fg)">Al volver de las canchas:</b> gastos, baño, celular afuera, lectura y a dormir.</li><li><b style="color:var(--fg)">Horario parejo:</b> levantarte siempre a la misma hora (±30 min), también el fin de semana. Es lo que más ordena el sueño.</li></ol></section>
+      <li><b style="color:var(--fg)">Domingo a la noche:</b> 15 min para mirar la semana y elegir 3 prioridades.</li><li><b style="color:var(--fg)">Al volver de las canchas:</b> gastos, baño, celular afuera, lectura y a dormir.</li><li><b style="color:var(--fg)">Horario parejo:</b> levantarte siempre a la misma hora (±30 min), también el fin de semana. Es lo que más ordena el sueño.</li></ol>
+      <p class="sub small" style="margin-top:10px"><b>Batería:</b> se calcula con lo que dormiste, tu deuda de sueño de la semana, qué tan parejo es tu horario, si tuviste dolor de cabeza y si entrenaste dos días seguidos. Es una estimación orientativa, no un dato médico.</p>
+      <p class="sub small"><b>Fuerza de un hábito:</b> sube con cada día que lo cumplís (el mínimo cuenta) y baja de a poco si fallás. Arriba de 80 es casi automático.</p></details></section>
   </main>
 </div>
 
@@ -595,7 +669,7 @@ body::before{display:none}html{background:var(--bg)}
 const TZ='America/Argentina/Buenos_Aires',KEY='micampo:v1';
 const SV=d=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+d+'</svg>',IC={moon:SV('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'),sprout:SV('<path d="M12 20v-8"/><path d="M12 12c0-4-3-6-7-6 0 4 3 6 7 6z"/><path d="M12 14c0-3.5 2.5-5.5 7-5.5 0 3.5-2.5 5.5-7 5.5z"/>'),redo:SV('<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/>'),save:SV('<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>')};
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['D','L','M','M','J','V','S'],ORDER=[1,2,3,4,5,6,0];
-const STAGES=['Semilla','Brote','Espiga','Cosecha'],MOMENTS=[['manana','Mañana','09:00'],['tarde','Tarde','15:00'],['noche','Noche','23:30']];
+const STAGES=['Iniciando','En construcción','Consolidado','Automático'],MOMENTS=[['manana','Mañana','09:00'],['tarde','Tarde','15:00'],['noche','Noche','23:30']];
 const SEED={habitos:[
  {id:'gym',name:'Gimnasio',days:[1,2,3,4],perWeek:3,from:'2026-10-12',active:true,time:'08:30',moment:'manana',min:'Ir igual y hacer 20 min',goal:'g_fisico',num:null},
  {id:'estudio',name:'Estudio autodidacta',days:[1,2,3,4,6],from:'2026-10-12',active:true,time:'10:00',moment:'manana',min:'15 min de agro',goal:'g_facu',num:{label:'Tiempo de estudio',unit:'min',step:15,autoDone:true}},
@@ -632,6 +706,7 @@ if(S.seedV<4){S.salud=S.salud||{meta:8,wake:'08:30',start:null};
   S.seedV=4;save();}
 S.salud=S.salud||{meta:8,wake:'08:30',start:null};
 if(S.seedV<5){const ar=S.habitos.find(h=>h.id==='arranque');if(ar&&!ar.steps)ar.steps=['Vaso de agua','Luz afuera 5 min'];const ci=S.habitos.find(h=>h.id==='sueno');if(ci&&!ci.steps)ci.steps=['Baño','Celular afuera','Leer'];S.seedV=5;save();}
+if(S.seedV<6){const es=S.habitos.find(h=>h.id==='estudio');if(es&&es.num){es.num.def=60;es.num.defMin=15;}if(!S.habitos.find(h=>h.id==='padel'))S.habitos.push({id:'padel',name:'Pádel',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});S.seedV=6;save();}
 
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 
@@ -652,7 +727,7 @@ const sched=(h,s)=>started(h,s)&&(h.days||[]).includes(dow(s));
 const quotaFree=(h,s)=>{if(!h.perWeek||st(s,h.id)>0)return false;const m=mondayOf(s),T=todayStr(),ds=[0,1,2,3,4,5,6].map(k=>add(m,k)).filter(d=>sched(h,d));
   if(ds.filter(d=>d!==s&&st(d,h.id)>0).length>=h.perWeek)return true;if(s>=T)return false;
   return ds.filter(d=>d<=s&&st(d,h.id)===0).length<=ds.length-h.perWeek;};
-const counts=(h,s)=>sched(h,s)&&st(s,h.id)!==-1&&!quotaFree(h,s);
+const counts=(h,s)=>!h.opt&&sched(h,s)&&st(s,h.id)!==-1&&!quotaFree(h,s);
 const goalById=id=>GOALS().find(g=>g.id===id);
 const uid=p=>p+Math.random().toString(36).slice(2,8);
 const round1=x=>Math.round(x*10)/10;
@@ -668,7 +743,7 @@ function dayRatio(s){let tot=0,got=0;HABS().forEach(h=>{if(!counts(h,s))return;c
 function dayDone(s){const r=HABS().filter(h=>counts(h,s));return r.length>0&&r.every(h=>st(s,h.id)>0);}
 function dayStreak(){const T=todayStr(),f=firstDate();let n=dayDone(T)?1:0,s=add(T,-1);for(let i=0;i<600&&s>=f;i++,s=add(s,-1)){if(!HABS().some(h=>counts(h,s)))continue;if(dayDone(s))n++;else break;}return n;}
 function monthRatio(ym){const T=todayStr();let tot=0,got=0;for(let s=ym+'-01';s.slice(0,7)===ym&&s<=T;s=add(s,1)){HABS().forEach(h=>{if(!counts(h,s))return;if(s===T&&st(s,h.id)===0)return;const v=st(s,h.id);tot++;got+=v===2?1:v===1?.5:0;});}return tot?got/tot:null;}
-function metricValue(m){if(m.type==='count'){let n=0;for(const s in S.dias)if(st(s,m.habit)>0)n++;return n;}if(m.type==='sum'){let n=0;for(const s in S.dias)n+=nv(s,m.habit);return n/(m.scale||1);}if(m.type==='log'){const l=m.log||[];return l.length?l[l.length-1].v:null;}if(m.type==='counter')return Number(m.cur)||0;if(m.type==='sleep'){const t=todayStr(),x=sleepStats(add(t,-6),t);return x?round1(x.avg):0;}return 0;}
+function metricValue(m){if(m.type==='count'){let n=0;for(const s in S.dias)if(st(s,m.habit)>0)n++;return n;}if(m.type==='sum'){let n=0;const hh=HABS().find(q=>q.id===m.habit);for(const s in S.dias){const v=nv(s,m.habit);if(v)n+=v;else if(hh&&hh.num){const x=st(s,m.habit);if(x===2)n+=hh.num.def||0;else if(x===1)n+=hh.num.defMin||0;}}return n/(m.scale||1);}if(m.type==='log'){const l=m.log||[];return l.length?l[l.length-1].v:null;}if(m.type==='counter')return Number(m.cur)||0;if(m.type==='sleep'){const t=todayStr(),x=sleepStats(add(t,-6),t);return x?round1(x.avg):0;}return 0;}
 function goalPct(g){const p=[];(g.metrics||[]).forEach(m=>{const tg=Number(m.target);if(m.type!=='log'&&tg>0)p.push(Math.min(1,metricValue(m)/tg));});const H=g.hitos||[];if(H.length)p.push(H.filter(x=>x.done).length/H.length);return p.length?Math.round(p.reduce((a,b)=>a+b,0)/p.length*100):0;}
 
 /* ---------- acciones ---------- */
@@ -707,12 +782,12 @@ function battery(T){const x=slp(T);if(!x)return null;const meta=S.salud.meta,h=s
   const c=(v)=>Math.max(0,Math.min(1,v));
   const pS=c((h-5)/(meta-5))*40,pD=c(1-debt/7)*20,pR=c(1-((w7?w7.sd:0)-15)/75)*15,pH=x.hd?0:15;
   const gy=HABS().find(q=>q.id==='gym'),two=gy&&st(add(T,-1),gy.id)>0&&st(add(T,-2),gy.id)>0,pL=two?5:10;
-  const score=Math.round(pS+pD+pR+pH+pL);return {score,h,debt,lvl:score>=85?'Plena':score>=70?'Buena':score>=55?'Media':'Baja'};}
+  let score=Math.round(pS+pD+pR+pH+pL),cap=100;if(debt>=2)cap=84;if(x.hd)cap=Math.min(cap,69);if(debt>=4)cap=Math.min(cap,54);score=Math.min(score,cap);return {score,h,debt,lvl:score>=85?'Plena':score>=70?'Buena':score>=55?'Media':'Baja'};}
 const ANIM={hoy:true,prog:true};
 function ring(lbl,v,txt){const r=22,C=2*Math.PI*r,o=C*(1-Math.max(0,Math.min(1,v)));
   return `<div class="ring"><div class="v"><svg viewBox="0 0 52 52"><circle class="bg" cx="26" cy="26" r="${r}" fill="none" stroke-width="6"/><circle class="fg rfg" cx="26" cy="26" r="${r}" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${o.toFixed(1)}"/></svg></div><div class="lb2"><em>${txt}</em><span>${lbl}</span></div></div>`;}
 function ringsData(T){const x=slp(T),rest=x?Math.min(1,slH(x)/S.salud.meta):0;
-  const gy=HABS().find(h=>h.id==='gym'),M=mondayOf(T);let gd=0;if(gy)for(let k=0;k<7;k++){const s=add(M,k);if(s<=T&&st(s,gy.id)>0)gd++;}
+  const gy=HABS().find(h=>h.id==='gym'),pd=HABS().find(h=>h.id==='padel'&&h.active!==false),M=mondayOf(T);let gd=0;for(let k=0;k<7;k++){const s=add(M,k);if(s>T)break;if(gy&&st(s,gy.id)>0)gd++;if(pd&&st(s,pd.id)>0)gd++;}
   const pw=gy?(gy.perWeek||(gy.days||[]).length||3):3,move=Math.min(1,gd/pw);
   const adv=HABS().filter(h=>(h.id==='estudio'||h.id==='innova')&&counts(h,T));let av;
   if(adv.length){av=adv.reduce((p,h)=>{const v=st(T,h.id);return p+(v===2?1:v===1?.5:0);},0)/adv.length;}else{const r=dayRatio(T);av=r===null?0:r;}
@@ -727,11 +802,11 @@ function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(-
     o+=`<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-opacity=".12" stroke-width="${sw}"/><circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-width="${sw}" stroke-linecap="round" class="rfg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${off.toFixed(1)}"/>`;});
   return `<svg viewBox="0 0 ${sz} ${sz}" class="fit">${o}</svg>`;}
 function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T),cols=['olive','sand','graph'];
-  box.innerHTML=`<div class="bx"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería</span><div class="score num">${b?b.score:'—'}</div><span class="lv3${b&&b.lvl==='Baja'?' low':''}">${b?b.lvl+(b.debt>=1?' · deuda '+fmtH(b.debt):''):'Anotá tu sueño'}</span></div></div>
+  box.innerHTML=`<div class="bx"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería</span><div class="score num">${b?b.score:'<span style="color:var(--line)">00</span>'}</div><span class="lv3${b&&b.lvl==='Baja'?' low':''}">${b?b.lvl+(b.debt>=1?' · deuda '+fmtH(b.debt):''):'Anotá tu sueño'}</span></div></div>
    <div class="leg">${R.map((r,i)=>`<div><span><i class="${cols[i]}"></i>${r[0]}</span><b class="num">${r[2]}</b></div>`).join('')}</div>
    <div class="callout"><p class="plan">${planText(T,b)}</p></div>`;
   if(b){const [cls,html,lk]=healthTip(T),tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
-    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}box.appendChild(tp);}animRings(box,ANIM.hoy);ANIM.hoy=false;}
+    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}box.querySelector('.callout').appendChild(tp);}animRings(box,ANIM.hoy);ANIM.hoy=false;}
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
 function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i]=!cur[i];if(cur[i])POP={id:h.id+'#'+i,t:Date.now()};const k=cur.filter(Boolean).length,prev=Object.assign({},S.dias[T]||{}),was=dayDone(T);
   patchDay(T,{['s_'+h.id]:cur,[h.id]:k===n?2:k>0?1:0});renderAll();vib(8);
@@ -740,7 +815,7 @@ function habRow(T,h){const v=st(T,h.id),n=nv(T,h.id),sk=streak(h),r=document.cre
   r.className='hrw'+(v===2?' done':v===1?' half':v===-1?' free':'')+(POP.id===h.id&&Date.now()-POP.t<700?' pop':'');
   const meta=[];if(v===2)meta.push('Hecho');else if(v===1)meta.push('Mínimo');else if(v===-1)meta.push('Libre');
   if(h.num&&n)meta.push(round1(n)+(h.num.unit?' '+h.num.unit:''));if(sk>1)meta.push('racha '+sk);
-  if(!v&&quotaFree(h,T))meta.push('Opcional: ya cumpliste las '+h.perWeek+' de la semana');else if(!v&&h.min&&!h.steps)meta.push('Mín: '+h.min);
+  if(h.opt&&!v)meta.push('Opcional · suma a Moverte');else if(!v&&quotaFree(h,T))meta.push('Opcional: ya cumpliste las '+h.perWeek+' de la semana');else if(!v&&h.min&&!h.steps)meta.push('Mín: '+h.min);
   r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v>0?'ok':''}"></span></button><div class="pills"></div>`;
   r.querySelector('b').textContent=h.name;const sp=r.querySelector('.info span');sp.textContent=meta.join(' · ');if(!meta.length)sp.remove();
   const ck=r.querySelector('.ck2');ck.setAttribute('aria-label',h.name+(v>0?': hecho, tocá para desmarcar':': tocá para marcar hecho'));
@@ -791,7 +866,7 @@ function renderWeekRev(T){const box=document.getElementById('weekBox'),fb=docume
   const a=d===0?mondayOf(T):add(mondayOf(T),-7),b=add(a,6),r=rangeRatio(a,b);
   if(r!==null){const prev=rangeRatio(add(a,-7),add(a,-1)),rows=HABS().map(h=>[h,rangeRatio(a,b,h)]).filter(x=>x[1]!==null).sort((x,y)=>y[1]-x[1]);
     const best=rows[0],worst=rows.length>1?rows[rows.length-1]:null,diff=prev===null?null:Math.round((r-prev)*100),sw=sleepStats(a,b);
-    box.innerHTML=`<div class="spread"><div><h3>${d===0?'Esta semana':'La semana pasada'}</h3><p class="sub small">${fmt(a,{day:'numeric',month:'short'})} al ${fmt(b,{day:'numeric',month:'short'})}${diff===null?'':' · '+(diff>=0?'+':'')+diff+'% vs la anterior'}</p></div><span class="gp num">${Math.round(r*100)}%</span></div>
+    box.innerHTML=`<div class="spread"><div><h3>${d===0?'Esta semana':'La semana pasada'}</h3><p class="sub small">${fmt(a,{day:'numeric',month:'short'})} al ${fmt(b,{day:'numeric',month:'short'})}${!diff?'':' · '+(diff>0?'+':'')+diff+'% vs la anterior'}</p></div><span class="gp num">${Math.round(r*100)}%</span></div>
      <div class="kp"><div><span>Mejor hábito</span><b></b></div><div><span>A mejorar</span><b></b></div><div><span>Sueño promedio</span><b class="num">${sw?fmtH(sw.avg):'—'}</b></div></div>`;
     const bs=box.querySelectorAll('.kp b');bs[0].textContent=best?best[0].name:'—';bs[1].textContent=worst&&worst[1]<1?worst[0].name:'Ninguno';box.hidden=false;}
   else box.hidden=true;
@@ -899,7 +974,7 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   html+=row('Días con dolor de cabeza',sa&&sa.hdp,sn&&sn.hdp,pct,(n,a)=>n<a);
   html+=row('Constancia de hábitos',rA,rN,pct,(n,a)=>n>a);
   html+=row('Gimnasio por semana',gymWeek(A[0],A[1]),sep?gymWeek(N[0],N[1]):null,v=>round1(v)+'',(n,a)=>n>a);
-  html+=row('Cómo te sentiste',feelOf(A[0],A[1]),sep?feelOf(N[0],N[1]):null,feelL,(n,a)=>n>a);
+  if(feelOf(A[0],A[1])!==null||(sep&&feelOf(N[0],N[1])!==null))html+=row('Cómo te sentiste',feelOf(A[0],A[1]),sep?feelOf(N[0],N[1]):null,feelL,(n,a)=>n>a);
   html+='</div>';box.insertAdjacentHTML('beforeend',html);
   const note=!sep?'La columna "Ahora" aparece desde el día 14, cuando ya no se pisa con tu primera semana.':day>=30&&sn&&sn.hdp>=.4?'Pasaron 30 días y el dolor de cabeza sigue seguido: priorizá la consulta médica.':'Verde = mejor que al principio · rojo = peor. El cambio real se ve a los 30, 60 y 90 días.';
   box.insertAdjacentHTML('beforeend',`<p class="sub small">${note}</p>`);}
@@ -928,23 +1003,21 @@ function gauge(v,id){const R=40,cx=50,cy=50,arc=270,C=2*Math.PI*R,L=C*arc/360,o=
 function animRings(root,go){const L=root.querySelectorAll('.rfg[data-o]');if(go===false){L.forEach(c=>{c.style.transition='none';c.style.strokeDashoffset=c.dataset.o;});return;}requestAnimationFrame(()=>requestAnimationFrame(()=>L.forEach(c=>c.style.strokeDashoffset=c.dataset.o)));}
 function softRing(v,sz,sw,id){const r=(sz-sw)/2,C=2*Math.PI*r,o=C*(1-Math.max(0,Math.min(1,v)));
   return `<svg viewBox="0 0 ${sz} ${sz}" class="sring"><defs><linearGradient id="sr${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="gs1"/><stop offset="1" class="gs2"/></linearGradient></defs><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" class="rbg" stroke-width="${sw}"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="url(#sr${id})" stroke-width="${sw}" stroke-linecap="round" class="rfg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${o.toFixed(1)}"/></svg>`;}
-function renderCampo(T){const box=document.getElementById('campo'),hs=HABS().filter(h=>h.active!==false&&started(h,T));box.innerHTML='';box.className='bento';
+function miniRing(v){const sz=40,sw=4,r=(sz-sw)/2,C=2*Math.PI*r,o=C*(1-Math.max(0,Math.min(1,v)));
+  return `<svg viewBox="0 0 ${sz} ${sz}" class="mring"><circle cx="20" cy="20" r="${r}" fill="none" class="rbg" stroke-width="${sw}"/><circle cx="20" cy="20" r="${r}" fill="none" class="rfg" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${o.toFixed(1)}"/></svg>`;}
+function renderCampo(T){const box=document.getElementById('campo'),hs=HABS().filter(h=>h.active!==false&&!h.opt&&started(h,T));box.className='';
   const a=add(T,-13),r=rangeRatio(a,T),pr=rangeRatio(add(a,-14),add(a,-1)),tr=r!==null&&pr!==null?Math.round((r-pr)*100):null;
-  let seg='';for(let s=a;s<=T;s=add(s,1)){const x=dayRatio(s);seg+=`<i class="${s===T?'t ':''}${x===null?'':x>=.999?'o3':x>=.5?'o2':x>0?'o1':''}"></i>`;}
+  let bars='';for(let s=a;s<=T;s=add(s,1)){const x=dayRatio(s);bars+=`<i style="height:${x===null?6:Math.max(6,Math.round(x*100))}%" class="${s===T?'t':''}"></i>`;}
   const cnt=[0,0,0,0];hs.forEach(h=>{const n=stageN(h);if(n>=0)cnt[n]++;});
   const lv=[[3,'automático','automáticos'],[2,'consolidado','consolidados'],[1,'en construcción','en construcción'],[0,'iniciando','iniciando']].filter(x=>cnt[x[0]]).map(x=>cnt[x[0]]+' '+(cnt[x[0]]===1?x[1]:x[2])).join(' · ');
-  const L=hs.map(h=>[h,strength(h)]).sort((x,y)=>y[1]-x[1]);
-  const trend=h=>{const d=Math.round(strength(h)*100)-Math.round(strengthAt(h,add(T,-14))*100);return d?`<span class="mono tr ${d>0?'up':'dn'}">${d>0?'+':'−'}${Math.abs(d)}</span>`:'<span class="mono tr">±0</span>';};
-  const days=(h,n)=>{let o='';for(let s=add(T,-(n-1));s<=T;s=add(s,1)){const x=st(s,h.id);o+=`<i class="${!sched(h,s)?'off':x===2?'o':x===1?'h':s===T?'t':''}"></i>`;}return o;};
-  let html=`<div class="gt hero4"><div class="hx"><span class="mono cap2">CONSTANCIA · 14 DÍAS</span><b class="num">${r===null?'—':Math.round(r*100)}<small>%</small></b>${tr===null?'':`<span class="dl ${tr>=0?'up':'dn'}">${tr>=0?'▲':'▼'} ${Math.abs(tr)} ${Math.abs(tr)===1?'pt':'pts'} vs 2 semanas antes</span>`}</div><div class="hr">${softRing(r||0,108,11,'h')}</div><div class="sg14">${seg}</div><span class="mono lvs">${lv.toUpperCase()}</span></div>`;
-  const first=L[0],last=L.length>=4?L[L.length-1]:null,mid=L.slice(1,last?L.length-1:L.length),tall=first&&mid.length>=2;
-  if(first){const [h,v]=first,n=stageN(h),sk=streak(h);
-    html+=`<button type="button" class="gt ${tall?'tall':'wide'}" data-h="${esc(h.id)}"><div class="tp"><span class="mono cap2">MÁS FUERTE</span>${trend(h)}</div><span class="ico">${hicon(h)}</span><b class="nm3"></b><b class="big num">${Math.round(v*100)}<small>/100</small></b><div class="bar"><i style="width:${Math.round(v*100)}%"></i></div><span class="sub2">${LVL[Math.max(0,n)]} · racha ${sk} ${sk===1?'día':'días'}</span>${tall?`<div class="cols">${days(h,14)}</div>`:''}</button>`;}
-  mid.forEach(([h,v])=>{html+=`<button type="button" class="gt sm" data-h="${esc(h.id)}"><div class="tp"><span class="ico">${hicon(h)}</span>${trend(h)}</div><b class="big num">${Math.round(v*100)}<small>/100</small></b><b class="nm3"></b><span class="lvl2">${LVL[Math.max(0,stageN(h))]}</span><div class="dd">${days(h,7)}</div></button>`;});
-  if(last){const [h,v]=last,n=stageN(h),dn=daysToNext(h);html+=`<button type="button" class="gt wide2" data-h="${esc(h.id)}"><span class="ico">${hicon(h)}</span><div class="wx"><b class="nm3"></b><span class="sub2">${LVL[Math.max(0,n)]}${dn?' · '+dn+(dn===1?' día':' días')+' para subir':''}</span></div><b class="big num">${Math.round(v*100)}</b></button>`;}
-  box.innerHTML=html;
-  box.querySelectorAll('[data-h]').forEach(el=>{const h=HABS().find(x=>x.id===el.dataset.h);el.querySelector('.nm3').textContent=h.name;el.setAttribute('aria-label',h.name+': fuerza '+Math.round(strength(h)*100));el.onclick=()=>openHabitSheet(h,T);});
-  animRings(box,ANIM.prog);ANIM.prog=false;}
+  box.innerHTML=`<h2>Resumen</h2><div class="sum4"><div><span class="k">Constancia · últimos 14 días</span><div class="score num">${r===null?'—':Math.round(r*100)}<small>%</small></div>${tr===null||!tr?'<span class="dl">Igual que las 2 semanas anteriores</span>':`<span class="dl ${tr>0?'up':'dn'}">${tr>0?'▲':'▼'} ${Math.abs(tr)} ${Math.abs(tr)===1?'punto':'puntos'} vs las 2 semanas anteriores</span>`}</div><div class="b14">${bars}</div></div><p class="sub small">${lv?lv.charAt(0).toUpperCase()+lv.slice(1):''}</p>`;
+  const L=document.getElementById('habl');L.innerHTML='<div class="spread"><h2>Hábitos</h2><span class="sub small">Fuerza 0–100</span></div>';
+  const list=document.createElement('div');list.className='hlst';
+  hs.map(h=>[h,strength(h)]).sort((x,y)=>y[1]-x[1]).forEach(([h,v])=>{const n=stageN(h),pct=Math.round(v*100),d=pct-Math.round(strengthAt(h,add(T,-14))*100),sk=streak(h),dn=daysToNext(h);
+    const el=document.createElement('button');el.type='button';el.className='hlr';
+    el.innerHTML=`<div class="mr">${miniRing(v)}<b class="num">${pct}</b></div><div class="tx"><b></b><span>${STAGES[Math.max(0,n)]}${n<3&&dn?' · '+dn+(dn===1?' día':' días')+' para subir':''}${sk>1?' · racha '+sk:''}</span></div><span class="mono td ${d>0?'up':d<0?'dn':''}">${d>0?'+':d<0?'−':'±'}${Math.abs(d)}</span>`;
+    el.querySelector('.tx b').textContent=h.name;el.setAttribute('aria-label',h.name+': fuerza '+pct+', '+STAGES[Math.max(0,n)]);el.onclick=()=>openHabitSheet(h,T);list.appendChild(el);});
+  L.appendChild(list);animRings(L,ANIM.prog);ANIM.prog=false;}
 
 /* ---------- QUÉ TE FUNCIONA ---------- */
 const bedKey=x=>{const m=hm2m(x.b);return m<12*60?m+1440:m;};
@@ -1046,8 +1119,9 @@ function openGoalDetail(g){const draw=()=>{if(!GOALS().includes(g)){sheet.close(
   draw();if(!sheet.open)sheet.showModal();}
 
 /* ---------- AJUSTES ---------- */
-function renderAj(){const b=document.getElementById('habs');b.innerHTML='';HABS().forEach(h=>{const r=document.createElement('button');r.type='button';r.className='r';const badge=h.active===false?' · En pausa':h.from&&h.from>todayStr()?' · Desde el '+fmt(h.from,{day:'numeric',month:'short'}):'';
-    r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(htime(h))} · ${ORDER.filter(d=>(h.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${badge}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=h.name;r.onclick=()=>openHab(h);b.appendChild(r);});
+function renderAj(){const b=document.getElementById('habs');b.innerHTML='';const act=HABS().filter(h=>h.active!==false),pau=HABS().filter(h=>h.active===false);let pb=null;if(pau.length){const d=document.createElement('details');d.className='help';d.innerHTML=`<summary>En pausa (${pau.length})</summary>`;pb=d;}
+  act.concat(pau).forEach(h=>{const tgt=h.active===false&&pb?pb:b;const r=document.createElement('button');r.type='button';r.className='r';const badge=h.active===false?' · En pausa':h.from&&h.from>todayStr()?' · Desde el '+fmt(h.from,{day:'numeric',month:'short'}):'';
+    r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(htime(h))} · ${ORDER.filter(d=>(h.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${badge}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=h.name;r.onclick=()=>openHab(h);tgt.appendChild(r);});if(pb)b.appendChild(pb);
   const f=document.getElementById('fixes');f.innerHTML='';S.fijos.forEach(x=>{const r=document.createElement('button');r.type='button';r.className='r';r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(x.time)} · ${ORDER.filter(d=>(x.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${x.until?' · hasta el '+fmt(x.until,{day:'numeric',month:'short'}):''}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=x.name;r.onclick=()=>openFix(x);f.appendChild(r);});
   document.getElementById('lastBk').textContent=S.backup?'Última copia: '+fmt(S.backup,{day:'numeric',month:'long'}):'Todavía no hiciste ninguna copia.';}
 function renderAll(){renderHeader();renderHoy();renderSleep(todayStr());renderProg();renderCampo(todayStr());renderSalud(todayStr());renderInsights();renderAj();renderCfg();}
@@ -1124,9 +1198,9 @@ document.getElementById('impBtn').onclick=()=>document.getElementById('impFile')
 document.getElementById('impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.habitos)||typeof d.dias!=='object')throw 0;localStorage.setItem(KEY,JSON.stringify(d));load();renderAll();toast('Copia restaurada');}catch(err){toast('Ese archivo no es una copia de Hábitos App');}e.target.value='';};r.readAsText(f);};
 
 /* ---------- navegación ---------- */
-function show(v){if(v==='hoy'){ANIM.hoy=true;}if(v==='prog'){ANIM.prog=true;}document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!=='v-'+v);document.querySelectorAll('nav.tabs button').forEach(b=>{if(b.dataset.v===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});document.querySelector('nav.tabs').hidden=v==='aj'||v==='rev';window.scrollTo(0,0);}
+function show(v){const hd=document.querySelector('header.top');if(hd)hd.hidden=!(v==='hoy'||v==='prog');if(v==='hoy'){ANIM.hoy=true;}if(v==='prog'){ANIM.prog=true;}document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!=='v-'+v);document.querySelectorAll('nav.tabs button').forEach(b=>{if(b.dataset.v===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});document.querySelector('nav.tabs').hidden=v==='aj'||v==='rev'||v==='hist';window.scrollTo(0,0);}
 document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{show(b.dataset.v);vib(6);const T=todayStr();if(b.dataset.v==='prog')renderCampo(T);else renderBat(T);});
-document.getElementById('gearBtn').onclick=()=>show('aj');document.getElementById('backBtn').onclick=()=>show('hoy');document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>show('hoy'));
+document.getElementById('gearBtn').onclick=()=>show('aj');document.getElementById('backBtn').onclick=()=>show('hoy');document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>show(b.dataset.back||'hoy'));document.getElementById('histRow').onclick=()=>show('hist');
 document.getElementById('mPrev').onclick=()=>{mOff--;renderProg();};document.getElementById('mNext').onclick=()=>{if(mOff<0){mOff++;renderProg();}};
 document.getElementById('newHab').onclick=()=>openHab(null);document.getElementById('newFix').onclick=()=>openFix(null);document.getElementById('newGoal').onclick=()=>openGoal(null);
 document.getElementById('prioAdd').onclick=()=>{document.getElementById('prioAdd').hidden=true;document.getElementById('prioForm').hidden=false;document.getElementById('prioIn').focus();};
