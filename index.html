@@ -604,6 +604,7 @@ details.help p{margin-top:8px}
 #goals .help{margin-top:10px}
 .tiny{font-size:11px;color:var(--muted);letter-spacing:.04em}
 .stpw{display:grid;grid-template-columns:1fr auto;gap:8px}.stpw .btn{min-height:44px;padding:8px 16px}
+.stl{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center;padding-bottom:4px}.stl-t{display:flex;flex-direction:column;gap:1px}.stl-t .k{font-size:12px;color:var(--muted);font-weight:600}.stl-t b{font-size:26px;font-weight:700;letter-spacing:-.03em}.stl .btn{min-height:42px;padding:8px 16px}
 </style>
 </head>
 <body>
@@ -675,6 +676,7 @@ details.help p{margin-top:8px}
         <li>Elegí la hora (ej. <b>08:45</b>), <b>Diariamente</b> y <b>Ejecutar inmediatamente</b>. Tocá <b>Siguiente</b>.</li>
         <li><b>Nueva automatización en blanco</b> → buscá la acción <b>Mostrar notificación</b>.</li>
         <li>Escribí el texto: <b>"Anotá cómo dormiste (10 s)"</b> y tocá <b>OK</b>.</li>
+        <li><b>Pasos en la app:</b> creá un atajo (no automatización) llamado exactamente <b>Pasos Hábitos</b> con 3 acciones: <b>Buscar muestras de salud</b> (Pasos, Fecha de inicio es hoy) → <b>Calcular estadísticas</b> (Suma) → <b>Copiar al portapapeles</b>. Después, en Hoy tocá <b>Actualizar</b>, volvé a la app y tocá <b>Pegar pasos</b>.</li>
         <li>Repetí con <b>13:30</b> "Después de almorzar: 10 min caminando" y <b>23:45</b> "Cierre del día: gastos, baño, celular afuera".</li>
       </ol><p class="sub small">Tip: tocá la notificación y abrí la app desde el ícono de inicio.</p></details></section>
     <section><h2>Ayuda</h2><details class="help"><summary>¿Cómo funciona la app?</summary><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)">
@@ -835,9 +837,10 @@ function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(-
 function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T),cols=['olive','sand','graph'];
   box.innerHTML=`<div class="bx"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy</span><div class="score lvw ${b?'l'+b.lvl:''}">${b?b.lvl:'<span style="color:var(--faint);font-size:30px;letter-spacing:-.02em">Sin datos</span>'}</div><span class="lv3${b&&b.lvl==='Baja'?' low':''}">${b?(b.debt>=1?'Deuda de sueño: '+fmtH(b.debt):'Sin deuda de sueño'):'Anotá cómo dormiste'}</span></div></div>
    <div class="leg">${R.map((r,i)=>`<div><span><i class="${cols[i]}"></i>${r[0]}</span><b class="num">${r[2]}</b></div>`).join('')}</div>
+   ${stepsRow(T)}
    <div class="callout"><p class="plan">${planText(T,b)}</p></div>`;
   if(b){const [cls,html,lk]=healthTip(T),tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
-    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}box.querySelector('.callout').appendChild(tp);}animRings(box,ANIM.hoy);ANIM.hoy=false;}
+    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}box.querySelector('.callout').appendChild(tp);}wireSteps(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
 function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i]=!cur[i];if(cur[i])POP={id:h.id+'#'+i,t:Date.now()};const k=cur.filter(Boolean).length,prev=Object.assign({},S.dias[T]||{}),was=dayDone(T);
   patchDay(T,{['s_'+h.id]:cur,[h.id]:k===n?2:k>0?1:0});renderAll();vib(8);
@@ -961,7 +964,7 @@ function sleepStats(a,b){const xs=[];for(let s=a;s<=b;s=add(s,1)){const x=slp(s)
   const hs=xs.map(slH),avg=hs.reduce((p,c)=>p+c,0)/hs.length,ws=xs.map(x=>hm2m(x.w)),wm=ws.reduce((p,c)=>p+c,0)/ws.length,sd=Math.sqrt(ws.reduce((p,c)=>p+(c-wm)**2,0)/ws.length);
   const hd=xs.filter(x=>x.hd).length;return {n:xs.length,avg,sd,hd,hdp:hd/xs.length};}
 function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSleep(s);
-  let b=x?x.b:(L?L.b:'01:30'),w=x?x.w:(L?L.w:S.salud.wake),stv=(S.dias[add(s,-1)]||{}).pasos||'';
+  let b=x?x.b:(L?L.b:'01:30'),w=x?x.w:(L?L.w:S.salud.wake),stv=(S.dias[add(s,-1)]||{}).pasos||(((S.dias[add(s,-1)]||{}).pasosHoy||{}).n)||'';
   const el=document.createElement('div');el.className='slpEd';
   const tb=(lbl,k,v)=>`<div class="tbox"><span>${lbl}</span><div class="tv"><button type="button" data-k="${k}" data-d="-15" aria-label="${lbl}: 15 minutos antes">−</button><input type="time" step="900" data-k="${k}" value="${v}" aria-label="${lbl}"><button type="button" data-k="${k}" data-d="15" aria-label="${lbl}: 15 minutos después">+</button></div></div>`;
   const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} de sueño</p><label class="stp"><span>Pasos de ayer <em>(opcional · copialo de la app Salud)</em></span><div class="stpw"><input type="number" inputmode="numeric" min="0" max="80000" placeholder="Ej: 8500" id="stIn" value="${stv}"><button type="button" class="btn" id="stPaste">Pegar</button></div></label><p class="q">¿Te despertaste con dolor de cabeza?</p><div class="yn"><button class="btn" type="button" data-h="0" aria-pressed="${x?x.hd===0:false}">No</button><button class="btn" type="button" data-h="1" aria-pressed="${x?x.hd===1:false}">Sí</button></div>`;
@@ -984,7 +987,7 @@ function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box
     box.appendChild(sleepEditor(T,()=>{slEdit=false;renderAll();}));
     if(slEdit){const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar';c.onclick=()=>{slEdit=false;renderAll();};box.appendChild(c);}return;}
   const h=slH(x);box.className='slp compact';
-  box.innerHTML=`<div class="t"><span class="sub small">Anoche</span><br><b>${fmtH(h)}</b> <span class="sub small">· ${x.b} → ${x.w} · ${x.hd?'con dolor de cabeza':'sin dolor de cabeza'}${(S.dias[add(T,-1)]||{}).pasos?' · '+fmtN((S.dias[add(T,-1)]||{}).pasos)+' pasos ayer':''}</span></div><button class="link" type="button" id="slEditB">Editar</button>`;
+  box.innerHTML=`<div class="t"><span class="sub small">Anoche</span><br><b>${fmtH(h)}</b> <span class="sub small">· ${x.b} → ${x.w} · ${x.hd?'con dolor de cabeza':'sin dolor de cabeza'}${((S.dias[add(T,-1)]||{}).pasos||((S.dias[add(T,-1)]||{}).pasosHoy||{}).n)?' · '+fmtN((S.dias[add(T,-1)]||{}).pasos||(S.dias[add(T,-1)]||{}).pasosHoy.n)+' pasos ayer':''}</span></div><button class="link" type="button" id="slEditB">Editar</button>`;
   box.querySelector('#slEditB').onclick=()=>{slEdit=true;renderAll();};}
 function feelOf(a,b){const v=[];for(const m in S.semanas){if(m>=mondayOf(a)&&m<=b&&typeof S.semanas[m].feel==='number')v.push(S.semanas[m].feel);}return v.length?v.reduce((p,c)=>p+c,0)/v.length:null;}
 function gymWeek(a,b){const g=HABS().find(h=>h.id==='gym');if(!g)return null;let n=0,d=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){d++;if(st(s,g.id)>0)n++;}return d?n/d*7:null;}
@@ -1093,7 +1096,12 @@ function renderInsights(){const box=document.getElementById('insights'),{list,ha
 
 /* ===================== SALUD v3: experimento, metas, pasos, STOP-Bang, respiración, test ===================== */
 const fmtN=n=>Math.round(n).toLocaleString('es-AR');
-function avgSteps(a,b){let n=0,c=0;for(let s=a;s<=b;s=add(s,1)){const v=(S.dias[s]||{}).pasos;if(v){n+=v;c++;}}return c?n/c:null;}
+function avgSteps(a,b){let n=0,c=0;for(let s=a;s<=b;s=add(s,1)){if(s===todayStr())continue;const d=S.dias[s]||{},v=d.pasos||(d.pasosHoy&&d.pasosHoy.n);if(v){n+=v;c++;}}return c?n/c:null;}
+const SC_NAME='Pasos Hábitos';let PEND=false;try{PEND=sessionStorage.getItem('pendPasos')==='1';}catch(e){}
+function stepsRow(T){const d=(S.dias[T]||{}).pasosHoy,pct=d?Math.min(100,Math.round(d.n/8000*100)):0;
+  return `<div class="stl"><div class="stl-t"><span class="k">Pasos de hoy</span><b class="num">${d?fmtN(d.n):'—'}</b><span class="sub small">${d?'de 8.000 · actualizado '+d.t:'Tocá Actualizar para traerlos de Salud'}</span></div>${PEND?'<button class="btn primary" type="button" id="stPasteNow">Pegar pasos</button>':'<button class="btn" type="button" id="stUpd">Actualizar</button>'}<div class="track ol" style="grid-column:1/-1;height:5px"><i style="width:${pct}%"></i></div></div>`;}
+function wireSteps(T){const u=document.getElementById('stUpd');if(u)u.onclick=()=>{PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);};
+  const pz=document.getElementById('stPasteNow');if(pz)pz.onclick=async()=>{try{const t=await navigator.clipboard.readText(),n=parseInt(String(t).replace(/[^0-9]/g,''),10);if(n>=0&&n<80000&&String(t).match(/[0-9]/)){patchDay(T,{pasosHoy:{n,t:nowHM()}});toast('Pasos actualizados: '+fmtN(n));}else toast('No encontré los pasos copiados. Revisá el atajo.');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();};}
 function avgFyv(a,b){const h=HABS().find(x=>x.id==='fyv');if(!h)return null;let n=0,c=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){if(!sched(h,s))continue;if(s===todayStr()&&!nv(s,h.id))continue;n+=nv(s,h.id);c++;}return c?n/c:null;}
 const EXPS=[{k:'mate',t:'Último mate a las 16:30',d:'Nada de mate ni café después de las 16:30.'},{k:'cama',t:'A dormir antes de la 1',d:'Acostarte antes de la 1:00 todas las noches.'},{k:'pantalla',t:'Celular afuera 30 min antes',d:'El celular fuera de la pieza 30 minutos antes de dormir.'},{k:'caminar',t:'Caminar 10 min después de almorzar',d:'Una caminata corta después del almuerzo.'},{k:'fyv',t:'5 porciones de frutas y verduras',d:'Llegar a 5 porciones todos los días.'},{k:'respira',t:'Respirar 5 min antes de dormir',d:'Suspiro cíclico guiado cada noche.'}];
 function expStats(a,b){const T=todayStr(),e=b>T?T:b,sl=sleepStats(a,e);return {sl,hab:rangeRatio(a,e),steps:avgSteps(a,e),fyv:avgFyv(a,e)};}
