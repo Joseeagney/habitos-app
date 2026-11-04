@@ -603,6 +603,7 @@ details.help p{margin-top:8px}
 .bc span{font-weight:700;font-size:16px;color:var(--fg)}
 #goals .help{margin-top:10px}
 .tiny{font-size:11px;color:var(--muted);letter-spacing:.04em}
+.stpw{display:grid;grid-template-columns:1fr auto;gap:8px}.stpw .btn{min-height:44px;padding:8px 16px}
 </style>
 </head>
 <body>
@@ -963,9 +964,10 @@ function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSlee
   let b=x?x.b:(L?L.b:'01:30'),w=x?x.w:(L?L.w:S.salud.wake),stv=(S.dias[add(s,-1)]||{}).pasos||'';
   const el=document.createElement('div');el.className='slpEd';
   const tb=(lbl,k,v)=>`<div class="tbox"><span>${lbl}</span><div class="tv"><button type="button" data-k="${k}" data-d="-15" aria-label="${lbl}: 15 minutos antes">−</button><input type="time" step="900" data-k="${k}" value="${v}" aria-label="${lbl}"><button type="button" data-k="${k}" data-d="15" aria-label="${lbl}: 15 minutos después">+</button></div></div>`;
-  const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} de sueño</p><label class="stp"><span>Pasos de ayer <em>(opcional · copialo de la app Salud)</em></span><input type="number" inputmode="numeric" min="0" max="80000" placeholder="Ej: 8500" id="stIn" value="${stv}"></label><p class="q">¿Te despertaste con dolor de cabeza?</p><div class="yn"><button class="btn" type="button" data-h="0" aria-pressed="${x?x.hd===0:false}">No</button><button class="btn" type="button" data-h="1" aria-pressed="${x?x.hd===1:false}">Sí</button></div>`;
+  const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} de sueño</p><label class="stp"><span>Pasos de ayer <em>(opcional · copialo de la app Salud)</em></span><div class="stpw"><input type="number" inputmode="numeric" min="0" max="80000" placeholder="Ej: 8500" id="stIn" value="${stv}"><button type="button" class="btn" id="stPaste">Pegar</button></div></label><p class="q">¿Te despertaste con dolor de cabeza?</p><div class="yn"><button class="btn" type="button" data-h="0" aria-pressed="${x?x.hd===0:false}">No</button><button class="btn" type="button" data-h="1" aria-pressed="${x?x.hd===1:false}">Sí</button></div>`;
     el.querySelectorAll('button[data-d]').forEach(bt=>bt.onclick=()=>{const d=Number(bt.dataset.d);stv=el.querySelector('#stIn').value;if(bt.dataset.k==='b')b=m2hm(hm2m(b)+d);else w=m2hm(hm2m(w)+d);paint();});
     el.querySelectorAll('input[type=time]').forEach(i=>i.onchange=()=>{if(!i.value)return;if(i.dataset.k==='b')b=i.value;else w=i.value;el.querySelector('#slHrs').textContent=fmtH(slH({b,w}))+' de sueño';});
+    const pb=el.querySelector('#stPaste');if(pb)pb.onclick=async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();const n=parseInt(String(t).replace(/[^0-9]/g,''),10);if(n>0&&n<80000){el.querySelector('#stIn').value=n;stv=n;toast('Pasos pegados: '+fmtN(n));}else toast('No encontré un número de pasos copiado');}catch(err){toast('No se pudo pegar: escribilo a mano');}};
     el.querySelectorAll('button[data-h]').forEach(bt=>bt.onclick=()=>{const hd=Number(bt.dataset.h);const si=el.querySelector('#stIn'),sv=si&&si.value?Math.max(0,Math.min(80000,parseInt(si.value,10)||0)):0;if(sv)patchDay(add(s,-1),{pasos:sv});patchDay(s,{sl:{b,w,hd}});if(!S.salud.start||s<S.salud.start){S.salud.start=s;save();}vib();
       toast('Sueño guardado · '+fmtH(slH({b,w})));onDone&&onDone();});};
   paint();return el;}
