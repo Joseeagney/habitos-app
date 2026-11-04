@@ -576,6 +576,33 @@ details.help p{margin-top:8px}
 
 .miles{gap:14px}.miles span{flex:0 0 auto;background:none!important;padding:0;border-radius:0;font-size:12.5px;color:var(--faint);box-shadow:none!important}
 .miles span.ok{color:var(--olive)}.miles span.ok::before{content:"✓ "}.miles span.now{color:var(--fg);font-weight:800}
+
+/* ===== SALUD v3 ===== */
+#v-hoy .bs2 .score.lvw{font-size:56px;letter-spacing:-.05em;line-height:1}
+.lvw.lAlta{color:var(--olive)}.lvw.lMedia{color:var(--sand)}.lvw.lBaja{color:var(--warn)}
+.stp{display:flex;flex-direction:column;gap:6px}.stp span{font-size:13px;font-weight:600}.stp em{font-style:normal;color:var(--muted);font-weight:500}
+.stp input{font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+.expc{background:var(--soft);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.expc .k{font-size:12.5px;color:var(--muted);font-weight:600}.expc .et{font-size:16px}
+.q2{font-size:14px;font-weight:600;margin-top:4px}
+.feel.two2{grid-template-columns:1fr 1fr}
+.explist{display:flex;flex-direction:column}
+.explist .hlr{grid-template-columns:1fr auto}
+.et2{font-size:17px}
+.metas{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.gsub{font-size:13px;font-weight:700;color:var(--muted);margin-top:6px}
+.mt2{display:flex;flex-direction:column;gap:6px}.mt2 .spread{font-size:14.5px}.mt2 b{font-weight:700}.mt2 small{color:var(--muted);font-size:11.5px}
+.mt2 .track{height:5px}
+.sx{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.rowx{font-size:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rowx small.up{color:var(--olive)}.rowx small.dn{color:var(--warn)}
+.sbq{display:flex;flex-direction:column}.sbr{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.sbr p{font-size:14px}
+.split button.on{background:var(--olive);color:var(--onc)}
+.br{display:grid;place-items:center;height:220px}
+.bc{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--olive) 35%,var(--bg)),var(--olive-s));display:grid;place-items:center;transform:scale(.55);transition:transform .25s linear;box-shadow:0 0 0 10px color-mix(in srgb,var(--olive) 8%,transparent)}
+.bc span{font-weight:700;font-size:16px;color:var(--fg)}
+#goals .help{margin-top:10px}
+.tiny{font-size:11px;color:var(--muted);letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -591,6 +618,7 @@ details.help p{margin-top:8px}
   <main id="v-hoy" class="view">
     <section id="bat" class="bat" aria-label="Batería del día"></section>
     <section id="slpBox" class="slp" aria-label="Sueño"></section>
+    <section id="expBox" aria-label="Experimento"></section>
     <section id="day" class="day" aria-label="Tu día"></section>
     <button type="button" class="revrow" id="revRow"></button>
   </main>
@@ -608,6 +636,7 @@ details.help p{margin-top:8px}
 
   <main id="v-prog" class="view" hidden>
     <section id="campo"></section>
+    <section id="expP"></section>
     <section id="habl"></section>
     <section id="salud"></section>
     <section id="insights"></section>
@@ -652,7 +681,7 @@ details.help p{margin-top:8px}
       <li><b style="color:var(--fg)">Día malo = versión mínima.</b> Cuenta igual.</li>
       <li><b style="color:var(--fg)">Imprevisto real = libre.</b> No suma ni resta.</li>
       <li><b style="color:var(--fg)">Domingo a la noche:</b> 15 min para mirar la semana y elegir 3 prioridades.</li><li><b style="color:var(--fg)">Al volver de las canchas:</b> gastos, baño, celular afuera, lectura y a dormir.</li><li><b style="color:var(--fg)">Horario parejo:</b> levantarte siempre a la misma hora (±30 min), también el fin de semana. Es lo que más ordena el sueño.</li></ol>
-      <p class="sub small" style="margin-top:10px"><b>Batería:</b> se calcula con lo que dormiste, tu deuda de sueño de la semana, qué tan parejo es tu horario, si tuviste dolor de cabeza y si entrenaste dos días seguidos. Es una estimación orientativa, no un dato médico.</p>
+      <p class="sub small" style="margin-top:10px"><b>Batería (Alta, Media o Baja):</b> resume lo que dormiste, tu deuda de sueño de la semana, qué tan parejo es tu horario, si tuviste dolor de cabeza y si entrenaste dos días seguidos. Es orientativa, no un dato médico.</p><p class="sub small"><b>Experimento de 14 días:</b> elegís un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Muestra relaciones, no prueba causas.</p>
       <p class="sub small"><b>Fuerza de un hábito:</b> sube con cada día que lo cumplís (el mínimo cuenta) y baja de a poco si fallás. Arriba de 80 es casi automático.</p></details></section>
   </main>
 </div>
@@ -707,6 +736,7 @@ if(S.seedV<4){S.salud=S.salud||{meta:8,wake:'08:30',start:null};
 S.salud=S.salud||{meta:8,wake:'08:30',start:null};
 if(S.seedV<5){const ar=S.habitos.find(h=>h.id==='arranque');if(ar&&!ar.steps)ar.steps=['Vaso de agua','Luz afuera 5 min'];const ci=S.habitos.find(h=>h.id==='sueno');if(ci&&!ci.steps)ci.steps=['Baño','Celular afuera','Leer'];S.seedV=5;save();}
 if(S.seedV<6){const es=S.habitos.find(h=>h.id==='estudio');if(es&&es.num){es.num.def=60;es.num.defMin=15;}if(!S.habitos.find(h=>h.id==='padel'))S.habitos.push({id:'padel',name:'Pádel',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});S.seedV=6;save();}
+if(S.seedV<7){const t0=todayStr0();if(!S.habitos.find(h=>h.id==='fyv'))S.habitos.push({id:'fyv',name:'Frutas y verduras',days:[0,1,2,3,4,5,6],from:t0,active:true,time:'',moment:'tarde',min:'3 porciones',goal:'g_fisico',num:{label:'Porciones',unit:'porc.',step:1,target:5,autoDone:true}});if(!S.habitos.find(h=>h.id==='respira'))S.habitos.push({id:'respira',name:'Respiración 5 min',days:[0,1,2,3,4,5,6],opt:true,breath:true,from:t0,active:true,time:'',moment:'noche',min:'',goal:'g_mente',num:null});S.salud.tests=S.salud.tests||[];S.expHist=S.expHist||[];S.seedV=7;save();}
 
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 
@@ -757,7 +787,7 @@ let POP={id:'',t:0};
 function setState(s,id,v,undoable){if(v>0)POP={id,t:Date.now()};const prev=Object.assign({},S.dias[s]||{}),was=dayDone(s);patchDay(s,{[id]:v});renderAll();vib();
   const u=undoable?()=>restore(s,prev):null;
   if(!was&&dayDone(s)){confetti();toast('Día completo · racha de '+dayStreak(),u);}else if(undoable)toast(v===2?'Hecho':v===1?'Mínimo':v===-1?'Libre':'Desmarcado',u);}
-function addNum(s,h){const prev=Object.assign({},S.dias[s]||{}),step=h.num.step||1,val=round1(nv(s,h.id)+step),p={['n_'+h.id]:val};if(st(s,h.id)===0&&h.num.autoDone!==false)p[h.id]=2;const was=dayDone(s);patchDay(s,p);renderAll();vib(8);
+function addNum(s,h){const prev=Object.assign({},S.dias[s]||{}),step=h.num.step||1,val=round1(nv(s,h.id)+step),p={['n_'+h.id]:val};if(h.num.target){p[h.id]=val>=h.num.target?2:1;if(val>=h.num.target)POP={id:h.id,t:Date.now()};}else if(st(s,h.id)===0&&h.num.autoDone!==false)p[h.id]=2;const was=dayDone(s);patchDay(s,p);renderAll();vib(8);
   if(!was&&dayDone(s)){confetti();toast('Día completo · racha de '+dayStreak(),()=>restore(s,prev));}else toast(h.num.label+': '+val+(h.num.unit?' '+h.num.unit:''),()=>restore(s,prev));}
 function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const c=document.getElementById('confetti'),x=c.getContext('2d'),dp=devicePixelRatio||1,W=c.width=innerWidth*dp,H=c.height=innerHeight*dp;
   const cs=getComputedStyle(document.documentElement),cols=[cs.getPropertyValue('--olive').trim(),cs.getPropertyValue('--fg').trim(),'#bcc59a','#a9a9a4'];
@@ -782,7 +812,7 @@ function battery(T){const x=slp(T);if(!x)return null;const meta=S.salud.meta,h=s
   const c=(v)=>Math.max(0,Math.min(1,v));
   const pS=c((h-5)/(meta-5))*40,pD=c(1-debt/7)*20,pR=c(1-((w7?w7.sd:0)-15)/75)*15,pH=x.hd?0:15;
   const gy=HABS().find(q=>q.id==='gym'),two=gy&&st(add(T,-1),gy.id)>0&&st(add(T,-2),gy.id)>0,pL=two?5:10;
-  let score=Math.round(pS+pD+pR+pH+pL),cap=100;if(debt>=2)cap=84;if(x.hd)cap=Math.min(cap,69);if(debt>=4)cap=Math.min(cap,54);score=Math.min(score,cap);return {score,h,debt,lvl:score>=85?'Plena':score>=70?'Buena':score>=55?'Media':'Baja'};}
+  let score=Math.round(pS+pD+pR+pH+pL),cap=100;if(debt>=2)cap=84;if(x.hd)cap=Math.min(cap,69);if(debt>=4)cap=Math.min(cap,54);score=Math.min(score,cap);return {score,h,debt,lvl:score>=70?'Alta':score>=55?'Media':'Baja'};}
 const ANIM={hoy:true,prog:true};
 function ring(lbl,v,txt){const r=22,C=2*Math.PI*r,o=C*(1-Math.max(0,Math.min(1,v)));
   return `<div class="ring"><div class="v"><svg viewBox="0 0 52 52"><circle class="bg" cx="26" cy="26" r="${r}" fill="none" stroke-width="6"/><circle class="fg rfg" cx="26" cy="26" r="${r}" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${o.toFixed(1)}"/></svg></div><div class="lb2"><em>${txt}</em><span>${lbl}</span></div></div>`;}
@@ -802,7 +832,7 @@ function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(-
     o+=`<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-opacity=".12" stroke-width="${sw}"/><circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-width="${sw}" stroke-linecap="round" class="rfg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${off.toFixed(1)}"/>`;});
   return `<svg viewBox="0 0 ${sz} ${sz}" class="fit">${o}</svg>`;}
 function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T),cols=['olive','sand','graph'];
-  box.innerHTML=`<div class="bx"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería</span><div class="score num">${b?b.score:'<span style="color:var(--line)">00</span>'}</div><span class="lv3${b&&b.lvl==='Baja'?' low':''}">${b?b.lvl+(b.debt>=1?' · deuda '+fmtH(b.debt):''):'Anotá tu sueño'}</span></div></div>
+  box.innerHTML=`<div class="bx"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy</span><div class="score lvw ${b?'l'+b.lvl:''}">${b?b.lvl:'<span style="color:var(--faint);font-size:30px;letter-spacing:-.02em">Sin datos</span>'}</div><span class="lv3${b&&b.lvl==='Baja'?' low':''}">${b?(b.debt>=1?'Deuda de sueño: '+fmtH(b.debt):'Sin deuda de sueño'):'Anotá cómo dormiste'}</span></div></div>
    <div class="leg">${R.map((r,i)=>`<div><span><i class="${cols[i]}"></i>${r[0]}</span><b class="num">${r[2]}</b></div>`).join('')}</div>
    <div class="callout"><p class="plan">${planText(T,b)}</p></div>`;
   if(b){const [cls,html,lk]=healthTip(T),tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
@@ -814,16 +844,17 @@ function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i
 function habRow(T,h){const v=st(T,h.id),n=nv(T,h.id),sk=streak(h),r=document.createElement('div');
   r.className='hrw'+(v===2?' done':v===1?' half':v===-1?' free':'')+(POP.id===h.id&&Date.now()-POP.t<700?' pop':'');
   const meta=[];if(v===2)meta.push('Hecho');else if(v===1)meta.push('Mínimo');else if(v===-1)meta.push('Libre');
-  if(h.num&&n)meta.push(round1(n)+(h.num.unit?' '+h.num.unit:''));if(sk>1)meta.push('racha '+sk);
-  if(h.opt&&!v)meta.push('Opcional · suma a Moverte');else if(!v&&quotaFree(h,T))meta.push('Opcional: ya cumpliste las '+h.perWeek+' de la semana');else if(!v&&h.min&&!h.steps)meta.push('Mín: '+h.min);
+  if(h.num&&n)meta.push(round1(n)+(h.num.target?' de '+h.num.target:'')+(h.num.unit?' '+h.num.unit:''));if(sk>1)meta.push('racha '+sk);
+  if(h.breath&&!v)meta.push('Opcional · suspiro cíclico guiado');else if(h.opt&&!v)meta.push('Opcional · suma a Moverte');else if(!v&&quotaFree(h,T))meta.push('Opcional: ya cumpliste las '+h.perWeek+' de la semana');else if(!v&&h.min&&!h.steps)meta.push('Mín: '+h.min);
   r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v>0?'ok':''}"></span></button><div class="pills"></div>`;
   r.querySelector('b').textContent=h.name;const sp=r.querySelector('.info span');sp.textContent=meta.join(' · ');if(!meta.length)sp.remove();
   const ck=r.querySelector('.ck2');ck.setAttribute('aria-label',h.name+(v>0?': hecho, tocá para desmarcar':': tocá para marcar hecho'));
   ck.onclick=()=>{if(h.steps&&h.steps.length){const all=v===2?[]:h.steps.map(()=>true);patchDay(T,{['s_'+h.id]:all});}setState(T,h.id,v===2?0:2,true);};
-  r.querySelector('.info').onclick=()=>openHabitSheet(h,T);
+  r.querySelector('.info').onclick=()=>h.breath?openBreath(T,h):openHabitSheet(h,T);
   const pl=r.querySelector('.pills');
-  if(v===0){if(h.num&&h.num.label){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent='+'+(h.num.step||1)+(h.num.unit?' '+h.num.unit:'');b.onclick=()=>addNum(T,h);pl.appendChild(b);}
-    if(h.min&&!(h.steps&&h.steps.length)){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent='Mínimo';b.title=h.min;b.onclick=()=>setState(T,h.id,1,true);pl.appendChild(b);}}
+  if(h.breath&&v!==2){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent='Empezar';b.onclick=()=>openBreath(T,h);pl.appendChild(b);}
+  if(v===0||(h.num&&h.num.target&&v===1)){if(h.num&&h.num.label){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent='+'+(h.num.step||1)+(h.num.unit?' '+h.num.unit:'');b.onclick=()=>addNum(T,h);pl.appendChild(b);}
+    if(v===0&&h.min&&!(h.steps&&h.steps.length)){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent='Mínimo';b.title=h.min;b.onclick=()=>setState(T,h.id,1,true);pl.appendChild(b);}}
   if(h.steps&&h.steps.length&&v!==-1){const ch=document.createElement('div');ch.className='chain';const ss=stepsOf(T,h);
     h.steps.forEach((t,i)=>{if(i){const e=document.createElement('em');e.textContent='→';ch.appendChild(e);}const b=document.createElement('button');b.type='button';b.className=(ss[i]?'on':'')+(POP.id===h.id+'#'+i&&Date.now()-POP.t<700?' pop':'');b.innerHTML='<i></i><span></span>';b.querySelector('span').textContent=t;b.setAttribute('aria-pressed',!!ss[i]);b.onclick=()=>toggleStep(T,h,i);ch.appendChild(b);});
     r.querySelector('.info').after(ch);ch.style.gridColumn='2';}
@@ -871,7 +902,9 @@ function renderWeekRev(T){const box=document.getElementById('weekBox'),fb=docume
     const bs=box.querySelectorAll('.kp b');bs[0].textContent=best?best[0].name:'—';bs[1].textContent=worst&&worst[1]<1?worst[0].name:'Ninguno';box.hidden=false;}
   else box.hidden=true;
   const W=S.semanas[a]||{};fb.innerHTML=`<h2>¿Cómo te sentiste, de cuerpo y de cabeza?</h2><div class="feel">${[[1,'Mejor'],[0,'Igual'],[-1,'Peor']].map(([v,l])=>`<button class="btn" type="button" data-f="${v}" aria-pressed="${W.feel===v}">${l}</button>`).join('')}</div>`;
-  fb.querySelectorAll('[data-f]').forEach(x=>x.onclick=()=>{W.feel=Number(x.dataset.f);S.semanas[a]=W;save();renderAll();toast('Anotado');});}
+  fb.querySelectorAll('[data-f]').forEach(x=>x.onclick=()=>{W.feel=Number(x.dataset.f);S.semanas[a]=W;save();renderAll();toast('Anotado');});
+  fb.insertAdjacentHTML('beforeend',`<p class="q2">¿Pasaste tiempo de calidad con otras personas (amigos, familia, pareja)?</p><div class="feel two2">${[[1,'Sí'],[0,'No']].map(([v,l])=>`<button class="btn" type="button" data-so="${v}" aria-pressed="${W.social===v}">${l}</button>`).join('')}</div>`);
+  fb.querySelectorAll('[data-so]').forEach(x=>x.onclick=()=>{W.social=Number(x.dataset.so);S.semanas[a]=W;save();renderAll();toast(W.social?'Bien ahí: los vínculos también son salud':'Anotado. Esta semana, ¿un mate con alguien?');});}
 function renderHoy(){const T=todayStr();renderBat(T);renderDay(T);renderRevRow(T);renderRev(T);}
 function rangeRatio(a,b,only){const T=todayStr();let tot=0,got=0;for(let s=a;s<=b&&s<=T;s=add(s,1)){HABS().forEach(h=>{if(only&&h!==only)return;if(!counts(h,s))return;if(s===T&&st(s,h.id)===0)return;const v=st(s,h.id);tot++;got+=v===2?1:v===1?.5:0;});}return tot?got/tot:null;}
 function renderWeek(T){const box=document.getElementById('weekBox'),d=dow(T);box.innerHTML='';
@@ -927,13 +960,13 @@ function sleepStats(a,b){const xs=[];for(let s=a;s<=b;s=add(s,1)){const x=slp(s)
   const hs=xs.map(slH),avg=hs.reduce((p,c)=>p+c,0)/hs.length,ws=xs.map(x=>hm2m(x.w)),wm=ws.reduce((p,c)=>p+c,0)/ws.length,sd=Math.sqrt(ws.reduce((p,c)=>p+(c-wm)**2,0)/ws.length);
   const hd=xs.filter(x=>x.hd).length;return {n:xs.length,avg,sd,hd,hdp:hd/xs.length};}
 function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSleep(s);
-  let b=x?x.b:(L?L.b:'01:30'),w=x?x.w:(L?L.w:S.salud.wake);
+  let b=x?x.b:(L?L.b:'01:30'),w=x?x.w:(L?L.w:S.salud.wake),stv=(S.dias[add(s,-1)]||{}).pasos||'';
   const el=document.createElement('div');el.className='slpEd';
   const tb=(lbl,k,v)=>`<div class="tbox"><span>${lbl}</span><div class="tv"><button type="button" data-k="${k}" data-d="-15" aria-label="${lbl}: 15 minutos antes">−</button><input type="time" step="900" data-k="${k}" value="${v}" aria-label="${lbl}"><button type="button" data-k="${k}" data-d="15" aria-label="${lbl}: 15 minutos después">+</button></div></div>`;
-  const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} de sueño</p><p class="q">¿Te despertaste con dolor de cabeza?</p><div class="yn"><button class="btn" type="button" data-h="0" aria-pressed="${x?x.hd===0:false}">No</button><button class="btn" type="button" data-h="1" aria-pressed="${x?x.hd===1:false}">Sí</button></div>`;
-    el.querySelectorAll('button[data-d]').forEach(bt=>bt.onclick=()=>{const d=Number(bt.dataset.d);if(bt.dataset.k==='b')b=m2hm(hm2m(b)+d);else w=m2hm(hm2m(w)+d);paint();});
+  const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} de sueño</p><label class="stp"><span>Pasos de ayer <em>(opcional · copialo de la app Salud)</em></span><input type="number" inputmode="numeric" min="0" max="80000" placeholder="Ej: 8500" id="stIn" value="${stv}"></label><p class="q">¿Te despertaste con dolor de cabeza?</p><div class="yn"><button class="btn" type="button" data-h="0" aria-pressed="${x?x.hd===0:false}">No</button><button class="btn" type="button" data-h="1" aria-pressed="${x?x.hd===1:false}">Sí</button></div>`;
+    el.querySelectorAll('button[data-d]').forEach(bt=>bt.onclick=()=>{const d=Number(bt.dataset.d);stv=el.querySelector('#stIn').value;if(bt.dataset.k==='b')b=m2hm(hm2m(b)+d);else w=m2hm(hm2m(w)+d);paint();});
     el.querySelectorAll('input[type=time]').forEach(i=>i.onchange=()=>{if(!i.value)return;if(i.dataset.k==='b')b=i.value;else w=i.value;el.querySelector('#slHrs').textContent=fmtH(slH({b,w}))+' de sueño';});
-    el.querySelectorAll('button[data-h]').forEach(bt=>bt.onclick=()=>{const hd=Number(bt.dataset.h);patchDay(s,{sl:{b,w,hd}});if(!S.salud.start||s<S.salud.start){S.salud.start=s;save();}vib();
+    el.querySelectorAll('button[data-h]').forEach(bt=>bt.onclick=()=>{const hd=Number(bt.dataset.h);const si=el.querySelector('#stIn'),sv=si&&si.value?Math.max(0,Math.min(80000,parseInt(si.value,10)||0)):0;if(sv)patchDay(add(s,-1),{pasos:sv});patchDay(s,{sl:{b,w,hd}});if(!S.salud.start||s<S.salud.start){S.salud.start=s;save();}vib();
       toast('Sueño guardado · '+fmtH(slH({b,w})));onDone&&onDone();});};
   paint();return el;}
 let slEdit=false;
@@ -949,7 +982,7 @@ function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box
     box.appendChild(sleepEditor(T,()=>{slEdit=false;renderAll();}));
     if(slEdit){const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar';c.onclick=()=>{slEdit=false;renderAll();};box.appendChild(c);}return;}
   const h=slH(x);box.className='slp compact';
-  box.innerHTML=`<div class="t"><span class="sub small">Anoche</span><br><b>${fmtH(h)}</b> <span class="sub small">· ${x.b} → ${x.w} · ${x.hd?'con dolor de cabeza':'sin dolor de cabeza'}</span></div><button class="link" type="button" id="slEditB">Editar</button>`;
+  box.innerHTML=`<div class="t"><span class="sub small">Anoche</span><br><b>${fmtH(h)}</b> <span class="sub small">· ${x.b} → ${x.w} · ${x.hd?'con dolor de cabeza':'sin dolor de cabeza'}${(S.dias[add(T,-1)]||{}).pasos?' · '+fmtN((S.dias[add(T,-1)]||{}).pasos)+' pasos ayer':''}</span></div><button class="link" type="button" id="slEditB">Editar</button>`;
   box.querySelector('#slEditB').onclick=()=>{slEdit=true;renderAll();};}
 function feelOf(a,b){const v=[];for(const m in S.semanas){if(m>=mondayOf(a)&&m<=b&&typeof S.semanas[m].feel==='number')v.push(S.semanas[m].feel);}return v.length?v.reduce((p,c)=>p+c,0)/v.length:null;}
 function gymWeek(a,b){const g=HABS().find(h=>h.id==='gym');if(!g)return null;let n=0,d=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){d++;if(st(s,g.id)>0)n++;}return d?n/d*7:null;}
@@ -974,6 +1007,8 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   html+=row('Días con dolor de cabeza',sa&&sa.hdp,sn&&sn.hdp,pct,(n,a)=>n<a);
   html+=row('Constancia de hábitos',rA,rN,pct,(n,a)=>n>a);
   html+=row('Gimnasio por semana',gymWeek(A[0],A[1]),sep?gymWeek(N[0],N[1]):null,v=>round1(v)+'',(n,a)=>n>a);
+  {const pa=avgSteps(A[0],A[1]),pn=sep?avgSteps(N[0],N[1]):null;if(pa!==null||pn!==null)html+=row('Pasos por día',pa,pn,fmtN,(n,a)=>n>a);}
+  {const fa=avgFyv(A[0],A[1]),fn=sep?avgFyv(N[0],N[1]):null;if(fa!==null||fn!==null)html+=row('Frutas y verduras/día',fa,fn,v=>round1(v)+'',(n,a)=>n>a);}
   if(feelOf(A[0],A[1])!==null||(sep&&feelOf(N[0],N[1])!==null))html+=row('Cómo te sentiste',feelOf(A[0],A[1]),sep?feelOf(N[0],N[1]):null,feelL,(n,a)=>n>a);
   html+='</div>';box.insertAdjacentHTML('beforeend',html);
   const note=!sep?'La columna "Ahora" aparece desde el día 14, cuando ya no se pisa con tu primera semana.':day>=30&&sn&&sn.hdp>=.4?'Pasaron 30 días y el dolor de cabeza sigue seguido: priorizá la consulta médica.':'Verde = mejor que al principio · rojo = peor. El cambio real se ve a los 30, 60 y 90 días.';
@@ -1043,9 +1078,6 @@ function insights(){const T=todayStr(),N=[];const ds=Object.keys(S.dias).filter(
   // 4. gimnasio -> sueño de esa noche
   const gy=HABS().find(h=>h.id==='gym');if(gy){const L=nights.filter(n=>counts(gy,n.prev)),[y,no]=grp(L,n=>st(n.prev,gy.id)>0);
     if(y.length>=MIN&&no.length>=MIN){const hy=avg(y,n=>slH(n.x)),hn=avg(no,n=>slH(n.x));if(Math.abs(hy-hn)>=.4)push({score:Math.abs(hy-hn)/3,t:`Los días que entrenás dormís <b>${fmtH(hy)}</b> esa noche; los que no, <b>${fmtH(hn)}</b>.`,bars:[['Con gimnasio',hy/10,fmtH(hy)],['Sin gimnasio',hn/10,fmtH(hn)]],n:`${y.length} y ${no.length} noches`});}}
-  // 5. arranque con luz -> hora de acostarse esa noche
-  const ar=HABS().find(h=>h.id==='arranque');if(ar){const L=nights.filter(n=>counts(ar,n.prev)),[y,no]=grp(L,n=>st(n.prev,ar.id)>0);
-    if(y.length>=MIN&&no.length>=MIN){const by=avg(y,n=>bedKey(n.x)),bn=avg(no,n=>bedKey(n.x));if(Math.abs(by-bn)>=20)push({score:Math.abs(by-bn)/120,t:`Los días que hacés el <b>Arranque con luz</b> te acostás a las <b>${m2hm(by)}</b> en promedio; los que no, a las <b>${m2hm(bn)}</b>.`,bars:null,n:`${y.length} y ${no.length} días`});}}
   return {list:N.sort((a,b)=>b.score-a.score).slice(0,3),have:nights.length};}
 function renderInsights(){const box=document.getElementById('insights'),{list,have}=insights(),need=14;box.innerHTML='<h2>Qué te funciona</h2>';
   if(have<need){const left=need-have;box.insertAdjacentHTML('beforeend',`<div class="lock"><b>Faltan ${left} ${left===1?'día':'días'} de registro</b><p class="sub small">Con 14 mañanas anotadas busco patrones reales en tus datos: qué horarios y hábitos te hacen dormir mejor, tener menos dolor de cabeza y cumplir más. Sin inventar nada.</p><div class="track ol"><i style="width:${Math.round(have/need*100)}%"></i></div></div>`);return;}
@@ -1055,6 +1087,77 @@ function renderInsights(){const box=document.getElementById('insights'),{list,ha
     if(it.bars){const mx=Math.max(...it.bars.map(x=>x[1]),.01);h+=it.bars.map(([l,v,txt,bad],j)=>`<div class="cbar"><span>${l}</span><div class="tr"><i class="${bad?'bad':j?'alt':''}" style="width:${Math.round(v/mx*100)}%"></i></div><b>${txt}</b></div>`).join('');}
     h+=`<span class="n">Basado en ${it.n}. Muestra una relación, no prueba que una cosa cause la otra.</span>`;c.innerHTML=h;w.appendChild(c);});
   box.appendChild(w);}
+
+
+/* ===================== SALUD v3: experimento, metas, pasos, STOP-Bang, respiración, test ===================== */
+const fmtN=n=>Math.round(n).toLocaleString('es-AR');
+function avgSteps(a,b){let n=0,c=0;for(let s=a;s<=b;s=add(s,1)){const v=(S.dias[s]||{}).pasos;if(v){n+=v;c++;}}return c?n/c:null;}
+function avgFyv(a,b){const h=HABS().find(x=>x.id==='fyv');if(!h)return null;let n=0,c=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){if(!sched(h,s))continue;if(s===todayStr()&&!nv(s,h.id))continue;n+=nv(s,h.id);c++;}return c?n/c:null;}
+const EXPS=[{k:'mate',t:'Último mate a las 16:30',d:'Nada de mate ni café después de las 16:30.'},{k:'cama',t:'A dormir antes de la 1',d:'Acostarte antes de la 1:00 todas las noches.'},{k:'pantalla',t:'Celular afuera 30 min antes',d:'El celular fuera de la pieza 30 minutos antes de dormir.'},{k:'caminar',t:'Caminar 10 min después de almorzar',d:'Una caminata corta después del almuerzo.'},{k:'fyv',t:'5 porciones de frutas y verduras',d:'Llegar a 5 porciones todos los días.'},{k:'respira',t:'Respirar 5 min antes de dormir',d:'Suspiro cíclico guiado cada noche.'}];
+function expStats(a,b){const T=todayStr(),e=b>T?T:b,sl=sleepStats(a,e);return {sl,hab:rangeRatio(a,e),steps:avgSteps(a,e),fyv:avgFyv(a,e)};}
+function expDay(T){const E=S.exp;if(!E)return null;const d=Math.round((toD(T)-toD(E.start))/864e5)+1;return d;}
+function renderExpHoy(T){const box=document.getElementById('expBox');box.innerHTML='';const E=S.exp;if(!E){box.hidden=true;return;}const d=expDay(T);if(d<1||d>14){box.hidden=true;return;}box.hidden=false;
+  const v=(E.log||{})[T];
+  box.innerHTML=`<div class="expc"><div class="spread"><span class="k">Experimento · día ${d} de 14</span><span class="mono tiny">${Object.values(E.log||{}).filter(x=>x===1).length} cumplidos</span></div><b class="et"></b><p class="q2">¿Lo cumpliste hoy?</p><div class="feel two2"><button class="btn" type="button" data-e="1" aria-pressed="${v===1}">Sí</button><button class="btn" type="button" data-e="0" aria-pressed="${v===0}">No</button></div></div>`;
+  box.querySelector('.et').textContent=E.title;
+  box.querySelectorAll('[data-e]').forEach(x=>x.onclick=()=>{E.log=E.log||{};E.log[T]=Number(x.dataset.e);save();vib(8);renderAll();toast(E.log[T]?'Sumado al experimento':'Anotado, mañana de nuevo');});}
+function cmpRow(lbl,a,n,f,better){let cl='';if(a!=null&&n!=null&&Math.abs(n-a)>1e-9)cl=better(n,a)?'up':'dn';return `<span>${lbl}</span><b class="a">${a==null?'—':f(a)}</b><b class="${cl}">${n==null?'—':f(n)}</b>`;}
+function renderExpProg(T){const box=document.getElementById('expP');box.innerHTML='<h2>Experimento de 14 días</h2>';const E=S.exp;
+  if(!E){box.insertAdjacentHTML('beforeend',`<p class="sub small">Elegí un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Es tu "antes y después" con datos reales.</p><div class="explist"></div>`);
+    const L=box.querySelector('.explist');EXPS.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='hlr';b.innerHTML=`<div class="tx"><b></b><span></span></div><span class="mono td">ELEGIR</span>`;b.querySelector('b').textContent=x.t;b.querySelector('.tx span').textContent=x.d;
+      b.onclick=()=>{S.exp={k:x.k,title:x.t,start:T,log:{}};save();vib();renderAll();toast('Experimento iniciado: 14 días');};L.appendChild(b);});
+    if((S.expHist||[]).length){const h=document.createElement('p');h.className='sub small';h.innerHTML='Anteriores: '+S.expHist.map(x=>`<b>${esc(x.title)}</b> (${esc(x.res)})`).join(' · ');box.appendChild(h);}return;}
+  const d=expDay(T),end=add(E.start,13),before=expStats(add(E.start,-14),add(E.start,-1)),dur=expStats(E.start,end),ans=Object.values(E.log||{}),adh=ans.length?ans.filter(x=>x===1).length/ans.length:null;
+  let html=`<div class="spread"><b class="et2"></b><span class="sub small num">${d>14?'Terminado':'Día '+Math.max(1,d)+' de 14'}</span></div><div class="track ol"><i style="width:${Math.min(100,Math.round(Math.max(0,d)/14*100))}%"></i></div>`;
+  html+=`<p class="sub small">Cumplimiento: <b>${adh===null?'—':Math.round(adh*100)+'%'}</b> de los días anotados.${d<4?' Los resultados se vuelven útiles desde el día 4.':''}</p>`;
+  html+=`<div class="cmp"><span class="h">Indicador</span><span class="h">14 días antes</span><span class="h">Durante</span>`;
+  html+=cmpRow('Horas de sueño',before.sl&&before.sl.avg,dur.sl&&dur.sl.avg,fmtH,(n,a)=>n>a);
+  html+=cmpRow('Días con dolor de cabeza',before.sl&&before.sl.hdp,dur.sl&&dur.sl.hdp,v=>Math.round(v*100)+'%',(n,a)=>n<a);
+  html+=cmpRow('Horario de levantarte',before.sl&&before.sl.sd,dur.sl&&dur.sl.sd,v=>'±'+Math.round(v)+' min',(n,a)=>n<a);
+  html+=cmpRow('Constancia de hábitos',before.hab,dur.hab,v=>Math.round(v*100)+'%',(n,a)=>n>a);
+  if(before.steps!=null||dur.steps!=null)html+=cmpRow('Pasos por día',before.steps,dur.steps,fmtN,(n,a)=>n>a);
+  html+='</div>';box.insertAdjacentHTML('beforeend',html);box.querySelector('.et2').textContent=E.title;
+  if(d>14){let good=0,bad=0;const chk=(a,n,better)=>{if(a==null||n==null||Math.abs(n-a)<1e-9)return;better(n,a)?good++:bad++;};
+    chk(before.sl&&before.sl.avg,dur.sl&&dur.sl.avg,(n,a)=>n-a>=.25);chk(before.sl&&before.sl.hdp,dur.sl&&dur.sl.hdp,(n,a)=>a-n>=.1);chk(before.hab,dur.hab,(n,a)=>n-a>=.05);
+    const res=good>bad?'te sirvió':good<bad?'no te sirvió':'sin cambio claro';
+    box.insertAdjacentHTML('beforeend',`<div class="note"><b>Resultado: ${res}.</b> ${good>bad?'Te conviene mantenerlo como hábito.':'Podés probar otro cambio.'}</div>`);
+    const b=document.createElement('button');b.type='button';b.className='btn';b.textContent='Guardar resultado y elegir otro';b.onclick=()=>{S.expHist=(S.expHist||[]).concat([{title:E.title,start:E.start,res}]);S.exp=null;save();renderAll();};box.appendChild(b);}
+  else{const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar experimento';c.onclick=()=>{if(c.dataset.sure){S.exp=null;save();renderAll();}else{c.dataset.sure='1';c.textContent='¿Seguro? Tocá otra vez';}};box.appendChild(c);}}
+function renderMetas(T){const box=document.getElementById('campo');const a=add(T,-6),sl=sleepStats(a,T),stp=avgSteps(a,add(T,-1)),fv=avgFyv(a,T),M=mondayOf(T);
+  const gy=HABS().find(h=>h.id==='gym'),pd=HABS().find(h=>h.id==='padel');let mv=0;for(let k=0;k<7;k++){const s=add(M,k);if(s>T)break;if(gy&&st(s,gy.id)>0)mv++;if(pd&&st(s,pd.id)>0)mv++;}
+  const rows=[['Sueño',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'h por noche'],['Pasos',stp,8000,fmtN,'por día'],['Frutas y verduras',fv,5,v=>round1(v)+'','porciones/día'],['Movimiento',mv,3,v=>v+'','sesiones esta semana']];
+  const el=document.createElement('div');el.className='metas';el.innerHTML=`<p class="gsub">Metas de salud · últimos 7 días</p>`+rows.map(([l,v,t,f,u])=>`<div class="mt2"><div class="spread"><span>${l}</span><span class="num"><b>${v==null?'—':f(v)}</b> / ${f(t)} <small>${u}</small></span></div><div class="track ol"><i style="width:${v==null?0:Math.min(100,Math.round(v/t*100))}%"></i></div></div>`).join('');
+  box.appendChild(el);}
+const SB=[['Ronquidos','¿Roncás fuerte (se escucha con la puerta cerrada o alguien te lo dijo)?'],['Cansancio','¿Te sentís cansado o con sueño durante el día seguido?'],['Pausas','¿Alguien te vio dejar de respirar o ahogarte mientras dormías?'],['Presión','¿Tenés presión alta o la estás tratando?'],['Peso','¿Tu índice de masa corporal es mayor a 35? (peso ÷ altura²)'],['Edad','¿Tenés más de 50 años?'],['Cuello','¿Tu cuello mide más de 40 cm de contorno?'],['Sexo','¿Sos varón?']];
+function openStopBang(){const ans=(S.salud.sb&&S.salud.sb.ans)?S.salud.sb.ans.slice():SB.map(()=>null);
+  const draw=()=>{SI.innerHTML=`<div><h3>Chequeo de apnea del sueño</h3><p class="sub small">Cuestionario STOP-Bang, usado por médicos para detectar riesgo. Tarda 1 minuto. No es un diagnóstico.</p></div><div class="sbq"></div><button class="btn primary" type="button" id="ok">Ver resultado</button>`;
+    const Q=SI.querySelector('.sbq');SB.forEach(([k,q],i)=>{const r=document.createElement('div');r.className='sbr';r.innerHTML=`<p></p><div class="split"><button type="button">Sí</button><button type="button">No</button></div>`;r.querySelector('p').textContent=q;const bs=r.querySelectorAll('button');[1,0].forEach((v,j)=>{if(ans[i]===v)bs[j].classList.add('on');bs[j].onclick=()=>{ans[i]=v;draw();};});Q.appendChild(r);});
+    const ok=SI.querySelector('#ok');ok.disabled=ans.some(x=>x===null);ok.style.opacity=ok.disabled?.4:1;
+    ok.onclick=()=>{const sc=ans.reduce((p,c)=>p+(c||0),0);S.salud.sb={score:sc,date:todayStr(),ans};save();renderAll();
+      const lv=sc>=5?'alto':sc>=3?'intermedio':'bajo';SI.innerHTML=`<div><h3>Riesgo ${lv} (${sc} de 8)</h3><p class="sub" style="margin-top:8px">${sc>=3?'Según este cuestionario conviene consultar con un médico (clínico u otorrino) y comentarle tus ronquidos y el dolor de cabeza al despertar. Puede pedirte un estudio del sueño.':'Según este cuestionario el riesgo es bajo. Igual, si los dolores de cabeza al despertar siguen, conviene consultar.'}</p><p class="sub small" style="margin-top:8px">No es un diagnóstico: solo un médico puede confirmarlo.</p></div><button class="btn primary" type="button" id="ok2">Listo</button>`;SI.querySelector('#ok2').onclick=()=>sheet.close();};};
+  draw();if(!sheet.open)sheet.showModal();}
+function openBreath(T,h){let run=false,t0=0,raf=0,el=0;const TOT=300;
+  SI.innerHTML=`<div><h3>Respiración · 5 minutos</h3><p class="sub small">Suspiro cíclico: inhalá por la nariz, sumá una segunda inhalación corta, y soltá todo el aire lento por la boca.</p></div><div class="br"><div class="bc"><span id="brT">Listo</span></div></div><p class="num" id="brC" style="text-align:center;font-size:22px;font-weight:700">5:00</p><button class="btn primary" type="button" id="brGo">Empezar</button><button class="btn" type="button" id="brX">Cerrar</button>`;
+  const C=SI.querySelector('.bc'),TT=SI.querySelector('#brT'),CC=SI.querySelector('#brC'),go=SI.querySelector('#brGo');
+  const phase=x=>{const c=x%9;if(c<2)return ['Inhalá',.55+.3*(c/2)];if(c<3)return ['Un poco más',.85+.15*(c-2)];return ['Soltá lento',1-.45*((c-3)/6)];};
+  const tick=()=>{if(!run)return;el=(performance.now()-t0)/1000;const left=Math.max(0,TOT-el),[w,sc]=phase(el);TT.textContent=w;C.style.transform=`scale(${sc})`;CC.textContent=Math.floor(left/60)+':'+String(Math.floor(left%60)).padStart(2,'0');
+    if(left<=0){run=false;TT.textContent='¡Listo!';go.textContent='Terminado';go.disabled=true;if(h)setState(T,h.id,2,true);vib(20);return;}raf=requestAnimationFrame(tick);};
+  go.onclick=()=>{if(run){run=false;cancelAnimationFrame(raf);go.textContent='Seguir';t0=performance.now()-el*1000;if(el>=180&&h&&st(T,h.id)===0)setState(T,h.id,2,true);return;}run=true;t0=performance.now()-el*1000;go.textContent='Pausar';tick();};
+  SI.querySelector('#brX').onclick=()=>{run=false;cancelAnimationFrame(raf);sheet.close();};
+  sheet.addEventListener('close',()=>{run=false;cancelAnimationFrame(raf);},{once:true});if(!sheet.open)sheet.showModal();}
+function renderSaludExtras(T){const box=document.getElementById('salud');if(!box)return;
+  const sb=S.salud.sb,ex=document.createElement('div');ex.className='sx';
+  if(!sb)ex.innerHTML=`<div class="note"><b>Chequeo de apnea del sueño.</b> Con ronquidos y dolor de cabeza al despertar, vale la pena hacerlo (1 minuto).<br><button class="link" type="button" id="sbGo">Hacer el chequeo</button></div>`;
+  else ex.innerHTML=`<div class="spread rowx"><span>Chequeo de apnea (STOP-Bang)</span><span><b>${sb.score>=5?'Riesgo alto':sb.score>=3?'Riesgo intermedio':'Riesgo bajo'}</b> · ${sb.score}/8 <button class="link" type="button" id="sbGo">Rehacer</button></span></div>`;
+  const tests=S.salud.tests||[],ym=T.slice(0,7),has=tests.some(t=>t.d.slice(0,7)===ym),f0=tests[0],l0=tests[tests.length-1];
+  let th=`<p class="gsub">Test del mes</p>`;
+  if(tests.length){const d=(k)=>f0&&l0&&tests.length>1&&f0[k]&&l0[k]?` <small class="${(l0[k]-f0[k])<0?'up':'dn'}">(${l0[k]-f0[k]>0?'+':''}${round1(l0[k]-f0[k])} desde el inicio)</small>`:'';
+    th+=`<div class="spread rowx"><span>Pulso en reposo</span><span><b class="num">${l0.rhr||'—'}</b> ppm${d('rhr')}</span></div><div class="spread rowx"><span>Cintura</span><span><b class="num">${l0.cin||'—'}</b> cm${d('cin')}</span></div>`;}
+  if(!has)th+=`<p class="sub small">Una vez por mes, apenas te levantás: medí tu pulso sentado durante 60 segundos (con los dedos en la muñeca o una app de cámara) y tu cintura a la altura del ombligo. Bajar el pulso en reposo es señal de mejor estado físico.</p><div class="two"><label class="fl"><span>Pulso en reposo (ppm)</span><input id="tRhr" type="number" inputmode="numeric" placeholder="Ej: 64"></label><label class="fl"><span>Cintura (cm)</span><input id="tCin" type="number" inputmode="decimal" placeholder="Ej: 82"></label></div><button class="btn" type="button" id="tSave">Guardar test del mes</button>`;
+  else th+=`<p class="sub small">Próximo test: el mes que viene.</p>`;
+  ex.insertAdjacentHTML('beforeend',th);box.appendChild(ex);
+  const g=ex.querySelector('#sbGo');if(g)g.onclick=openStopBang;
+  const sv=ex.querySelector('#tSave');if(sv)sv.onclick=()=>{const r=parseInt(ex.querySelector('#tRhr').value,10),c=parseFloat((ex.querySelector('#tCin').value||'').replace(',','.'));if(!(r>30&&r<150)&&!(c>40&&c<200)){toast('Cargá al menos un dato válido');return;}S.salud.tests=(S.salud.tests||[]).concat([{d:T,rhr:r>30&&r<150?r:null,cin:c>40&&c<200?c:null}]);save();renderAll();toast('Test guardado');};}
 
 /* ---------- PROGRESO ---------- */
 let mOff=0;
@@ -1091,9 +1194,12 @@ function goalKey(g){const T=todayStr();let dl='Sin fecha límite';if(g.deadline)
   if(m){const v=metricValue(m),tg=Number(m.target)||0;ml=`${round1(v)}${tg?' / '+tg:''} ${String(m.label).replace(/\s*\(.*\)$/,'').toLowerCase()}`;}
   const H=g.hitos||[];return {dl,ml,hl:H.length?H.filter(x=>x.done).length+'/'+H.length+' hitos':''};}
 function renderGoals(){const box=document.getElementById('goals');box.innerHTML='';if(!GOALS().length){box.innerHTML='<p class="empty">Sin objetivos todavía.</p>';return;}
-  GOALS().forEach(g=>{const gp=goalPct(g),k=goalKey(g),el=document.createElement('button');el.type='button';el.className='gcard';
+  const HS=['g_fisico','g_mente'],gs=GOALS().filter(g=>HS.includes(g.id)),gv=GOALS().filter(g=>!HS.includes(g.id));let tgt=box;
+  const sub=t=>{const h=document.createElement('p');h.className='gsub';h.textContent=t;box.appendChild(h);};
+  if(gs.length)sub('Salud');
+  gs.concat(gv).forEach((g,i)=>{if(i===gs.length&&gv.length){const d=document.createElement('details');d.className='help';d.innerHTML=`<summary>Vida y proyectos (${gv.length})</summary>`;box.appendChild(d);tgt=d;}const box2=tgt;const gp=goalPct(g),k=goalKey(g),el=document.createElement('button');el.type='button';el.className='gcard';
     el.innerHTML=`<div class="gh" style="display:grid;grid-template-columns:1fr auto;gap:12px"><div style="min-width:0"><h3></h3><p class="sub small">${esc(k.dl)}</p></div><span class="gp num">${gp}%</span></div><div class="track ol"><i style="width:${gp}%"></i></div><div class="kl"><span>${esc(k.ml)}</span><span>${esc(k.hl)}</span></div>`;
-    el.querySelector('h3').textContent=g.title;el.onclick=()=>openGoalDetail(g);box.appendChild(el);});}
+    el.querySelector('h3').textContent=g.title;el.onclick=()=>openGoalDetail(g);box2.appendChild(el);});}
 function openGoalDetail(g){const draw=()=>{if(!GOALS().includes(g)){sheet.close();return;}const T=todayStr(),gp=goalPct(g),k=goalKey(g),rer=()=>{save();renderAll();draw();};
     SI.innerHTML='';const el=document.createElement('div');el.style.cssText='display:flex;flex-direction:column;gap:16px';
     el.innerHTML=`<div class="gh" style="display:grid;grid-template-columns:1fr auto;gap:12px"><div style="min-width:0"><h3></h3><p class="sub small">${esc(k.dl)}</p></div><span class="gp num">${gp}%</span></div><div class="track ol"><i style="width:${gp}%"></i></div>${g.why?'<p class="why"></p>':''}`;
@@ -1124,7 +1230,7 @@ function renderAj(){const b=document.getElementById('habs');b.innerHTML='';const
     r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(htime(h))} · ${ORDER.filter(d=>(h.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${badge}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=h.name;r.onclick=()=>openHab(h);tgt.appendChild(r);});if(pb)b.appendChild(pb);
   const f=document.getElementById('fixes');f.innerHTML='';S.fijos.forEach(x=>{const r=document.createElement('button');r.type='button';r.className='r';r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(x.time)} · ${ORDER.filter(d=>(x.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${x.until?' · hasta el '+fmt(x.until,{day:'numeric',month:'short'}):''}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=x.name;r.onclick=()=>openFix(x);f.appendChild(r);});
   document.getElementById('lastBk').textContent=S.backup?'Última copia: '+fmt(S.backup,{day:'numeric',month:'long'}):'Todavía no hiciste ninguna copia.';}
-function renderAll(){renderHeader();renderHoy();renderSleep(todayStr());renderProg();renderCampo(todayStr());renderSalud(todayStr());renderInsights();renderAj();renderCfg();}
+function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();}
 
 /* ---------- hojas y formularios ---------- */
 const sheet=document.getElementById('sheet'),SI=document.getElementById('SI');
@@ -1199,7 +1305,7 @@ document.getElementById('impFile').onchange=e=>{const f=e.target.files[0];if(!f)
 
 /* ---------- navegación ---------- */
 function show(v){const hd=document.querySelector('header.top');if(hd)hd.hidden=!(v==='hoy'||v==='prog');if(v==='hoy'){ANIM.hoy=true;}if(v==='prog'){ANIM.prog=true;}document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!=='v-'+v);document.querySelectorAll('nav.tabs button').forEach(b=>{if(b.dataset.v===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});document.querySelector('nav.tabs').hidden=v==='aj'||v==='rev'||v==='hist';window.scrollTo(0,0);}
-document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{show(b.dataset.v);vib(6);const T=todayStr();if(b.dataset.v==='prog')renderCampo(T);else renderBat(T);});
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{show(b.dataset.v);vib(6);const T=todayStr();if(b.dataset.v==='prog'){renderCampo(T);renderMetas(T);}else renderBat(T);});
 document.getElementById('gearBtn').onclick=()=>show('aj');document.getElementById('backBtn').onclick=()=>show('hoy');document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>show(b.dataset.back||'hoy'));document.getElementById('histRow').onclick=()=>show('hist');
 document.getElementById('mPrev').onclick=()=>{mOff--;renderProg();};document.getElementById('mNext').onclick=()=>{if(mOff<0){mOff++;renderProg();}};
 document.getElementById('newHab').onclick=()=>openHab(null);document.getElementById('newFix').onclick=()=>openFix(null);document.getElementById('newGoal').onclick=()=>openGoal(null);
