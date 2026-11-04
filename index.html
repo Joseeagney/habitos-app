@@ -605,6 +605,10 @@ details.help p{margin-top:8px}
 .tiny{font-size:11px;color:var(--muted);letter-spacing:.04em}
 .stpw{display:grid;grid-template-columns:1fr auto;gap:8px}.stpw .btn{min-height:44px;padding:8px 16px}
 .stl{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center;padding-bottom:4px}.stl-t{display:flex;flex-direction:column;gap:1px}.stl-t .k{font-size:12px;color:var(--muted);font-weight:600}.stl-t b{font-size:26px;font-weight:700;letter-spacing:-.03em}.stl .btn{min-height:42px;padding:8px 16px}
+
+.p90{position:relative;padding-bottom:18px}.p90 .track{height:6px}
+.p90l{position:absolute;left:0;right:0;bottom:0;height:16px}.p90l span{position:absolute;transform:translateX(-100%);font-size:11.5px;color:var(--faint);font-weight:600}.p90l span.ok{color:var(--olive)}
+#expPick{align-self:flex-start}
 </style>
 </head>
 <body>
@@ -825,11 +829,14 @@ function ringsData(T){const x=slp(T),rest=x?Math.min(1,slH(x)/S.salud.meta):0;
   const adv=HABS().filter(h=>(h.id==='estudio'||h.id==='innova')&&counts(h,T));let av;
   if(adv.length){av=adv.reduce((p,h)=>{const v=st(T,h.id);return p+(v===2?1:v===1?.5:0);},0)/adv.length;}else{const r=dayRatio(T);av=r===null?0:r;}
   return [['Descansar',rest,x?Math.round(rest*100)+'%':'—'],['Moverte',move,gd+'/'+pw],['Avanzar',av,Math.round(av*100)+'%']];}
-function planText(T,b){const bed=bedTarget(),mate=m2hm(hm2m(bed)-8*60);
-  if(!b)return 'Anotá cómo dormiste abajo y te armo el plan del día.';
-  if(b.lvl==='Baja')return `Día de <b>batería baja</b>: gimnasio en versión mínima, siesta de 10–20 min antes de las 16 y <b>a dormir a las ${bed}</b>.`;
-  if(b.lvl==='Media')return `Día normal: entrená sin forzar, lo más difícil de estudio a la mañana y <b>último mate a las ${mate}</b>.`;
-  return curHr()<13?`Buen día: <b>entrená fuerte</b> y hacé lo más difícil de estudio a la mañana, que es tu mejor momento.`:`Buen día: aprovechá la tarde para <b>Innova</b> y cortá el mate a las <b>${mate}</b> para dormirte a horario.`;}
+function planText(T,b){const bed=bedTarget(),mate=m2hm(hm2m(bed)-8*60),hr=curHr(),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
+  if(!b)return 'Anotá cómo dormiste y te armo el plan del día.';
+  if(hr>=20||hr<5)return b.lvl==='Baja'?`Hoy la batería estuvo baja: priorizá dormir. <b>A la cama a las ${bed}</b>, con el celular afuera.`:`Cerrá bien el día: <b>a dormir a las ${bed}</b> para llegar a ${fmtH(S.salud.meta)}.`;
+  const L=b.lvl==='Baja'?[gT&&!gD?'gimnasio en versión mínima':null,hr<16?'siesta de 10–20 min antes de las 16':null,`<b>a dormir a las ${bed}</b>`]
+   :b.lvl==='Media'?[gT&&!gD?'entrená sin forzar':null,hr<13?'lo más difícil de estudio a la mañana':null,hr<16?`<b>último mate a las ${mate}</b>`:`<b>a dormir a las ${bed}</b>`]
+   :[gT&&!gD?'<b>entrená fuerte</b>':null,hr<13?'lo más difícil de estudio ahora, que es tu mejor momento':'aprovechá la tarde para <b>Innova</b>',hr<16?`último mate a las ${mate}`:null];
+  const x=L.filter(Boolean),txt=x.length>1?x.slice(0,-1).join(', ')+' y '+x[x.length-1]:x[0];
+  return (b.lvl==='Baja'?'Día de batería baja: ':b.lvl==='Media'?'Día normal: ':'Buen día: ')+txt+'.';}
 function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(--sand)','var(--graph)'];let o='';
   R.forEach((r,i)=>{const rad=c-sw/2-i*(sw+gap),C=2*Math.PI*rad,off=C*(1-Math.max(0,Math.min(1,r[1])));
     o+=`<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-opacity=".12" stroke-width="${sw}"/><circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-width="${sw}" stroke-linecap="round" class="rfg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${off.toFixed(1)}"/>`;});
@@ -839,7 +846,7 @@ function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ri
    <div class="leg">${R.map((r,i)=>`<div><span><i class="${cols[i]}"></i>${r[0]}</span><b class="num">${r[2]}</b></div>`).join('')}</div>
    ${stepsRow(T)}
    <div class="callout"><p class="plan">${planText(T,b)}</p></div>`;
-  if(b){const [cls,html,lk]=healthTip(T),tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
+  const HT=b?healthTip(T):null;if(b&&HT){const [cls,html,lk]=HT,tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
     if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}box.querySelector('.callout').appendChild(tp);}wireSteps(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
 function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i]=!cur[i];if(cur[i])POP={id:h.id+'#'+i,t:Date.now()};const k=cur.filter(Boolean).length,prev=Object.assign({},S.dias[T]||{}),was=dayDone(T);
@@ -981,7 +988,7 @@ function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&
   const gy=HABS().find(h=>h.id==='gym');if(gy&&st(T,gy.id)>0&&hr<14)return ['',`Después del gimnasio: sumá al mate <b>algo con proteína</b> (huevo, queso, yogur o leche). Ayuda a recuperar y a ganar músculo.`];
   if(hr>=13&&hr<16)return ['',`Después de almorzar: <b>10 min caminando</b>. Baja el pico de azúcar y ayuda con el bajón de la siesta.`];
   if(hr>=5&&hr<12)return ['',`Primero <b>luz del día</b>: unos minutos afuera al levantarte ayudan a despertarte y a dormirte más temprano a la noche.`];
-  return ['',`Esta noche: <b>a dormir a las ${bedTarget()}</b> para llegar a ${fmtH(S.salud.meta)}. Lo que más pesa es el horario parejo.`];}
+  return null;}
 function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box.innerHTML='';box.className='slp';
   if(!x||slEdit){box.innerHTML=`<div class="spread"><h2>¿Cómo dormiste?</h2><span class="hintx">10 segundos</span></div>`;
     box.appendChild(sleepEditor(T,()=>{slEdit=false;renderAll();}));
@@ -995,7 +1002,7 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   const day=st0?Math.round((toD(T)-toD(st0))/864e5)+1:0;
   box.innerHTML=`<div class="spread"><h2>Salud · antes y después</h2><span class="sub small num">${st0?'Día '+day+' de 90':'Sin empezar'}</span></div>`;
   if(!st0){box.insertAdjacentHTML('beforeend','<p class="note">Registrá cómo dormiste cada mañana (lo hacés en <b>Hoy</b>, tarda 10 segundos). Tus primeros 7 días son tu punto de partida: el "antes".</p>');return;}
-  box.insertAdjacentHTML('beforeend',`<div class="miles">${[30,60,90].map(n=>`<span class="${day>=n?'ok':day>n-30?'now':''}">${n} días</span>`).join('')}</div>`);
+  box.insertAdjacentHTML('beforeend',`<div class="p90"><div class="track ol"><i style="width:${Math.min(100,Math.round(day/90*100))}%"></i></div><div class="p90l">${[30,60,90].map(n=>`<span class="${day>=n?'ok':''}" style="left:${n/90*100}%">${day>=n?'✓ ':''}${n}</span>`).join('')}</div></div>`);
   // barras 14 días
   const a14=add(T,-13),mx=Math.max(10,S.salud.meta+1);let bars='';
   for(let s=a14;s<=T;s=add(s,1)){const x=slp(s);if(!x){bars+=`<i class="e" title="${fmt(s,{day:'numeric',month:'short'})}: sin registro"></i>`;continue;}const h=slH(x);bars+=`<i class="${h<S.salud.meta-.25?'lo':''}${x.hd?' hd':''}" style="height:${Math.min(100,h/mx*100)}%" title="${fmt(s,{day:'numeric',month:'short'})}: ${fmtH(h)}${x.hd?' · dolor de cabeza':''}"></i>`;}
@@ -1050,6 +1057,8 @@ function renderCampo(T){const box=document.getElementById('campo'),hs=HABS().fil
   let bars='';for(let s=a;s<=T;s=add(s,1)){const x=dayRatio(s);bars+=`<i style="height:${x===null?6:Math.max(6,Math.round(x*100))}%" class="${s===T?'t':''}"></i>`;}
   const cnt=[0,0,0,0];hs.forEach(h=>{const n=stageN(h);if(n>=0)cnt[n]++;});
   const lv=[[3,'automático','automáticos'],[2,'consolidado','consolidados'],[1,'en construcción','en construcción'],[0,'iniciando','iniciando']].filter(x=>cnt[x[0]]).map(x=>cnt[x[0]]+' '+(cnt[x[0]]===1?x[1]:x[2])).join(' · ');
+  let nd=0;for(let s=a;s<=T;s=add(s,1)){if(HABS().some(h=>st(s,h.id)>0))nd++;}
+  if(nd<3){box.innerHTML=`<h2>Resumen</h2><div class="note"><b>Tu resumen aparece desde el día 3.</b> Marcá tus hábitos y anotá tu sueño: con pocos días ya vas a ver tu constancia y cómo evoluciona.</div>`;const L0=document.getElementById('habl');L0.innerHTML='';return;}
   box.innerHTML=`<h2>Resumen</h2><div class="sum4"><div><span class="k">Constancia · últimos 14 días</span><div class="score num">${r===null?'—':Math.round(r*100)}<small>%</small></div>${tr===null||!tr?'<span class="dl">Igual que las 2 semanas anteriores</span>':`<span class="dl ${tr>0?'up':'dn'}">${tr>0?'▲':'▼'} ${Math.abs(tr)} ${Math.abs(tr)===1?'punto':'puntos'} vs las 2 semanas anteriores</span>`}</div><div class="b14">${bars}</div></div><p class="sub small">${lv?lv.charAt(0).toUpperCase()+lv.slice(1):''}</p>`;
   const L=document.getElementById('habl');L.innerHTML='<div class="spread"><h2>Hábitos</h2><span class="sub small">Fuerza 0–100</span></div>';
   const list=document.createElement('div');list.className='hlst';
@@ -1113,9 +1122,10 @@ function renderExpHoy(T){const box=document.getElementById('expBox');box.innerHT
   box.querySelectorAll('[data-e]').forEach(x=>x.onclick=()=>{E.log=E.log||{};E.log[T]=Number(x.dataset.e);save();vib(8);renderAll();toast(E.log[T]?'Sumado al experimento':'Anotado, mañana de nuevo');});}
 function cmpRow(lbl,a,n,f,better){let cl='';if(a!=null&&n!=null&&Math.abs(n-a)>1e-9)cl=better(n,a)?'up':'dn';return `<span>${lbl}</span><b class="a">${a==null?'—':f(a)}</b><b class="${cl}">${n==null?'—':f(n)}</b>`;}
 function renderExpProg(T){const box=document.getElementById('expP');box.innerHTML='<h2>Experimento de 14 días</h2>';const E=S.exp;
-  if(!E){box.insertAdjacentHTML('beforeend',`<p class="sub small">Elegí un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Es tu "antes y después" con datos reales.</p><div class="explist"></div>`);
-    const L=box.querySelector('.explist');EXPS.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='hlr';b.innerHTML=`<div class="tx"><b></b><span></span></div><span class="mono td">ELEGIR</span>`;b.querySelector('b').textContent=x.t;b.querySelector('.tx span').textContent=x.d;
-      b.onclick=()=>{S.exp={k:x.k,title:x.t,start:T,log:{}};save();vib();renderAll();toast('Experimento iniciado: 14 días');};L.appendChild(b);});
+  if(!E){box.insertAdjacentHTML('beforeend',`<p class="sub small">Elegí un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Es tu "antes y después" con datos reales.</p><button class="btn primary" type="button" id="expPick">Elegir un experimento</button>`);
+    box.querySelector('#expPick').onclick=()=>{SI.innerHTML='<div><h3>Elegí tu experimento</h3><p class="sub small">Durante 14 días, cada día marcás si lo cumpliste.</p></div><div class="explist"></div><button class="btn" type="button" id="ok">Cancelar</button>';SI.querySelector('#ok').onclick=()=>sheet.close();
+    const L=SI.querySelector('.explist');EXPS.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='hlr';b.innerHTML=`<div class="tx"><b></b><span></span></div><span class="mono td">ELEGIR</span>`;b.querySelector('b').textContent=x.t;b.querySelector('.tx span').textContent=x.d;
+      b.onclick=()=>{S.exp={k:x.k,title:x.t,start:T,log:{}};save();vib();sheet.close();renderAll();toast('Experimento iniciado: 14 días');};L.appendChild(b);});if(!sheet.open)sheet.showModal();};
     if((S.expHist||[]).length){const h=document.createElement('p');h.className='sub small';h.innerHTML='Anteriores: '+S.expHist.map(x=>`<b>${esc(x.title)}</b> (${esc(x.res)})`).join(' · ');box.appendChild(h);}return;}
   const d=expDay(T),end=add(E.start,13),before=expStats(add(E.start,-14),add(E.start,-1)),dur=expStats(E.start,end),ans=Object.values(E.log||{}),adh=ans.length?ans.filter(x=>x===1).length/ans.length:null;
   let html=`<div class="spread"><b class="et2"></b><span class="sub small num">${d>14?'Terminado':'Día '+Math.max(1,d)+' de 14'}</span></div><div class="track ol"><i style="width:${Math.min(100,Math.round(Math.max(0,d)/14*100))}%"></i></div>`;
@@ -1163,11 +1173,12 @@ function renderSaludExtras(T){const box=document.getElementById('salud');if(!box
   let th=`<p class="gsub">Test del mes</p>`;
   if(tests.length){const d=(k)=>f0&&l0&&tests.length>1&&f0[k]&&l0[k]?` <small class="${(l0[k]-f0[k])<0?'up':'dn'}">(${l0[k]-f0[k]>0?'+':''}${round1(l0[k]-f0[k])} desde el inicio)</small>`:'';
     th+=`<div class="spread rowx"><span>Pulso en reposo</span><span><b class="num">${l0.rhr||'—'}</b> ppm${d('rhr')}</span></div><div class="spread rowx"><span>Cintura</span><span><b class="num">${l0.cin||'—'}</b> cm${d('cin')}</span></div>`;}
-  if(!has)th+=`<p class="sub small">Una vez por mes, apenas te levantás: medí tu pulso sentado durante 60 segundos (con los dedos en la muñeca o una app de cámara) y tu cintura a la altura del ombligo. Bajar el pulso en reposo es señal de mejor estado físico.</p><div class="two"><label class="fl"><span>Pulso en reposo (ppm)</span><input id="tRhr" type="number" inputmode="numeric" placeholder="Ej: 64"></label><label class="fl"><span>Cintura (cm)</span><input id="tCin" type="number" inputmode="decimal" placeholder="Ej: 82"></label></div><button class="btn" type="button" id="tSave">Guardar test del mes</button>`;
+  if(!has)th+=`<div class="spread rowx"><span>${tests.length?'Toca el test de este mes':'Pulso en reposo y cintura, 1 vez por mes'}</span><button class="link" type="button" id="tOpen">Cargar</button></div>`;
   else th+=`<p class="sub small">Próximo test: el mes que viene.</p>`;
   ex.insertAdjacentHTML('beforeend',th);box.appendChild(ex);
   const g=ex.querySelector('#sbGo');if(g)g.onclick=openStopBang;
-  const sv=ex.querySelector('#tSave');if(sv)sv.onclick=()=>{const r=parseInt(ex.querySelector('#tRhr').value,10),c=parseFloat((ex.querySelector('#tCin').value||'').replace(',','.'));if(!(r>30&&r<150)&&!(c>40&&c<200)){toast('Cargá al menos un dato válido');return;}S.salud.tests=(S.salud.tests||[]).concat([{d:T,rhr:r>30&&r<150?r:null,cin:c>40&&c<200?c:null}]);save();renderAll();toast('Test guardado');};}
+  const to=ex.querySelector('#tOpen');if(to)to.onclick=()=>{SI.innerHTML=`<div><h3>Test del mes</h3><p class="sub small">Apenas te levantás: medí tu pulso sentado durante 60 segundos (dedos en la muñeca o una app de cámara) y tu cintura a la altura del ombligo. Si el pulso en reposo baja con los meses, tu estado físico mejora.</p></div><div class="two"><label class="fl"><span>Pulso en reposo (ppm)</span><input id="tRhr" type="number" inputmode="numeric" placeholder="Ej: 64"></label><label class="fl"><span>Cintura (cm)</span><input id="tCin" type="number" inputmode="decimal" placeholder="Ej: 82"></label></div><button class="btn primary" type="button" id="tSave">Guardar</button>`;
+    const ex=SI;SI.querySelector('#tSave').onclick=()=>{const r=parseInt(ex.querySelector('#tRhr').value,10),c=parseFloat((ex.querySelector('#tCin').value||'').replace(',','.'));if(!(r>30&&r<150)&&!(c>40&&c<200)){toast('Cargá al menos un dato válido');return;}S.salud.tests=(S.salud.tests||[]).concat([{d:T,rhr:r>30&&r<150?r:null,cin:c>40&&c<200?c:null}]);save();sheet.close();renderAll();toast('Test guardado');};if(!sheet.open)sheet.showModal();};}
 
 /* ---------- PROGRESO ---------- */
 let mOff=0;
@@ -1237,7 +1248,7 @@ function openGoalDetail(g){const draw=()=>{if(!GOALS().includes(g)){sheet.close(
 /* ---------- AJUSTES ---------- */
 function renderAj(){const b=document.getElementById('habs');b.innerHTML='';const act=HABS().filter(h=>h.active!==false),pau=HABS().filter(h=>h.active===false);let pb=null;if(pau.length){const d=document.createElement('details');d.className='help';d.innerHTML=`<summary>En pausa (${pau.length})</summary>`;pb=d;}
   act.concat(pau).forEach(h=>{const tgt=h.active===false&&pb?pb:b;const r=document.createElement('button');r.type='button';r.className='r';const badge=h.active===false?' · En pausa':h.from&&h.from>todayStr()?' · Desde el '+fmt(h.from,{day:'numeric',month:'short'}):'';
-    r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(htime(h))} · ${ORDER.filter(d=>(h.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${badge}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=h.name;r.onclick=()=>openHab(h);tgt.appendChild(r);});if(pb)b.appendChild(pb);
+    r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(h.time||(MOMENTS.find(m=>m[0]===(h.moment||'manana'))||MOMENTS[0])[1])}${h.opt?' · opcional':''} · ${ORDER.filter(d=>(h.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${badge}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=h.name;r.onclick=()=>openHab(h);tgt.appendChild(r);});if(pb)b.appendChild(pb);
   const f=document.getElementById('fixes');f.innerHTML='';S.fijos.forEach(x=>{const r=document.createElement('button');r.type='button';r.className='r';r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(x.time)} · ${ORDER.filter(d=>(x.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${x.until?' · hasta el '+fmt(x.until,{day:'numeric',month:'short'}):''}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=x.name;r.onclick=()=>openFix(x);f.appendChild(r);});
   document.getElementById('lastBk').textContent=S.backup?'Última copia: '+fmt(S.backup,{day:'numeric',month:'long'}):'Todavía no hiciste ninguna copia.';}
 function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();}
