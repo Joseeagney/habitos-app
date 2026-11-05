@@ -650,6 +650,7 @@ nav.tabs{padding-right:70px;padding-left:70px}
 .expfull{display:flex;flex-direction:column;gap:12px}
 #insights>.link{align-self:flex-start}
 .callout .tip{margin-top:8px}
+.hdl{align-self:center;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -935,7 +936,7 @@ function renderRevRow(T){const el=document.getElementById('revRow'),d=dow(T),PM=
   const done=PP.filter(p=>p.done).length;
   el.className='revrow'+(d===0?' hot':'');
   el.innerHTML=`<div><b>${d===0?'Hoy toca el repaso de la semana':'Repaso y prioridades'}</b><br><span>${PP.length?done+' de '+PP.length+' prioridades cumplidas':'Todavía no elegiste prioridades'}</span></div>${SVGI.arr}`;
-  el.hidden=!(d===0||(d===1&&!(S.semanas[add(mondayOf(T),-7)]||{}).feel));
+  el.hidden=!(d===0||(d===1&&!PP.length));
   el.onclick=()=>show('rev');}
 function renderRev(T){document.getElementById('revDate').textContent=fmt(T,{weekday:'long',day:'numeric',month:'long'});
   renderWeekRev(T);
@@ -953,6 +954,7 @@ function renderWeekRev(T){const box=document.getElementById('weekBox'),fb=docume
      <div class="kp"><div><span>Mejor hábito</span><b></b></div><div><span>A mejorar</span><b></b></div><div><span>Sueño promedio</span><b class="num">${sw?fmtH(sw.avg):'—'}</b></div></div>`;
     const bs=box.querySelectorAll('.kp b');bs[0].textContent=best?best[0].name:'—';bs[1].textContent=worst&&worst[1]<1?worst[0].name:'Ninguno';box.hidden=false;}
   else box.hidden=true;
+  fb.hidden=true;return;
   const W=S.semanas[a]||{};fb.innerHTML=`<h2>¿Cómo te sentiste, de cuerpo y de cabeza?</h2><div class="feel">${[[1,'Mejor'],[0,'Igual'],[-1,'Peor']].map(([v,l])=>`<button class="btn" type="button" data-f="${v}" aria-pressed="${W.feel===v}">${l}</button>`).join('')}</div>`;
   fb.querySelectorAll('[data-f]').forEach(x=>x.onclick=()=>{W.feel=Number(x.dataset.f);S.semanas[a]=W;save();renderAll();toast('Anotado');});
   fb.insertAdjacentHTML('beforeend',`<p class="q2">¿Pasaste tiempo de calidad con otras personas (amigos, familia, pareja)?</p><div class="feel two2">${[[1,'Sí'],[0,'No']].map(([v,l])=>`<button class="btn" type="button" data-so="${v}" aria-pressed="${W.social===v}">${l}</button>`).join('')}</div>`);
@@ -970,7 +972,7 @@ function renderWeek(T){const box=document.getElementById('weekBox'),d=dow(T);box
   box.innerHTML=`<div class="spread"><div><h3>${d===0?'Tu semana':'Tu semana pasada'}</h3><p class="sub small">${fmt(a,{day:'numeric',month:'short'})} al ${fmt(b,{day:'numeric',month:'short'})}${diff===null?'':' · '+(diff>=0?'+':'')+diff+'% vs la anterior'}</p></div><span class="gp num">${Math.round(r*100)}%</span></div>
    <div class="kp"><div><span>Mejor hábito</span><b></b></div><div><span>A mejorar</span><b></b></div><div><span>Días completos</span><b class="num"></b></div></div>`;
   const bs=box.querySelectorAll('.kp b');bs[0].textContent=best?best[0].name:'—';bs[1].textContent=worst&&worst[1]<1?worst[0].name:'Ninguno';
-  let full=0;for(let s=a;s<=b&&s<=T;s=add(s,1))if(dayDone(s))full++;bs[2].textContent=full+' / 7';const W=S.semanas[a]=S.semanas[a]||{},fl=document.createElement('div');fl.style.cssText='display:flex;flex-direction:column;gap:8px';fl.innerHTML=`<p class="small" style="font-weight:700">¿Cómo te sentiste esta semana, de cuerpo y de cabeza?</p><div class="feel">${[[1,'Mejor'],[0,'Igual'],[-1,'Peor']].map(([v,l])=>`<button class="btn" type="button" data-f="${v}" aria-pressed="${W.feel===v}">${l}</button>`).join('')}</div>`;fl.querySelectorAll('[data-f]').forEach(x=>x.onclick=()=>{W.feel=Number(x.dataset.f);S.semanas[a]=W;save();renderAll();toast('Anotado');});box.appendChild(fl);box.hidden=false;}
+  let full=0;for(let s=a;s<=b&&s<=T;s=add(s,1))if(dayDone(s))full++;bs[2].textContent=full+' / 7';const W=S.semanas[a]=S.semanas[a]||{},fl=document.createElement('div');fl.style.cssText='display:flex;flex-direction:column;gap:8px';fl.innerHTML=`<p class="small" style="font-weight:700">¿Cómo te sentiste esta semana, de cuerpo y de cabeza?</p><div class="feel">${[[1,'Mejor'],[0,'Igual'],[-1,'Peor']].map(([v,l])=>`<button class="btn" type="button" data-f="${v}" aria-pressed="${W.feel===v}">${l}</button>`).join('')}</div>`;fl.querySelectorAll('[data-f]').forEach(x=>x.onclick=()=>{W.feel=Number(x.dataset.f);S.semanas[a]=W;save();renderAll();toast('Anotado');});box.hidden=false;}
 function renderBk(T){const el=document.getElementById('bkHint'),n=Object.keys(S.dias).length;
   const since=S.backup?Math.round((toD(T)-toD(S.backup))/864e5):null;
   if(n<3||(since!==null&&since<7)){el.hidden=true;return;}
@@ -1017,11 +1019,11 @@ function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSlee
   let b=x?x.b:(L?L.b:'01:30'),w=x?x.w:(L?L.w:S.salud.wake),stv=(S.dias[add(s,-1)]||{}).pasos||(((S.dias[add(s,-1)]||{}).pasosHoy||{}).n)||'';
   const el=document.createElement('div');el.className='slpEd';
   const tb=(lbl,k,v)=>`<div class="tbox"><span>${lbl}</span><div class="tv"><button type="button" data-k="${k}" data-d="-15" aria-label="${lbl}: 15 minutos antes">−</button><input type="time" step="900" data-k="${k}" value="${v}" aria-label="${lbl}"><button type="button" data-k="${k}" data-d="15" aria-label="${lbl}: 15 minutos después">+</button></div></div>`;
-  const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} de sueño</p><label class="stp"><span>Pasos de ayer <em>(opcional · copialo de la app Salud)</em></span><div class="stpw"><input type="number" inputmode="numeric" min="0" max="80000" placeholder="Ej: 8500" id="stIn" value="${stv}"><button type="button" class="btn" id="stPaste">Pegar</button></div></label><p class="q">¿Te despertaste con dolor de cabeza?</p><div class="yn"><button class="btn" type="button" data-h="0" aria-pressed="${x?x.hd===0:false}">No</button><button class="btn" type="button" data-h="1" aria-pressed="${x?x.hd===1:false}">Sí</button></div>`;
-    el.querySelectorAll('button[data-d]').forEach(bt=>bt.onclick=()=>{const d=Number(bt.dataset.d);stv=el.querySelector('#stIn').value;if(bt.dataset.k==='b')b=m2hm(hm2m(b)+d);else w=m2hm(hm2m(w)+d);paint();});
+  const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} de sueño</p><button class="btn primary" type="button" data-h="0">Guardar</button><button class="link hdl" type="button" data-h="1">Me desperté con dolor de cabeza</button>`;
+    el.querySelectorAll('button[data-d]').forEach(bt=>bt.onclick=()=>{const d=Number(bt.dataset.d);if(bt.dataset.k==='b')b=m2hm(hm2m(b)+d);else w=m2hm(hm2m(w)+d);paint();});
     el.querySelectorAll('input[type=time]').forEach(i=>i.onchange=()=>{if(!i.value)return;if(i.dataset.k==='b')b=i.value;else w=i.value;el.querySelector('#slHrs').textContent=fmtH(slH({b,w}))+' de sueño';});
     const pb=el.querySelector('#stPaste');if(pb)pb.onclick=async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();const n=parseInt(String(t).replace(/[^0-9]/g,''),10);if(n>0&&n<80000){el.querySelector('#stIn').value=n;stv=n;toast('Pasos pegados: '+fmtN(n));}else toast('No encontré un número de pasos copiado');}catch(err){toast('No se pudo pegar: escribilo a mano');}};
-    el.querySelectorAll('button[data-h]').forEach(bt=>bt.onclick=()=>{const hd=Number(bt.dataset.h);const si=el.querySelector('#stIn'),sv=si&&si.value?Math.max(0,Math.min(80000,parseInt(si.value,10)||0)):0;if(sv)patchDay(add(s,-1),{pasos:sv});patchDay(s,{sl:{b,w,hd}});if(!S.salud.start||s<S.salud.start){S.salud.start=s;save();}vib();
+    el.querySelectorAll('button[data-h]').forEach(bt=>bt.onclick=()=>{const hd=Number(bt.dataset.h);const si=el.querySelector('#stIn'),sv=si&&si&&si.value?Math.max(0,Math.min(80000,parseInt(si.value,10)||0)):0;if(sv)patchDay(add(s,-1),{pasos:sv});patchDay(s,{sl:{b,w,hd}});if(!S.salud.start||s<S.salud.start){S.salud.start=s;save();}vib();
       toast('Sueño guardado · '+fmtH(slH({b,w})));onDone&&onDone();});};
   paint();return el;}
 let slEdit=false;
