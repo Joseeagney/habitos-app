@@ -609,6 +609,13 @@ details.help p{margin-top:8px}
 .p90{position:relative;padding-bottom:18px}.p90 .track{height:6px}
 .p90l{position:absolute;left:0;right:0;bottom:0;height:16px}.p90l span{position:absolute;transform:translateX(-100%);font-size:11.5px;color:var(--faint);font-weight:600}.p90l span.ok{color:var(--olive)}
 #expPick{align-self:flex-start}
+
+.wtr{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center;border-top:1px solid var(--line);padding-top:14px}
+.wtr-t{display:flex;flex-direction:column;gap:1px}.wtr-t .k{font-size:12px;color:var(--muted);font-weight:600}.wtr-t b{font-size:26px;font-weight:700;letter-spacing:-.03em}
+.wtr-b{display:flex;gap:8px}.wb{display:flex;flex-direction:column;align-items:center;gap:0;min-height:52px;padding:6px 14px;border-color:color-mix(in srgb,#3b82c4 30%,var(--line))}
+.wb span{font-weight:700;font-size:14px}.wb small{font-size:10.5px;color:var(--muted);font-weight:600}
+.wb:active{background:color-mix(in srgb,#3b82c4 12%,var(--bg))}
+.wdots{grid-column:1/-1;display:flex;gap:4px}.wdots i{flex:1;height:6px;border-radius:3px;background:color-mix(in srgb,#3b82c4 14%,var(--line))}.wdots i.on{background:#4a90c9}
 </style>
 </head>
 <body>
@@ -667,7 +674,7 @@ details.help p{margin-top:8px}
     <button class="back" type="button" id="backBtn">‹ Hoy</button>
     <h1>Ajustes</h1>
     <section><div class="spread"><h2>Hábitos</h2><button class="link" type="button" id="newHab">Nuevo hábito</button></div><div class="lst" id="habs"></div></section>
-    <section><h2>Sueño</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p></section>
+    <section><h2>Sueño</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p><label class="fl" style="margin-top:12px"><span>Meta de agua (bebidas, el mate cuenta)</span><select id="cfgAgua"><option value="1500">1,5 L</option><option value="2000">2 L</option><option value="2500">2,5 L (días de calor)</option><option value="3000">3 L (calor + ejercicio)</option></select></label></section>
     <section><div class="spread"><h2>Bloques fijos del día</h2><button class="link" type="button" id="newFix">Nuevo bloque</button></div><p class="sub small">Aparecen en tu línea de tiempo pero no se marcan (trabajo, facultad).</p><div class="lst" id="fixes"></div></section>
     <section><h2>Copia de seguridad</h2>
       <p class="sub small">Tus datos se guardan en este celular. Hacé una copia de vez en cuando por si cambiás de teléfono o borrás Safari.</p>
@@ -680,6 +687,7 @@ details.help p{margin-top:8px}
         <li>Elegí la hora (ej. <b>08:45</b>), <b>Diariamente</b> y <b>Ejecutar inmediatamente</b>. Tocá <b>Siguiente</b>.</li>
         <li><b>Nueva automatización en blanco</b> → buscá la acción <b>Mostrar notificación</b>.</li>
         <li>Escribí el texto: <b>"Anotá cómo dormiste (10 s)"</b> y tocá <b>OK</b>.</li>
+        <li><b>Agua sin abrir la app:</b> creá un atajo <b>Tomé agua</b> con la acción <b>Registrar muestra de salud</b> (Tipo: Agua, 250 mL). Después: Configuración → Accesibilidad → Tocar → <b>Tocar atrás</b> → Doble toque → <b>Tomé agua</b>. Dos toquecitos en la espalda del iPhone y listo.</li>
         <li><b>Pasos en la app:</b> creá un atajo (no automatización) llamado exactamente <b>Pasos Hábitos</b> con 3 acciones: <b>Buscar muestras de salud</b> (Pasos, Fecha de inicio es hoy) → <b>Calcular estadísticas</b> (Suma) → <b>Copiar al portapapeles</b>. Después, en Hoy tocá <b>Actualizar</b>, volvé a la app y tocá <b>Pegar pasos</b>.</li>
         <li>Repetí con <b>13:30</b> "Después de almorzar: 10 min caminando" y <b>23:45</b> "Cierre del día: gastos, baño, celular afuera".</li>
       </ol><p class="sub small">Tip: tocá la notificación y abrí la app desde el ícono de inicio.</p></details></section>
@@ -845,9 +853,10 @@ function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ri
   box.innerHTML=`<div class="bx"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy</span><div class="score lvw ${b?'l'+b.lvl:''}">${b?b.lvl:'<span style="color:var(--faint);font-size:30px;letter-spacing:-.02em">Sin datos</span>'}</div><span class="lv3${b&&b.lvl==='Baja'?' low':''}">${b?(b.debt>=1?'Deuda de sueño: '+fmtH(b.debt):'Sin deuda de sueño'):'Anotá cómo dormiste'}</span></div></div>
    <div class="leg">${R.map((r,i)=>`<div><span><i class="${cols[i]}"></i>${r[0]}</span><b class="num">${r[2]}</b></div>`).join('')}</div>
    ${stepsRow(T)}
+   ${waterRow(T)}
    <div class="callout"><p class="plan">${planText(T,b)}</p></div>`;
   const HT=b?healthTip(T):null;if(b&&HT){const [cls,html,lk]=HT,tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
-    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}box.querySelector('.callout').appendChild(tp);}wireSteps(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
+    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}box.querySelector('.callout').appendChild(tp);}wireSteps(T);wireWater(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
 function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i]=!cur[i];if(cur[i])POP={id:h.id+'#'+i,t:Date.now()};const k=cur.filter(Boolean).length,prev=Object.assign({},S.dias[T]||{}),was=dayDone(T);
   patchDay(T,{['s_'+h.id]:cur,[h.id]:k===n?2:k>0?1:0});renderAll();vib(8);
@@ -986,6 +995,7 @@ function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&
   if(wk&&wk.hd>=3&&turno&&!turno.done)return ['warm',`<b>${wk.hd} de ${wk.n} días con dolor de cabeza.</b> Junto con los ronquidos, conviene que lo vea un médico (clínico u otorrino) para descartar apnea del sueño.`,['Ver objetivo',()=>openGoalDetail(gm)]];
   if(x&&slH(x)<S.salud.meta-1&&hr>=12&&hr<16)return ['',`Dormiste <b>${fmtH(slH(x))}</b>. Si podés, una siesta de <b>10 a 20 min</b> antes de las 16 te devuelve la atención sin dejarte pesado.`];
   const gy=HABS().find(h=>h.id==='gym');if(gy&&st(T,gy.id)>0&&hr<14)return ['',`Después del gimnasio: sumá al mate <b>algo con proteína</b> (huevo, queso, yogur o leche). Ayuda a recuperar y a ganar músculo.`];
+  if(hr>=12&&hr<21&&waterOf(T)<waterGoal()*(hr<16?.35:.6))return ['',`Vas <b>${fmtL(waterOf(T))}</b> de agua. Tomá un vaso ahora: con calor, poca hidratación baja la energía y la concentración.`];
   if(hr>=13&&hr<16)return ['',`Después de almorzar: <b>10 min caminando</b>. Baja el pico de azúcar y ayuda con el bajón de la siesta.`];
   if(hr>=5&&hr<12)return ['',`Primero <b>luz del día</b>: unos minutos afuera al levantarte ayudan a despertarte y a dormirte más temprano a la noche.`];
   return null;}
@@ -1027,7 +1037,7 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   box.insertAdjacentHTML('beforeend',`<p class="sub small">${note}</p>`);}
 function renderCfg(){const m=document.getElementById('cfgMeta'),w=document.getElementById('cfgWake');m.value=String(S.salud.meta);w.value=S.salud.wake;
   document.getElementById('cfgBed').textContent='Hora ideal para acostarte: '+bedTarget()+'.';
-  m.onchange=()=>{S.salud.meta=Number(m.value);save();renderAll();};w.onchange=()=>{if(w.value){S.salud.wake=w.value;save();renderAll();}};}
+  m.onchange=()=>{S.salud.meta=Number(m.value);save();renderAll();};const ag=document.getElementById('cfgAgua');ag.value=String(waterGoal());ag.onchange=()=>{S.salud.agua=Number(ag.value);save();renderAll();};w.onchange=()=>{if(w.value){S.salud.wake=w.value;save();renderAll();}};}
 
 
 /* ---------- FUERZA DE HÁBITOS ---------- */
@@ -1110,7 +1120,7 @@ const SC_NAME='Pasos Hábitos';let PEND=false;try{PEND=sessionStorage.getItem('p
 function stepsRow(T){const d=(S.dias[T]||{}).pasosHoy,pct=d?Math.min(100,Math.round(d.n/8000*100)):0;
   return `<div class="stl"><div class="stl-t"><span class="k">Pasos de hoy</span><b class="num">${d?fmtN(d.n):'—'}</b><span class="sub small">${d?'de 8.000 · actualizado '+d.t:'Tocá Actualizar para traerlos de Salud'}</span></div>${PEND?'<button class="btn primary" type="button" id="stPasteNow">Pegar pasos</button>':'<button class="btn" type="button" id="stUpd">Actualizar</button>'}<div class="track ol" style="grid-column:1/-1;height:5px"><i style="width:${pct}%"></i></div></div>`;}
 function wireSteps(T){const u=document.getElementById('stUpd');if(u)u.onclick=()=>{PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);};
-  const pz=document.getElementById('stPasteNow');if(pz)pz.onclick=async()=>{try{const t=await navigator.clipboard.readText(),n=parseInt(String(t).replace(/[^0-9]/g,''),10);if(n>=0&&n<80000&&String(t).match(/[0-9]/)){patchDay(T,{pasosHoy:{n,t:nowHM()}});toast('Pasos actualizados: '+fmtN(n));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();};}
+  const pz=document.getElementById('stPasteNow');if(pz)pz.onclick=async()=>{try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM()}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();};}
 function avgFyv(a,b){const h=HABS().find(x=>x.id==='fyv');if(!h)return null;let n=0,c=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){if(!sched(h,s))continue;if(s===todayStr()&&!nv(s,h.id))continue;n+=nv(s,h.id);c++;}return c?n/c:null;}
 const EXPS=[{k:'mate',t:'Último mate a las 16:30',d:'Nada de mate ni café después de las 16:30.'},{k:'cama',t:'A dormir antes de la 1',d:'Acostarte antes de la 1:00 todas las noches.'},{k:'pantalla',t:'Celular afuera 30 min antes',d:'El celular fuera de la pieza 30 minutos antes de dormir.'},{k:'caminar',t:'Caminar 10 min después de almorzar',d:'Una caminata corta después del almuerzo.'},{k:'fyv',t:'5 porciones de frutas y verduras',d:'Llegar a 5 porciones todos los días.'},{k:'respira',t:'Respirar 5 min antes de dormir',d:'Suspiro cíclico guiado cada noche.'}];
 function expStats(a,b){const T=todayStr(),e=b>T?T:b,sl=sleepStats(a,e);return {sl,hab:rangeRatio(a,e),steps:avgSteps(a,e),fyv:avgFyv(a,e)};}
@@ -1145,7 +1155,7 @@ function renderExpProg(T){const box=document.getElementById('expP');box.innerHTM
   else{const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar experimento';c.onclick=()=>{if(c.dataset.sure){S.exp=null;save();renderAll();}else{c.dataset.sure='1';c.textContent='¿Seguro? Tocá otra vez';}};box.appendChild(c);}}
 function renderMetas(T){const box=document.getElementById('campo');const a=add(T,-6),sl=sleepStats(a,T),stp=avgSteps(a,add(T,-1)),fv=avgFyv(a,T),M=mondayOf(T);
   const gy=HABS().find(h=>h.id==='gym'),pd=HABS().find(h=>h.id==='padel');let mv=0;for(let k=0;k<7;k++){const s=add(M,k);if(s>T)break;if(gy&&st(s,gy.id)>0)mv++;if(pd&&st(s,pd.id)>0)mv++;}
-  const rows=[['Sueño',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'h por noche'],['Pasos',stp,8000,fmtN,'por día'],['Frutas y verduras',fv,5,v=>round1(v)+'','porciones/día'],['Movimiento',mv,3,v=>v+'','sesiones esta semana']];
+  const wa=avgWater(a,T);const rows=[['Sueño',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'h por noche'],['Agua',wa,waterGoal(),fmtL,'por día'],['Pasos',stp,8000,fmtN,'por día'],['Frutas y verduras',fv,5,v=>round1(v)+'','porciones/día'],['Movimiento',mv,3,v=>v+'','sesiones esta semana']];
   const el=document.createElement('div');el.className='metas';el.innerHTML=`<p class="gsub">Metas de salud · últimos 7 días</p>`+rows.map(([l,v,t,f,u])=>`<div class="mt2"><div class="spread"><span>${l}</span><span class="num"><b>${v==null?'—':f(v)}</b> / ${f(t)} <small>${u}</small></span></div><div class="track ol"><i style="width:${v==null?0:Math.min(100,Math.round(v/t*100))}%"></i></div></div>`).join('');
   box.appendChild(el);}
 const SB=[['Ronquidos','¿Roncás fuerte (se escucha con la puerta cerrada o alguien te lo dijo)?'],['Cansancio','¿Te sentís cansado o con sueño durante el día seguido?'],['Pausas','¿Alguien te vio dejar de respirar o ahogarte mientras dormías?'],['Presión','¿Tenés presión alta o la estás tratando?'],['Peso','¿Tu índice de masa corporal es mayor a 35? (peso ÷ altura²)'],['Edad','¿Tenés más de 50 años?'],['Cuello','¿Tu cuello mide más de 40 cm de contorno?'],['Sexo','¿Sos varón?']];
@@ -1179,6 +1189,18 @@ function renderSaludExtras(T){const box=document.getElementById('salud');if(!box
   const g=ex.querySelector('#sbGo');if(g)g.onclick=openStopBang;
   const to=ex.querySelector('#tOpen');if(to)to.onclick=()=>{SI.innerHTML=`<div><h3>Test del mes</h3><p class="sub small">Apenas te levantás: medí tu pulso sentado durante 60 segundos (dedos en la muñeca o una app de cámara) y tu cintura a la altura del ombligo. Si el pulso en reposo baja con los meses, tu estado físico mejora.</p></div><div class="two"><label class="fl"><span>Pulso en reposo (ppm)</span><input id="tRhr" type="number" inputmode="numeric" placeholder="Ej: 64"></label><label class="fl"><span>Cintura (cm)</span><input id="tCin" type="number" inputmode="decimal" placeholder="Ej: 82"></label></div><button class="btn primary" type="button" id="tSave">Guardar</button>`;
     const ex=SI;SI.querySelector('#tSave').onclick=()=>{const r=parseInt(ex.querySelector('#tRhr').value,10),c=parseFloat((ex.querySelector('#tCin').value||'').replace(',','.'));if(!(r>30&&r<150)&&!(c>40&&c<200)){toast('Cargá al menos un dato válido');return;}S.salud.tests=(S.salud.tests||[]).concat([{d:T,rhr:r>30&&r<150?r:null,cin:c>40&&c<200?c:null}]);save();sheet.close();renderAll();toast('Test guardado');};if(!sheet.open)sheet.showModal();};}
+
+
+/* ---------- HIDRATACIÓN ---------- */
+const fmtL=ml=>(Math.round(ml/50)/20).toLocaleString('es-AR',{minimumFractionDigits:ml%1000?1:0,maximumFractionDigits:2})+' L';
+const waterOf=s=>{const d=S.dias[s]||{};return (d.agua||0)+(d.aguaH||0);};
+const waterGoal=()=>S.salud.agua||2000;
+function waterRow(T){const w=waterOf(T),g=waterGoal(),pct=Math.min(100,Math.round(w/g*100)),glasses=Math.min(12,Math.ceil(g/250)),full=Math.floor(w/250);
+  let dots='';for(let i=0;i<glasses;i++)dots+=`<i class="${i<full?'on':''}"></i>`;
+  return `<div class="wtr"><div class="wtr-t"><span class="k">Agua de hoy</span><b class="num">${fmtL(w)}</b><span class="sub small">de ${fmtL(g)}${w>=g?' · ¡meta cumplida!':''}</span></div><div class="wtr-b"><button class="btn wb" type="button" data-ml="250"><span>+ Vaso</span><small>250 ml</small></button><button class="btn wb" type="button" data-ml="500"><span>+ Botella</span><small>500 ml</small></button></div><div class="wdots">${dots}</div></div>`;}
+function wireWater(T){document.querySelectorAll('.wtr .wb').forEach(b=>b.onclick=()=>{const ml=Number(b.dataset.ml),prev=Object.assign({},S.dias[T]||{}),was=waterOf(T)>=waterGoal();patchDay(T,{agua:((S.dias[T]||{}).agua||0)+ml});vib(8);renderBat(T);renderMetas&&0;
+  const now=waterOf(T);if(!was&&now>=waterGoal()){confetti();toast('¡Meta de agua cumplida! '+fmtL(now),()=>restore(T,prev));}else toast('+'+ml+' ml · '+fmtL(now),()=>restore(T,prev));});}
+function avgWater(a,b){let n=0,c=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){const v=waterOf(s);if(s===todayStr())continue;if(v){n+=v;c++;}}return c?n/c:null;}
 
 /* ---------- PROGRESO ---------- */
 let mOff=0;
