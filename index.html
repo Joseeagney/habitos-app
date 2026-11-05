@@ -709,7 +709,7 @@ nav.tabs{padding-right:70px;padding-left:70px}
     <button class="back" type="button" id="backBtn">‹ Hoy</button>
     <h1>Ajustes</h1>
     <section><div class="spread"><h2>Hábitos</h2><button class="link" type="button" id="newHab">Nuevo hábito</button></div><div class="lst" id="habs"></div></section>
-    <section><h2>Sueño</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p><label class="fl" style="margin-top:12px"><span>Meta de agua (bebidas, el mate cuenta)</span><select id="cfgAgua"><option value="1500">1,5 L</option><option value="2000">2 L</option><option value="2500">2,5 L (días de calor)</option><option value="3000">3 L (calor + ejercicio)</option></select></label></section>
+    <section><h2>Sueño</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p><label class="fl" style="margin-top:12px"><span>Meta de agua (bebidas, el mate cuenta)</span><select id="cfgAgua"><option value="1500">1,5 L</option><option value="2000">2 L</option><option value="2500">2,5 L (días de calor)</option><option value="3000">3 L (calor + ejercicio)</option></select></label><label class="fl" style="margin-top:12px"><span>Bici al trabajo, ida y vuelta (se suma sola al cardio)</span><select id="cfgBici"><option value="0">No voy en bici</option><option value="20">20 min</option><option value="30">30 min</option><option value="40">40 min</option><option value="60">1 h</option></select></label></section>
     <section><div class="spread"><h2>Bloques fijos del día</h2><button class="link" type="button" id="newFix">Nuevo bloque</button></div><p class="sub small">Aparecen en tu línea de tiempo pero no se marcan (trabajo, facultad).</p><div class="lst" id="fixes"></div></section>
     <section><h2>Copia de seguridad</h2>
       <p class="sub small">Tus datos se guardan en este celular. Hacé una copia de vez en cuando por si cambiás de teléfono o borrás Safari.</p>
@@ -788,6 +788,7 @@ S.salud=S.salud||{meta:8,wake:'08:30',start:null};
 if(S.seedV<5){const ar=S.habitos.find(h=>h.id==='arranque');if(ar&&!ar.steps)ar.steps=['Vaso de agua','Luz afuera 5 min'];const ci=S.habitos.find(h=>h.id==='sueno');if(ci&&!ci.steps)ci.steps=['Baño','Celular afuera','Leer'];S.seedV=5;save();}
 if(S.seedV<6){const es=S.habitos.find(h=>h.id==='estudio');if(es&&es.num){es.num.def=60;es.num.defMin=15;}if(!S.habitos.find(h=>h.id==='padel'))S.habitos.push({id:'padel',name:'Pádel',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});S.seedV=6;save();}
 if(S.seedV<7){const t0=todayStr0();if(!S.habitos.find(h=>h.id==='fyv'))S.habitos.push({id:'fyv',name:'Frutas y verduras',days:[0,1,2,3,4,5,6],from:t0,active:true,time:'',moment:'tarde',min:'3 porciones',goal:'g_fisico',num:{label:'Porciones',unit:'porc.',step:1,target:5,autoDone:true}});if(!S.habitos.find(h=>h.id==='respira'))S.habitos.push({id:'respira',name:'Respiración 5 min',days:[0,1,2,3,4,5,6],opt:true,breath:true,from:t0,active:true,time:'',moment:'noche',min:'',goal:'g_mente',num:null});S.salud.tests=S.salud.tests||[];S.expHist=S.expHist||[];S.seedV=7;save();}
+if(S.seedV<8){if(!S.habitos.find(h=>h.id==='correr'))S.habitos.push({id:'correr',name:'Correr',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});if(S.salud.bici==null)S.salud.bici=30;S.seedV=8;save();}
 
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 
@@ -868,7 +869,7 @@ const ANIM={hoy:true,prog:true};
 function ring(lbl,v,txt){const r=22,C=2*Math.PI*r,o=C*(1-Math.max(0,Math.min(1,v)));
   return `<div class="ring"><div class="v"><svg viewBox="0 0 52 52"><circle class="bg" cx="26" cy="26" r="${r}" fill="none" stroke-width="6"/><circle class="fg rfg" cx="26" cy="26" r="${r}" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${o.toFixed(1)}"/></svg></div><div class="lb2"><em>${txt}</em><span>${lbl}</span></div></div>`;}
 function ringsData(T){const x=slp(T),rest=x?Math.min(1,slH(x)/S.salud.meta):0;
-  const gy=HABS().find(h=>h.id==='gym'),pd=HABS().find(h=>h.id==='padel'&&h.active!==false),M=mondayOf(T);let gd=0;for(let k=0;k<7;k++){const s=add(M,k);if(s>T)break;if(gy&&st(s,gy.id)>0)gd++;if(pd&&st(s,pd.id)>0)gd++;}
+  const gy=HABS().find(h=>h.id==='gym'),pd=HABS().find(h=>h.id==='padel'&&h.active!==false),cr=HABS().find(h=>h.id==='correr'&&h.active!==false),M=mondayOf(T);let gd=0;for(let k=0;k<7;k++){const s=add(M,k);if(s>T)break;if(gy&&st(s,gy.id)>0)gd++;if(pd&&st(s,pd.id)>0)gd++;if(cr&&st(s,cr.id)>0)gd++;}
   const pw=gy?(gy.perWeek||(gy.days||[]).length||3):3,move=Math.min(1,gd/pw);
   const adv=HABS().filter(h=>(h.id==='estudio'||h.id==='innova')&&counts(h,T));let av;
   if(adv.length){av=adv.reduce((p,h)=>{const v=st(T,h.id);return p+(v===2?1:v===1?.5:0);},0)/adv.length;}else{const r=dayRatio(T);av=r===null?0:r;}
@@ -954,7 +955,9 @@ function renderWeekRev(T){const box=document.getElementById('weekBox'),fb=docume
   const W=S.semanas[a]||{};fb.innerHTML=`<h2>¿Cómo te sentiste, de cuerpo y de cabeza?</h2><div class="feel">${[[1,'Mejor'],[0,'Igual'],[-1,'Peor']].map(([v,l])=>`<button class="btn" type="button" data-f="${v}" aria-pressed="${W.feel===v}">${l}</button>`).join('')}</div>`;
   fb.querySelectorAll('[data-f]').forEach(x=>x.onclick=()=>{W.feel=Number(x.dataset.f);S.semanas[a]=W;save();renderAll();toast('Anotado');});
   fb.insertAdjacentHTML('beforeend',`<p class="q2">¿Pasaste tiempo de calidad con otras personas (amigos, familia, pareja)?</p><div class="feel two2">${[[1,'Sí'],[0,'No']].map(([v,l])=>`<button class="btn" type="button" data-so="${v}" aria-pressed="${W.social===v}">${l}</button>`).join('')}</div>`);
-  fb.querySelectorAll('[data-so]').forEach(x=>x.onclick=()=>{W.social=Number(x.dataset.so);S.semanas[a]=W;save();renderAll();toast(W.social?'Bien ahí: los vínculos también son salud':'Anotado. Esta semana, ¿un mate con alguien?');});}
+  fb.querySelectorAll('[data-so]').forEach(x=>x.onclick=()=>{W.social=Number(x.dataset.so);S.semanas[a]=W;save();renderAll();toast(W.social?'Bien ahí: los vínculos también son salud':'Anotado. Esta semana, ¿un mate con alguien?');});
+  fb.insertAdjacentHTML('beforeend',`<p class="q2">¿Comiste algo con proteína en casi todas las comidas? <span class="sub small">(huevo, carne, pollo, queso, yogur, legumbres)</span></p><div class="feel">${[[2,'Sí'],[1,'A medias'],[0,'No']].map(([v,l])=>`<button class="btn" type="button" data-pr="${v}" aria-pressed="${W.prot===v}">${l}</button>`).join('')}</div>`);
+  fb.querySelectorAll('[data-pr]').forEach(x=>x.onclick=()=>{W.prot=Number(x.dataset.pr);S.semanas[a]=W;save();renderAll();toast(W.prot===2?'Bien: así se gana músculo':'Tip: sumá huevo, queso o pollo a la comida que más se te escapa');});}
 function renderHoy(){const T=todayStr();renderBat(T);renderDay(T);renderRevRow(T);renderRev(T);}
 function rangeRatio(a,b,only){const T=todayStr();let tot=0,got=0;for(let s=a;s<=b&&s<=T;s=add(s,1)){HABS().forEach(h=>{if(only&&h!==only)return;if(!counts(h,s))return;if(s===T&&st(s,h.id)===0)return;const v=st(s,h.id);tot++;got+=v===2?1:v===1?.5:0;});}return tot?got/tot:null;}
 function renderWeek(T){const box=document.getElementById('weekBox'),d=dow(T);box.innerHTML='';
@@ -1068,7 +1071,7 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   box.insertAdjacentHTML('beforeend',`<p class="sub small">${note}</p>`);}
 function renderCfg(){const m=document.getElementById('cfgMeta'),w=document.getElementById('cfgWake');m.value=String(S.salud.meta);w.value=S.salud.wake;
   document.getElementById('cfgBed').textContent='Hora ideal para acostarte: '+bedTarget()+'.';
-  m.onchange=()=>{S.salud.meta=Number(m.value);save();renderAll();};const ag=document.getElementById('cfgAgua');ag.value=String(waterGoal());ag.onchange=()=>{S.salud.agua=Number(ag.value);save();renderAll();};w.onchange=()=>{if(w.value){S.salud.wake=w.value;save();renderAll();}};}
+  m.onchange=()=>{S.salud.meta=Number(m.value);save();renderAll();};const ag=document.getElementById('cfgAgua');ag.value=String(waterGoal());const bc=document.getElementById('cfgBici');bc.value=String(S.salud.bici==null?30:S.salud.bici);bc.onchange=()=>{S.salud.bici=Number(bc.value);save();renderAll();};ag.onchange=()=>{S.salud.agua=Number(ag.value);save();renderAll();};w.onchange=()=>{if(w.value){S.salud.wake=w.value;save();renderAll();}};}
 
 
 /* ---------- FUERZA DE HÁBITOS ---------- */
@@ -1185,8 +1188,7 @@ function renderExpProg(T){const box=document.getElementById('expP');box.innerHTM
     const b=document.createElement('button');b.type='button';b.className='btn';b.textContent='Guardar resultado y elegir otro';b.onclick=()=>{S.expHist=(S.expHist||[]).concat([{title:E.title,start:E.start,res}]);S.exp=null;save();renderAll();};box.appendChild(b);}
   else{const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar experimento';c.onclick=()=>{if(c.dataset.sure){S.exp=null;save();renderAll();}else{c.dataset.sure='1';c.textContent='¿Seguro? Tocá otra vez';}};box.appendChild(c);}}
 function renderMetas(T){const box=document.getElementById('campo');const a=add(T,-6),sl=sleepStats(a,T),stp=avgSteps(a,add(T,-1)),fv=avgFyv(a,T),M=mondayOf(T);
-  const gy=HABS().find(h=>h.id==='gym'),pd=HABS().find(h=>h.id==='padel');let mv=0;for(let k=0;k<7;k++){const s=add(M,k);if(s>T)break;if(gy&&st(s,gy.id)>0)mv++;if(pd&&st(s,pd.id)>0)mv++;}
-  const wa=avgWater(a,T);const rows=[['Sueño',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'h por noche'],['Agua',wa,waterGoal(),fmtL,'por día'],['Pasos',stp,8000,fmtN,'por día'],['Frutas y verduras',fv,5,v=>round1(v)+'','porciones/día'],['Movimiento',mv,3,v=>v+'','sesiones esta semana']];
+  const wa=avgWater(a,T);const rows=[['Sueño',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'h por noche'],['Agua',wa,waterGoal(),fmtL,'por día'],['Pasos',stp,8000,fmtN,'por día'],['Frutas y verduras',fv,5,v=>round1(v)+'','porciones/día'],['Cardio',cardioWeek(T),150,v=>v+'','min esta semana']];
   const el=document.createElement('div');el.className='metas';el.innerHTML=`<p class="gsub">Metas de salud · últimos 7 días</p>`+rows.map(([l,v,t,f,u])=>`<div class="mt2"><div class="spread"><span>${l}</span><span class="num"><b>${v==null?'—':f(v)}</b> / ${f(t)} <small>${u}</small></span></div><div class="track ol"><i style="width:${v==null?0:Math.min(100,Math.round(v/t*100))}%"></i></div></div>`).join('');
   box.appendChild(el);}
 const SB=[['Ronquidos','¿Roncás fuerte (se escucha con la puerta cerrada o alguien te lo dijo)?'],['Cansancio','¿Te sentís cansado o con sueño durante el día seguido?'],['Pausas','¿Alguien te vio dejar de respirar o ahogarte mientras dormías?'],['Presión','¿Tenés presión alta o la estás tratando?'],['Peso','¿Tu índice de masa corporal es mayor a 35? (peso ÷ altura²)'],['Edad','¿Tenés más de 50 años?'],['Cuello','¿Tu cuello mide más de 40 cm de contorno?'],['Sexo','¿Sos varón?']];
@@ -1246,6 +1248,14 @@ function wireQuick(T){const q=id=>document.getElementById(id);
   q('qSl').onclick=()=>{slEdit=true;renderAll();const b=q('slpBox');if(b)b.scrollIntoView({behavior:'smooth',block:'center'});};
   q('qSt').onclick=()=>PEND?stepsPaste(T):stepsRun();
   q('qWa').onclick=()=>openWaterSheet();}
+
+
+/* ---------- cardio de la semana (bici al trabajo automática + pádel + correr) ---------- */
+function workDay(s){return S.fijos.some(f=>/trabaj|cancha/i.test(f.name||'')&&(f.days||[]).includes(dow(s))&&(!f.until||s<=f.until));}
+function cardioDay(s){const T=todayStr();let m=0;const pd=HABS().find(h=>h.id==='padel'),cr=HABS().find(h=>h.id==='correr');
+  if(pd&&st(s,pd.id)>0)m+=60;if(cr&&st(s,cr.id)>0)m+=30;
+  if((S.salud.bici||0)>0&&workDay(s)&&(s<T||(s===T&&curHr()>=19)))m+=S.salud.bici;return m;}
+function cardioWeek(T){const M=mondayOf(T);let m=0;for(let k=0;k<7;k++){const s=add(M,k);if(s>T)break;m+=cardioDay(s);}return m;}
 
 /* ---------- PROGRESO ---------- */
 let mOff=0;
