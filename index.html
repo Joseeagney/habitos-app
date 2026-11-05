@@ -633,6 +633,22 @@ details.help p{margin-top:8px}
 nav.tabs{padding-right:70px;padding-left:70px}
 .wopts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.wopts .btn{display:flex;flex-direction:column;align-items:center;min-height:64px}.wopts small{font-size:11.5px;color:var(--muted);font-weight:600}
 .wdots i.on,.wb{} .wdots i.on{background:var(--water)}
+
+.qrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.qt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:1px;padding:11px 12px 10px;border:1px solid var(--line);border-radius:14px;background:var(--bg);min-width:0;transition:transform .12s;-webkit-tap-highlight-color:transparent}
+.qt:active{transform:scale(.96)}
+.qt .k{font-size:11.5px;color:var(--muted);font-weight:600}
+.qt b{font-size:20px;font-weight:700;letter-spacing:-.03em;line-height:1.2}
+.qt small{font-size:11px;color:var(--faint);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qt .qb{display:block;height:3px;border-radius:2px;background:color-mix(in srgb,var(--fg) 8%,var(--bg));margin-top:7px;overflow:hidden}.qt .qb i{display:block;height:100%;border-radius:2px;transition:width .6s}
+.qt.pend{border-color:color-mix(in srgb,var(--olive) 55%,var(--line));background:color-mix(in srgb,var(--olive) 7%,var(--bg))}.qt.pend b{color:var(--olive)}
+.segtab{display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:11px;background:color-mix(in srgb,var(--fg) 6%,var(--bg))}
+.segtab button{all:unset;text-align:center;padding:8px 0;border-radius:8px;font-weight:650;font-size:14px;color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
+.segtab button[aria-selected=true]{background:var(--bg);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px var(--line)}
+.lrows{display:flex;flex-direction:column}
+.warnx{border-left:3px solid #b54a2c}
+.expfull{display:flex;flex-direction:column;gap:12px}
+#insights>.link{align-self:flex-start}
 </style>
 </head>
 <body>
@@ -665,12 +681,14 @@ nav.tabs{padding-right:70px;padding-left:70px}
   </main>
 
   <main id="v-prog" class="view" hidden>
-    <section id="campo"></section>
-    <section id="expP"></section>
-    <section id="habl"></section>
-    <section id="salud"></section>
-    <section id="insights"></section>
-    <button type="button" class="revrow" id="histRow"><div><b>Historial y objetivos</b><br><span>Calendario para corregir días y tus objetivos</span></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="segtab" id="progSeg" role="tablist"><button type="button" data-p="res" role="tab">Resumen</button><button type="button" data-p="sal" role="tab">Salud</button></div>
+    <section id="campo" data-pg="res"></section>
+    <section id="habl" data-pg="res"></section>
+    <section id="insights" data-pg="res"></section>
+    <section id="salud" data-pg="sal"></section>
+    <section id="expP" data-pg="sal"></section>
+    <div class="lrows" data-pg="res"><button type="button" class="revrow" id="histRow"><div><b>Historial y objetivos</b><br><span>Calendario para corregir días y tus objetivos</span></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button type="button" class="revrow" id="revRow2"><div><b>Repaso y prioridades</b><br><span>Un minuto por semana · copia de seguridad</span></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div>
   </main>
 
   <main id="v-hist" class="view" hidden>
@@ -870,11 +888,10 @@ function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(-
 function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T),cols=['olive','sand','graph'];
   box.innerHTML=`<div class="bx"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy</span><div class="score lvw ${b?'l'+b.lvl:''}">${b?b.lvl:'<span style="color:var(--faint);font-size:30px;letter-spacing:-.02em">Sin datos</span>'}</div><span class="lv3${b&&b.lvl==='Baja'?' low':''}">${b?(b.debt>=1?'Deuda de sueño: '+fmtH(b.debt):'Sin deuda de sueño'):'Anotá cómo dormiste'}</span></div></div>
    <div class="leg">${R.map((r,i)=>`<div><span><i class="${cols[i]}"></i>${r[0]}</span><b class="num">${r[2]}</b></div>`).join('')}</div>
-   ${stepsRow(T)}
-   ${waterRow(T)}
-   <div class="callout"><p class="plan">${planText(T,b)}</p></div>`;
-  const HT=b?healthTip(T):null;if(b&&HT){const [cls,html,lk]=HT,tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
-    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}box.querySelector('.callout').appendChild(tp);}wireSteps(T);wireWater(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
+   ${b?`<div class="callout"><p class="plan">${planText(T,b)}</p></div>`:''}
+   ${quickRow(T)}`;
+  let HT=b?healthTip(T):null;if(HT&&HT[0]==='warm')HT=null;if(b&&HT){const [cls,html,lk]=HT,tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
+    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}const co=box.querySelector('.callout');if(co)co.appendChild(tp);}wireQuick(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
 function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i]=!cur[i];if(cur[i])POP={id:h.id+'#'+i,t:Date.now()};const k=cur.filter(Boolean).length,prev=Object.assign({},S.dias[T]||{}),was=dayDone(T);
   patchDay(T,{['s_'+h.id]:cur,[h.id]:k===n?2:k>0?1:0});renderAll();vib(8);
@@ -883,45 +900,40 @@ function habRow(T,h){const v=st(T,h.id),n=nv(T,h.id),sk=streak(h),r=document.cre
   r.className='hrw'+(v===2?' done':v===1?' half':v===-1?' free':'')+(POP.id===h.id&&Date.now()-POP.t<700?' pop':'');
   const meta=[];if(v===2)meta.push('Hecho');else if(v===1)meta.push('Mínimo');else if(v===-1)meta.push('Libre');
   if(h.num&&n)meta.push(round1(n)+(h.num.target?' de '+h.num.target:'')+(h.num.unit?' '+h.num.unit:''));if(sk>1)meta.push('racha '+sk);
-  if(h.breath&&!v)meta.push('Opcional · suspiro cíclico guiado');else if(h.opt&&!v)meta.push('Opcional · suma a Moverte');else if(!v&&quotaFree(h,T))meta.push('Opcional: ya cumpliste las '+h.perWeek+' de la semana');else if(!v&&h.min&&!h.steps)meta.push('Mín: '+h.min);
-  r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v>0?'ok':''}"></span></button><div class="pills"></div>`;
+  if(h.steps&&h.steps.length&&v!==2){const k=stepsOf(T,h).filter(Boolean).length;if(k)meta.push(k+' de '+h.steps.length);}if(h.breath&&!v)meta.push('Opcional · 5 min guiado');else if(h.opt&&!v)meta.push('Opcional');else if(!v&&quotaFree(h,T))meta.push('Opcional esta semana');
+  r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v>0?'ok':''}"></span></button>`;
   r.querySelector('b').textContent=h.name;const sp=r.querySelector('.info span');sp.textContent=meta.join(' · ');if(!meta.length)sp.remove();
   const ck=r.querySelector('.ck2');ck.setAttribute('aria-label',h.name+(v>0?': hecho, tocá para desmarcar':': tocá para marcar hecho'));
   ck.onclick=()=>{if(h.steps&&h.steps.length){const all=v===2?[]:h.steps.map(()=>true);patchDay(T,{['s_'+h.id]:all});}setState(T,h.id,v===2?0:2,true);};
   r.querySelector('.info').onclick=()=>h.breath?openBreath(T,h):openHabitSheet(h,T);
-  const pl=r.querySelector('.pills');
-  if(h.breath&&v!==2){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent='Empezar';b.onclick=()=>openBreath(T,h);pl.appendChild(b);}
-  if(v===0||(h.num&&h.num.target&&v===1)){if(h.num&&h.num.label){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent='+'+(h.num.step||1)+(h.num.unit?' '+h.num.unit:'');b.onclick=()=>addNum(T,h);pl.appendChild(b);}
-    if(v===0&&h.min&&!(h.steps&&h.steps.length)){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent='Mínimo';b.title=h.min;b.onclick=()=>setState(T,h.id,1,true);pl.appendChild(b);}}
-  if(h.steps&&h.steps.length&&v!==-1){const ch=document.createElement('div');ch.className='chain';const ss=stepsOf(T,h);
-    h.steps.forEach((t,i)=>{if(i){const e=document.createElement('em');e.textContent='→';ch.appendChild(e);}const b=document.createElement('button');b.type='button';b.className=(ss[i]?'on':'')+(POP.id===h.id+'#'+i&&Date.now()-POP.t<700?' pop':'');b.innerHTML='<i></i><span></span>';b.querySelector('span').textContent=t;b.setAttribute('aria-pressed',!!ss[i]);b.onclick=()=>toggleStep(T,h,i);ch.appendChild(b);});
-    r.querySelector('.info').after(ch);ch.style.gridColumn='2';}
   return r;}
+function expRow(T){const E=S.exp,d=expDay(T),v=(E.log||{})[T]===1,r=document.createElement('div');r.className='hrw'+(v?' done':'');
+  r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v?'ok':''}">Experimento · día ${d} de 14</span></button>`;
+  r.querySelector('b').textContent=E.title;const tg=()=>{E.log=E.log||{};if(v)delete E.log[T];else E.log[T]=1;save();vib(8);renderAll();if(!v)toast('Sumado al experimento');};
+  r.querySelector('.ck2').onclick=tg;r.querySelector('.info').onclick=tg;return r;}
 function evRow(icon,txt,time){const r=document.createElement('div');r.className='evr';r.innerHTML=`<span class="ic2">${icon}</span><span><b></b></span><span class="tm2">${esc(time)}</span>`;r.querySelector('b').textContent=txt;return r;}
 function renderDay(T){const box=document.getElementById('day'),now=momNow();box.innerHTML='';
   if(openDayKey!==T){openDayKey=T;openMom=null;}
   const G={manana:[],tarde:[],noche:[]};
   HABS().filter(h=>sched(h,T)).forEach(h=>{const t=htime(h),m=h.time?momOfTime(h.time):(h.moment||'manana');G[m].push({k:'h',h,key:sortKey(t)});});
-  S.fijos.forEach(f=>{if((f.days||[]).includes(dow(T))&&(!f.until||T<=f.until)){const t=f.time||'00:00';G[momOfTime(t)].push({k:'e',ic:SVGI.pin,t:f.name,time:t,key:sortKey(t)});}});
-  const bed=bedTarget(),mate=m2hm(hm2m(bed)-8*60);
-  G[momOfTime(mate)].push({k:'e',ic:SVGI.cup,t:'Último mate',time:mate,key:sortKey(mate)});
-  G[momOfTime(bed)].push({k:'e',ic:SVGI.bed,t:'A dormir',time:bed,key:sortKey(bed)});
+  if(S.exp){const d=expDay(T);if(d>=1&&d<=14){const m=['mate','caminar'].includes(S.exp.k)?'tarde':'noche';G[m].push({k:'x',key:-1});}}
   const order=['manana','tarde','noche'],ni=order.indexOf(now);
   MOMS.forEach(([id,name],i)=>{const items=G[id].sort((a,b)=>a.key-b.key),hs=items.filter(x=>x.k==='h').map(x=>x.h);if(!items.length)return;
     const req=hs.filter(h=>counts(h,T)),dn=req.filter(h=>st(T,h.id)>0).length,pending=req.length-dn;
-    const def=i===ni||(i<ni&&pending>0),isOpen=openMom?openMom[id]:def;
+    const def=i===ni,isOpen=openMom?openMom[id]:def;
     const el=document.createElement('section');el.className='mom'+(i===ni?' now':'')+(isOpen?' open':'');
     el.innerHTML=`<header role="button" tabindex="0" aria-expanded="${isOpen}"><h3>${name}${i===ni?'<span class="tag">AHORA</span>':''}</h3><span class="c">${req.length?(pending?dn+' / '+req.length:'Listo ✓'):''}${SVGI.chev}</span></header>`;
     const hd=el.querySelector('header'),tg=()=>{openMom=openMom||{manana:false,tarde:false,noche:false};if(!openMom.__init){MOMS.forEach(([k],j)=>{openMom[k]=j===ni||(j<ni&&G[k].some(x=>x.k==='h'&&counts(x.h,T)&&st(T,x.h.id)===0));});openMom.__init=1;}openMom[id]=!isOpen;renderDay(T);};
     hd.onclick=tg;hd.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tg();}};
-    if(isOpen){const rows=document.createElement('div');rows.className='rows';items.forEach(it=>rows.appendChild(it.k==='h'?habRow(T,it.h):evRow(it.ic,it.t,it.time)));el.appendChild(rows);}
-    else{const pk=document.createElement('p');pk.className='peek';pk.textContent=items.map(x=>x.k==='h'?x.h.name:x.t).join(' · ');el.appendChild(pk);}
+    if(isOpen){const rows=document.createElement('div');rows.className='rows';items.forEach(it=>rows.appendChild(it.k==='h'?habRow(T,it.h):it.k==='x'?expRow(T):evRow(it.ic,it.t,it.time)));el.appendChild(rows);}
+    else{const pk=document.createElement('p');pk.className='peek';pk.textContent=items.map(x=>x.k==='h'?x.h.name:x.k==='x'?'Experimento':x.t).join(' · ');el.appendChild(pk);}
     box.appendChild(el);});
   if(!box.children.length)box.innerHTML='<p class="empty">Hoy no toca ningún hábito.</p>';}
 function renderRevRow(T){const el=document.getElementById('revRow'),d=dow(T),PM=planMonday(),PP=(S.semanas[PM]&&S.semanas[PM].prio)||[],hot=d===0||d===1&&!(S.semanas[add(mondayOf(T),-7)]||{}).feel&&d===1;
   const done=PP.filter(p=>p.done).length;
   el.className='revrow'+(d===0?' hot':'');
   el.innerHTML=`<div><b>${d===0?'Hoy toca el repaso de la semana':'Repaso y prioridades'}</b><br><span>${PP.length?done+' de '+PP.length+' prioridades cumplidas':'Todavía no elegiste prioridades'}</span></div>${SVGI.arr}`;
+  el.hidden=!(d===0||(d===1&&!(S.semanas[add(mondayOf(T),-7)]||{}).feel));
   el.onclick=()=>show('rev');}
 function renderRev(T){document.getElementById('revDate').textContent=fmt(T,{weekday:'long',day:'numeric',month:'long'});
   renderWeekRev(T);
@@ -1017,10 +1029,11 @@ function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&
   if(hr>=13&&hr<16)return ['',`Después de almorzar: <b>10 min caminando</b>. Baja el pico de azúcar y ayuda con el bajón de la siesta.`];
   if(hr>=5&&hr<12)return ['',`Primero <b>luz del día</b>: unos minutos afuera al levantarte ayudan a despertarte y a dormirte más temprano a la noche.`];
   return null;}
-function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box.innerHTML='';box.className='slp';
+function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box.innerHTML='';box.className='slp';box.hidden=false;
   if(!x||slEdit){box.innerHTML=`<div class="spread"><h2>¿Cómo dormiste?</h2><span class="hintx">10 segundos</span></div>`;
     box.appendChild(sleepEditor(T,()=>{slEdit=false;renderAll();}));
     if(slEdit){const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar';c.onclick=()=>{slEdit=false;renderAll();};box.appendChild(c);}return;}
+  box.hidden=true;return;
   const h=slH(x);box.className='slp compact';
   box.innerHTML=`<div class="t"><span class="sub small">Anoche</span><br><b>${fmtH(h)}</b> <span class="sub small">· ${x.b} → ${x.w} · ${x.hd?'con dolor de cabeza':'sin dolor de cabeza'}${((S.dias[add(T,-1)]||{}).pasos||((S.dias[add(T,-1)]||{}).pasosHoy||{}).n)?' · '+fmtN((S.dias[add(T,-1)]||{}).pasos||(S.dias[add(T,-1)]||{}).pasosHoy.n)+' pasos ayer':''}</span></div><button class="link" type="button" id="slEditB">Editar</button>`;
   box.querySelector('#slEditB').onclick=()=>{slEdit=true;renderAll();};}
@@ -1028,7 +1041,7 @@ function feelOf(a,b){const v=[];for(const m in S.semanas){if(m>=mondayOf(a)&&m<=
 function gymWeek(a,b){const g=HABS().find(h=>h.id==='gym');if(!g)return null;let n=0,d=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){d++;if(st(s,g.id)>0)n++;}return d?n/d*7:null;}
 function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.start;box.innerHTML='';
   const day=st0?Math.round((toD(T)-toD(st0))/864e5)+1:0;
-  box.innerHTML=`<div class="spread"><h2>Salud · antes y después</h2><span class="sub small num">${st0?'Día '+day+' de 90':'Sin empezar'}</span></div>`;
+  box.innerHTML=`<div class="spread"><h2>Antes y después</h2><span class="sub small num">${st0?'Día '+day+' de 90':'Sin empezar'}</span></div>`;
   if(!st0){box.insertAdjacentHTML('beforeend','<p class="note">Registrá cómo dormiste cada mañana (lo hacés en <b>Hoy</b>, tarda 10 segundos). Tus primeros 7 días son tu punto de partida: el "antes".</p>');return;}
   box.insertAdjacentHTML('beforeend',`<div class="p90"><div class="track ol"><i style="width:${Math.min(100,Math.round(day/90*100))}%"></i></div><div class="p90l">${[30,60,90].map(n=>`<span class="${day>=n?'ok':''}" style="left:${n/90*100}%">${day>=n?'✓ ':''}${n}</span>`).join('')}</div></div>`);
   // barras 14 días
@@ -1051,7 +1064,7 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   {const fa=avgFyv(A[0],A[1]),fn=sep?avgFyv(N[0],N[1]):null;if(fa!==null||fn!==null)html+=row('Frutas y verduras/día',fa,fn,v=>round1(v)+'',(n,a)=>n>a);}
   if(feelOf(A[0],A[1])!==null||(sep&&feelOf(N[0],N[1])!==null))html+=row('Cómo te sentiste',feelOf(A[0],A[1]),sep?feelOf(N[0],N[1]):null,feelL,(n,a)=>n>a);
   html+='</div>';box.insertAdjacentHTML('beforeend',html);
-  const note=!sep?'La columna "Ahora" aparece desde el día 14, cuando ya no se pisa con tu primera semana.':day>=30&&sn&&sn.hdp>=.4?'Pasaron 30 días y el dolor de cabeza sigue seguido: priorizá la consulta médica.':'Verde = mejor que al principio · rojo = peor. El cambio real se ve a los 30, 60 y 90 días.';
+  const note=!sep?'La columna "Ahora" aparece desde el día 14, cuando ya no se pisa con tu primera semana.':'Verde = mejor que al principio · rojo = peor. El cambio real se ve a los 30, 60 y 90 días.';
   box.insertAdjacentHTML('beforeend',`<p class="sub small">${note}</p>`);}
 function renderCfg(){const m=document.getElementById('cfgMeta'),w=document.getElementById('cfgWake');m.value=String(S.salud.meta);w.value=S.salud.wake;
   document.getElementById('cfgBed').textContent='Hora ideal para acostarte: '+bedTarget()+'.';
@@ -1087,7 +1100,7 @@ function renderCampo(T){const box=document.getElementById('campo'),hs=HABS().fil
   const lv=[[3,'automático','automáticos'],[2,'consolidado','consolidados'],[1,'en construcción','en construcción'],[0,'iniciando','iniciando']].filter(x=>cnt[x[0]]).map(x=>cnt[x[0]]+' '+(cnt[x[0]]===1?x[1]:x[2])).join(' · ');
   let nd=0;for(let s=a;s<=T;s=add(s,1)){if(HABS().some(h=>st(s,h.id)>0))nd++;}
   if(nd<3){box.innerHTML=`<h2>Resumen</h2><div class="note"><b>Tu resumen aparece desde el día 3.</b> Marcá tus hábitos y anotá tu sueño: con pocos días ya vas a ver tu constancia y cómo evoluciona.</div>`;const L0=document.getElementById('habl');L0.innerHTML='';return;}
-  box.innerHTML=`<h2>Resumen</h2><div class="sum4"><div><span class="k">Constancia · últimos 14 días</span><div class="score num">${r===null?'—':Math.round(r*100)}<small>%</small></div>${tr===null||!tr?'<span class="dl">Igual que las 2 semanas anteriores</span>':`<span class="dl ${tr>0?'up':'dn'}">${tr>0?'▲':'▼'} ${Math.abs(tr)} ${Math.abs(tr)===1?'punto':'puntos'} vs las 2 semanas anteriores</span>`}</div><div class="b14">${bars}</div></div><p class="sub small">${lv?lv.charAt(0).toUpperCase()+lv.slice(1):''}</p>`;
+  box.innerHTML=`<div class="sum4"><div><span class="k">Constancia · últimos 14 días</span><div class="score num">${r===null?'—':Math.round(r*100)}<small>%</small></div>${tr===null||!tr?'<span class="dl">Igual que las 2 semanas anteriores</span>':`<span class="dl ${tr>0?'up':'dn'}">${tr>0?'▲':'▼'} ${Math.abs(tr)} ${Math.abs(tr)===1?'punto':'puntos'} vs las 2 semanas anteriores</span>`}</div><div class="b14">${bars}</div></div><p class="sub small">${lv?lv.charAt(0).toUpperCase()+lv.slice(1):''}</p>`;
   const L=document.getElementById('habl');L.innerHTML='<div class="spread"><h2>Hábitos</h2><span class="sub small">Fuerza 0–100</span></div>';
   const list=document.createElement('div');list.className='hlst';
   hs.map(h=>[h,strength(h)]).sort((x,y)=>y[1]-x[1]).forEach(([h,v])=>{const n=stageN(h),pct=Math.round(v*100),d=pct-Math.round(strengthAt(h,add(T,-14))*100),sk=streak(h),dn=daysToNext(h);
@@ -1143,14 +1156,14 @@ function avgFyv(a,b){const h=HABS().find(x=>x.id==='fyv');if(!h)return null;let 
 const EXPS=[{k:'mate',t:'Último mate a las 16:30',d:'Nada de mate ni café después de las 16:30.'},{k:'cama',t:'A dormir antes de la 1',d:'Acostarte antes de la 1:00 todas las noches.'},{k:'pantalla',t:'Celular afuera 30 min antes',d:'El celular fuera de la pieza 30 minutos antes de dormir.'},{k:'caminar',t:'Caminar 10 min después de almorzar',d:'Una caminata corta después del almuerzo.'},{k:'fyv',t:'5 porciones de frutas y verduras',d:'Llegar a 5 porciones todos los días.'},{k:'respira',t:'Respirar 5 min antes de dormir',d:'Suspiro cíclico guiado cada noche.'}];
 function expStats(a,b){const T=todayStr(),e=b>T?T:b,sl=sleepStats(a,e);return {sl,hab:rangeRatio(a,e),steps:avgSteps(a,e),fyv:avgFyv(a,e)};}
 function expDay(T){const E=S.exp;if(!E)return null;const d=Math.round((toD(T)-toD(E.start))/864e5)+1;return d;}
-function renderExpHoy(T){const box=document.getElementById('expBox');box.innerHTML='';const E=S.exp;if(!E){box.hidden=true;return;}const d=expDay(T);if(d<1||d>14){box.hidden=true;return;}box.hidden=false;
+function renderExpHoy(T){const box=document.getElementById('expBox');box.innerHTML='';box.hidden=true;return;const E=S.exp;if(!E){box.hidden=true;return;}const d=expDay(T);if(d<1||d>14){box.hidden=true;return;}box.hidden=false;
   const v=(E.log||{})[T];
   box.innerHTML=`<div class="expc"><div class="spread"><span class="k">Experimento · día ${d} de 14</span><span class="mono tiny">${Object.values(E.log||{}).filter(x=>x===1).length} cumplidos</span></div><b class="et"></b><p class="q2">¿Lo cumpliste hoy?</p><div class="feel two2"><button class="btn" type="button" data-e="1" aria-pressed="${v===1}">Sí</button><button class="btn" type="button" data-e="0" aria-pressed="${v===0}">No</button></div></div>`;
   box.querySelector('.et').textContent=E.title;
   box.querySelectorAll('[data-e]').forEach(x=>x.onclick=()=>{E.log=E.log||{};E.log[T]=Number(x.dataset.e);save();vib(8);renderAll();toast(E.log[T]?'Sumado al experimento':'Anotado, mañana de nuevo');});}
 function cmpRow(lbl,a,n,f,better){let cl='';if(a!=null&&n!=null&&Math.abs(n-a)>1e-9)cl=better(n,a)?'up':'dn';return `<span>${lbl}</span><b class="a">${a==null?'—':f(a)}</b><b class="${cl}">${n==null?'—':f(n)}</b>`;}
-function renderExpProg(T){const box=document.getElementById('expP');box.innerHTML='<h2>Experimento de 14 días</h2>';const E=S.exp;
-  if(!E){box.insertAdjacentHTML('beforeend',`<p class="sub small">Elegí un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Es tu "antes y después" con datos reales.</p><button class="btn primary" type="button" id="expPick">Elegir un experimento</button>`);
+function renderExpProg(T){const box=document.getElementById('expP');box.innerHTML='<p class="gsub">Experimento de 14 días</p>';const E=S.exp;
+  if(!E){box.insertAdjacentHTML('beforeend',`<div class="spread rowx"><span>Probá un cambio 14 días y mirá si te sirve</span><button class="link" type="button" id="expPick">Elegir</button></div>`);
     box.querySelector('#expPick').onclick=()=>{SI.innerHTML='<div><h3>Elegí tu experimento</h3><p class="sub small">Durante 14 días, cada día marcás si lo cumpliste.</p></div><div class="explist"></div><button class="btn" type="button" id="ok">Cancelar</button>';SI.querySelector('#ok').onclick=()=>sheet.close();
     const L=SI.querySelector('.explist');EXPS.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='hlr';b.innerHTML=`<div class="tx"><b></b><span></span></div><span class="mono td">ELEGIR</span>`;b.querySelector('b').textContent=x.t;b.querySelector('.tx span').textContent=x.d;
       b.onclick=()=>{S.exp={k:x.k,title:x.t,start:T,log:{}};save();vib();sheet.close();renderAll();toast('Experimento iniciado: 14 días');};L.appendChild(b);});if(!sheet.open)sheet.showModal();};
@@ -1193,7 +1206,7 @@ function openBreath(T,h){let run=false,t0=0,raf=0,el=0;const TOT=300;
   go.onclick=()=>{if(run){run=false;cancelAnimationFrame(raf);go.textContent='Seguir';t0=performance.now()-el*1000;if(el>=180&&h&&st(T,h.id)===0)setState(T,h.id,2,true);return;}run=true;t0=performance.now()-el*1000;go.textContent='Pausar';tick();};
   SI.querySelector('#brX').onclick=()=>{run=false;cancelAnimationFrame(raf);sheet.close();};
   sheet.addEventListener('close',()=>{run=false;cancelAnimationFrame(raf);},{once:true});if(!sheet.open)sheet.showModal();}
-function renderSaludExtras(T){const box=document.getElementById('salud');if(!box)return;
+function renderSaludExtras(T){return;const box=document.getElementById('salud');if(!box)return;
   const sb=S.salud.sb,ex=document.createElement('div');ex.className='sx';
   if(!sb)ex.innerHTML=`<div class="note"><b>Chequeo de apnea del sueño.</b> Con ronquidos y dolor de cabeza al despertar, vale la pena hacerlo (1 minuto).<br><button class="link" type="button" id="sbGo">Hacer el chequeo</button></div>`;
   else ex.innerHTML=`<div class="spread rowx"><span>Chequeo de apnea (STOP-Bang)</span><span><b>${sb.score>=5?'Riesgo alto':sb.score>=3?'Riesgo intermedio':'Riesgo bajo'}</b> · ${sb.score}/8 <button class="link" type="button" id="sbGo">Rehacer</button></span></div>`;
@@ -1218,6 +1231,21 @@ function waterRow(T){const w=waterOf(T),g=waterGoal(),pct=Math.min(100,Math.roun
   return `<div class="wtr"><div class="wtr-t"><span class="k">Agua de hoy</span><b class="num">${fmtL(w)}</b><span class="sub small">de ${fmtL(g)}${w>=g?' · ¡meta cumplida!':''}</span></div><div class="wtr-b"><button class="btn wb" type="button" data-ml="250"><span>+ Vaso</span><small>250 ml</small></button><button class="btn wb" type="button" data-ml="500"><span>+ Botella</span><small>500 ml</small></button></div><div class="wdots">${dots}</div></div>`;}
 function wireWater(T){document.querySelectorAll('.wtr .wb').forEach(b=>b.onclick=()=>addWater(Number(b.dataset.ml)));}
 function avgWater(a,b){let n=0,c=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){const v=waterOf(s);if(s===todayStr())continue;if(v){n+=v;c++;}}return c?n/c:null;}
+
+
+/* ---------- fila rápida: Sueño · Pasos · Agua ---------- */
+function quickRow(T){const x=slp(T),d=(S.dias[T]||{}).pasosHoy,w=waterOf(T),g=waterGoal();
+  const tile=(id,k,val,sub,pct,cls,col)=>`<button type="button" class="qt ${cls||''}" id="${id}"><span class="k">${k}</span><b class="num">${val}</b><small>${sub}</small><span class="qb"><i style="width:${Math.max(0,Math.min(100,pct))}%;background:${col}"></i></span></button>`;
+  return `<div class="qrow">${
+    tile('qSl','Sueño',x?fmtH(slH(x)):'Anotar',x?x.b+' → '+x.w:'10 segundos',x?slH(x)/S.salud.meta*100:0,x?'':'pend','var(--olive)')}${
+    tile('qSt','Pasos',d?fmtN(d.n):'—',PEND?'Tocá para pegar':d?'a las '+d.t:'Tocá para traer',d?d.n/8000*100:0,PEND?'pend':'','var(--sand)')}${
+    tile('qWa','Agua',fmtL(w),'de '+fmtL(g),w/g*100,'','var(--water)')}</div>`;}
+function stepsRun(){PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);}
+async function stepsPaste(T){try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM()}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();}
+function wireQuick(T){const q=id=>document.getElementById(id);
+  q('qSl').onclick=()=>{slEdit=true;renderAll();const b=q('slpBox');if(b)b.scrollIntoView({behavior:'smooth',block:'center'});};
+  q('qSt').onclick=()=>PEND?stepsPaste(T):stepsRun();
+  q('qWa').onclick=()=>openWaterSheet();}
 
 /* ---------- PROGRESO ---------- */
 let mOff=0;
@@ -1290,7 +1318,27 @@ function renderAj(){const b=document.getElementById('habs');b.innerHTML='';const
     r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(h.time||(MOMENTS.find(m=>m[0]===(h.moment||'manana'))||MOMENTS[0])[1])}${h.opt?' · opcional':''} · ${ORDER.filter(d=>(h.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${badge}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=h.name;r.onclick=()=>openHab(h);tgt.appendChild(r);});if(pb)b.appendChild(pb);
   const f=document.getElementById('fixes');f.innerHTML='';S.fijos.forEach(x=>{const r=document.createElement('button');r.type='button';r.className='r';r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(x.time)} · ${ORDER.filter(d=>(x.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${x.until?' · hasta el '+fmt(x.until,{day:'numeric',month:'short'}):''}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=x.name;r.onclick=()=>openFix(x);f.appendChild(r);});
   document.getElementById('lastBk').textContent=S.backup?'Última copia: '+fmt(S.backup,{day:'numeric',month:'long'}):'Todavía no hiciste ninguna copia.';}
-function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();}
+
+/* ---------- pestañas de Progreso ---------- */
+let PTAB='res';try{PTAB=sessionStorage.getItem('ptab')||'res';}catch(e){}
+function renderPTab(){document.querySelectorAll('#v-prog [data-pg]').forEach(x=>x.hidden=x.dataset.pg!==PTAB);document.querySelectorAll('#progSeg button').forEach(b=>b.setAttribute('aria-selected',b.dataset.p===PTAB));}
+(function(){document.querySelectorAll('#progSeg button').forEach(b=>b.onclick=()=>{PTAB=b.dataset.p;try{sessionStorage.setItem('ptab',PTAB);}catch(e){}renderPTab();ANIM.prog=true;window.scrollTo(0,0);});
+  const r2=document.getElementById('revRow2');if(r2)r2.onclick=()=>show('rev');})();
+/* experimento compacto: el detalle se abre en una hoja */
+function compactExp(T){const box=document.getElementById('expP'),E=S.exp;if(!E)return;const full=document.createElement('div');full.className='expfull';
+  while(box.children.length>1)full.appendChild(box.children[1]);
+  const d=expDay(T),ans=Object.values(E.log||{}),adh=ans.length?Math.round(ans.filter(x=>x===1).length/ans.length*100):null;
+  box.insertAdjacentHTML('beforeend',`<div class="spread rowx"><span><b class="et3"></b><br><span class="sub small">${d>14?'Terminado · mirá el resultado':'Día '+Math.max(1,d)+' de 14'+(adh===null?'':' · cumplido '+adh+'%')}</span></span><button class="link" type="button" id="expOpen">Ver resultados</button></div>`);
+  box.querySelector('.et3').textContent=E.title;
+  box.querySelector('#expOpen').onclick=()=>{SI.innerHTML='<div><h3>Experimento de 14 días</h3></div>';SI.appendChild(full);const c=document.createElement('button');c.type='button';c.className='btn primary';c.textContent='Listo';c.onclick=()=>sheet.close();SI.appendChild(c);if(!sheet.open)sheet.showModal();};}
+/* qué te funciona: el más fuerte + ver más */
+function compactIns(){const w=document.querySelector('#insights .ins');if(!w||w.children.length<2)return;const rest=[...w.children].slice(1);rest.forEach(x=>x.hidden=true);
+  const b=document.createElement('button');b.type='button';b.className='link';b.textContent='Ver '+rest.length+(rest.length===1?' descubrimiento más':' descubrimientos más');b.onclick=()=>{rest.forEach(x=>x.hidden=false);b.remove();};w.after(b);}
+/* aviso médico: siempre visible en Salud */
+function saludWarn(T){const box=document.getElementById('salud'),wk=sleepStats(add(T,-6),T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7');
+  if(!(wk&&wk.hd>=3&&!(turno&&turno.done)))return;const n=document.createElement('div');n.className='note warnx';n.innerHTML=`<b>${wk.hd} de ${wk.n} días con dolor de cabeza esta semana.</b> Si se mantiene varias semanas, vale una consulta con un clínico.`;box.children[0].after(n);}
+
+function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();compactExp(T);compactIns();saludWarn(T);renderPTab();}
 
 /* ---------- hojas y formularios ---------- */
 const sheet=document.getElementById('sheet'),SI=document.getElementById('SI');
@@ -1302,10 +1350,12 @@ function openHabitSheet(h,t){const draw=()=>{const v=st(t,h.id),n=nv(t,h.id),g=g
     SI.innerHTML=`<div><h3></h3><p class="sub small">${t===todayStr()?'Hoy':fmt(t,{weekday:'long',day:'numeric'})}${g?' · '+esc(g.title):''}</p></div>
      <div class="seg"><button type="button" data-v="2" aria-pressed="${v===2}">Hecho<small>completo</small></button><button type="button" data-v="1" aria-pressed="${v===1}">Mínimo<small>${esc(h.min||'versión corta')}</small></button><button type="button" data-v="-1" aria-pressed="${v===-1}">Libre<small>no cuenta</small></button><button type="button" data-v="0" aria-pressed="${v===0}">Sin hacer<small>todavía</small></button></div>
      ${h.num&&h.num.label?`<div class="fl"><span>${esc(h.num.label)}${h.num.unit?' ('+esc(h.num.unit)+')':''}</span><div class="stepper"><button type="button" data-n="-1" aria-label="Restar">−</button><input id="sn" inputmode="decimal" value="${n||''}" placeholder="0" aria-label="${esc(h.num.label)}"><button type="button" data-n="1" aria-label="Sumar">+</button></div></div>`:''}
+     ${h.steps&&h.steps.length?`<div class="chain">${h.steps.map((x,i)=>`${i?'<em>→</em>':''}<button type="button" data-st="${i}" class="${stepsOf(t,h)[i]?'on':''}" aria-pressed="${!!stepsOf(t,h)[i]}"><i></i><span>${esc(x)}</span></button>`).join('')}</div>`:''}
      <div class="spread sub small"><span>${sn<0?'Todavía no arrancó':STAGES[sn]+' · constancia '+Math.round(strength(h)*100)+'%'}</span><span>racha ${sk}</span></div>
      <button class="btn primary" type="button" id="ok">Listo</button>`;
     SI.querySelector('h3').textContent=h.name;
     SI.querySelectorAll('[data-v]').forEach(x=>x.onclick=()=>{setState(t,h.id,Number(x.dataset.v),true);draw();});
+    SI.querySelectorAll('[data-st]').forEach(x=>x.onclick=()=>{toggleStep(t,h,Number(x.dataset.st));draw();});
     const setN=val=>{val=Math.max(0,round1(val));const p={['n_'+h.id]:val};if(val>0&&st(t,h.id)===0&&h.num.autoDone!==false)p[h.id]=2;patchDay(t,p);renderAll();draw();};
     SI.querySelectorAll('[data-n]').forEach(x=>x.onclick=()=>setN(nv(t,h.id)+Number(x.dataset.n)*(h.num.step||1)));
     const inp=SI.querySelector('#sn');if(inp)inp.onchange=()=>{const x=parseFloat(inp.value.replace(',','.'));setN(isNaN(x)?0:x);};
