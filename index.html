@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Hábitos App</title>
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#191919" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff">
+<script>try{(function(){var c=JSON.parse(localStorage.getItem("micampo:tone")||"null")||{m:"auto"},h=+new Date().toLocaleString("en-US",{timeZone:"America/Argentina/Buenos_Aires",hour:"numeric",hour12:false})%24,t=c.m!=="auto"?c.m:((h<10||h>=21)?"suave":"dia"),a={suave:"suave",claro:"light",oscuro:"dark"}[t];if(a)document.documentElement.setAttribute("data-theme",a);})();}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -651,6 +651,41 @@ nav.tabs{padding-right:70px;padding-left:70px}
 #insights>.link{align-self:flex-start}
 .callout .tip{margin-top:8px}
 .hdl{align-self:center;font-size:13px;color:var(--muted)}
+
+/* ---- tono suave: oscuro cálido, poco contraste, sin azul fuerte ---- */
+:root[data-theme="suave"]{--bg:#17130f;--soft:#211b15;--fg:#e8dbc5;--muted:#a6957b;--faint:#74664f;--line:#2d251d;
+  --olive:#b2b36b;--olive-s:#2b2a18;--warn:#e3967a;--warn-s:#3a241b;--onc:#17130f;--navbg:#e8dbc5;--navfg:#17130f;color-scheme:dark;
+  --sand:#cfa877;--sand-s:#30261a;--graph:#d6c8ae;--glass:color-mix(in srgb,var(--bg) 74%,transparent);--glass-b:color-mix(in srgb,#ffe2b8 6%,transparent);--shadow:0 14px 34px -24px rgba(0,0,0,.85);
+  --water:#8fb0b6;--water-s:color-mix(in srgb,#8fb0b6 16%,var(--bg))}
+:root[data-theme="suave"] .revrow.hot{color:#17130f}
+html,body{transition:background-color .6s ease}
+/* ---- Hoy básico ---- */
+.bxb{all:unset;box-sizing:border-box;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bx.bxb{display:grid;grid-template-columns:132px 1fr;gap:22px;align-items:center}
+.bxb:active{transform:scale(.985)}
+.rgl{display:flex;flex-direction:column}.rgn{display:flex;gap:10px;align-items:flex-start}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-top:6px;flex:0 0 auto}.dot.olive{background:var(--olive)}.dot.sand{background:var(--sand)}.dot.graph{background:var(--graph)}
+.qrow.q2{grid-template-columns:1fr 1fr}
+#v-hoy .day{gap:0}
+.dhd{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:1px solid var(--fg)}
+.dhd h2{font-size:22px!important;letter-spacing:-.03em!important;border:0!important;padding:0!important}
+.dhd .c{font-size:13px;font-weight:700;color:var(--muted)}.dhd .c.ok{color:var(--olive)}
+.mlab{margin:20px 0 0;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.mlab.now{color:var(--olive)}
+#v-hoy .rows.flat{display:flex;flex-direction:column;padding:0}
+#v-hoy .rows.flat>.mlab,#v-hoy .rows.flat>.mlab+.hrw{border-top:0}
+#v-hoy .hrw{grid-template-columns:42px 1fr;padding:15px 0}
+#v-hoy .hrw .ck2{width:28px;height:28px;border-width:1.8px}
+#v-hoy .hrw .ck2 svg{width:16px;height:16px}
+.grp{margin-top:22px;border-top:1px solid var(--line)}
+.ghd{all:unset;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ghd>span{display:flex;flex-direction:column;gap:2px;min-width:0}.ghd b{font-size:15px;font-weight:700}
+.ghd small{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ghd svg{width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;flex:0 0 auto}
+.grp.open .ghd svg{transform:rotate(180deg)}
+.tv{display:grid;grid-template-columns:30px minmax(0,1fr) 30px;align-items:center;gap:4px;width:100%}
+.tv input{width:100%}.tv button{width:30px;height:30px}
+.synclk{word-break:break-all;background:var(--soft);border-radius:8px;padding:10px 12px;user-select:all;-webkit-user-select:all}
 </style>
 </head>
 <body>
@@ -664,8 +699,8 @@ nav.tabs{padding-right:70px;padding-left:70px}
   </header>
 
   <main id="v-hoy" class="view">
-    <section id="bat" class="bat" aria-label="Batería del día"></section>
     <section id="slpBox" class="slp" aria-label="Sueño"></section>
+    <section id="bat" class="bat" aria-label="Batería del día"></section>
     <section id="expBox" aria-label="Experimento"></section>
     <section id="day" class="day" aria-label="Tu día"></section>
     <button type="button" class="revrow" id="revRow"></button>
@@ -712,7 +747,24 @@ nav.tabs{padding-right:70px;padding-left:70px}
     <h1>Ajustes</h1>
     <section><div class="spread"><h2>Hábitos</h2><button class="link" type="button" id="newHab">Nuevo hábito</button></div><div class="lst" id="habs"></div></section>
     <section><h2>Metas de salud</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p><label class="fl" style="margin-top:12px"><span>Meta de agua (bebidas, el mate cuenta)</span><select id="cfgAgua"><option value="1500">1,5 L</option><option value="2000">2 L</option><option value="2500">2,5 L (días de calor)</option><option value="3000">3 L (calor + ejercicio)</option></select></label><label class="fl" style="margin-top:12px"><span>Bici al trabajo, ida y vuelta (se suma sola al cardio)</span><select id="cfgBici"><option value="0">No voy en bici</option><option value="20">20 min</option><option value="30">30 min</option><option value="40">40 min</option><option value="60">1 h</option></select></label></section>
-    <section><div class="spread"><h2>Bloques fijos del día</h2><button class="link" type="button" id="newFix">Nuevo bloque</button></div><p class="sub small">Aparecen en tu línea de tiempo pero no se marcan (trabajo, facultad).</p><div class="lst" id="fixes"></div></section>
+    <section><div class="spread"><h2>Bloques fijos del día</h2><button class="link" type="button" id="newFix">Nuevo bloque</button></div><p class="sub small">Tus horarios fijos (trabajo, facultad). La app los usa para sumar la bici al cardio.</p><div class="lst" id="fixes"></div></section>
+    <section><h2>Pasos automáticos</h2>
+      <p class="sub small">La app no puede leer Salud por sí sola. El atajo <b>Pasos Hábitos</b> le manda tu número de pasos y acá aparece solo.</p>
+      <p class="sub small" id="syncSt"></p>
+      <div class="inl"><button class="btn primary" type="button" id="syncCopy">Copiar enlace para el atajo</button><button class="btn" type="button" id="syncTest">Probar</button></div>
+      <p class="mono tiny synclk" id="syncLinkTxt" hidden></p>
+      <details class="help"><summary>Cómo configurarlo (2 minutos)</summary><ol>
+        <li>Acá arriba tocá <b>Copiar enlace para el atajo</b>.</li>
+        <li>Abrí <b>Atajos</b>, mantené apretado <b>Pasos Hábitos</b> y tocá <b>Editar</b>.</li>
+        <li>Borrá la acción <b>Copiar al portapapeles</b> (tocá la <b>ⓧ</b> de la acción). Si al final hay una acción <b>Abrir URL</b> o <b>Abrir app</b>, borrala también.</li>
+        <li>Abajo, en <b>Buscar acciones</b>, escribí <b>URL</b> y tocá <b>Obtener contenido de URL</b>.</li>
+        <li>En esa acción nueva, si en el lugar de la URL aparece un botón azul (<b>Texto</b>), tocalo y elegí <b>Borrar</b>. Después tocá el lugar de la URL, mantené apretado y tocá <b>Pegar</b>.</li>
+        <li>Sin cerrar el teclado, en la barra de arriba del teclado tocá <b>Texto</b>: tiene que quedar pegado al final del enlace. Tocá <b>OK</b>.</li>
+        <li>Tocá <b>▶</b> para probarlo. Si te pregunta si permitís conectarse a <b>ntfy.sh</b>, tocá <b>Permitir siempre</b>. Volvé a esta app: en Pasos tiene que aparecer el número.</li>
+        <li><b>Para que sea solo:</b> en Atajos, pestaña <b>Automatización</b> → <b>+</b> → <b>App</b> → elegí <b>WhatsApp</b> → marcá <b>Se abre</b> → <b>Ejecutar inmediatamente</b> y apagá <b>Notificar al ejecutarse</b> → <b>Siguiente</b> → elegí <b>Pasos Hábitos</b>. Cada vez que abrís WhatsApp, tus pasos se actualizan sin que hagas nada.</li>
+      </ol><p class="sub small">Solo viaja el número de pasos, por un servicio gratuito (ntfy.sh) con un código secreto que es solo tuyo.</p></details></section>
+    <section><h2>Pantalla</h2><label class="fl"><span>Tono</span><select id="cfgTone"><option value="auto">Automático: suave antes de las 10 y desde las 21</option><option value="claro">Siempre claro</option><option value="suave">Siempre suave</option><option value="oscuro">Siempre oscuro</option></select></label>
+      <p class="sub small">El tono suave es oscuro y cálido, sin luz azul fuerte: no encandila al despertarte ni antes de dormir. También lo cambiás con el ícono de la luna o el sol, arriba.</p></section>
     <section><h2>Copia de seguridad</h2>
       <p class="sub small">Tus datos se guardan en este celular. Hacé una copia de vez en cuando por si cambiás de teléfono o borrás Safari.</p>
       <div class="inl"><button class="btn" type="button" id="expBtn">Guardar copia</button><button class="btn" type="button" id="impBtn">Restaurar copia</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>
@@ -724,8 +776,7 @@ nav.tabs{padding-right:70px;padding-left:70px}
         <li>Elegí la hora (ej. <b>08:45</b>), <b>Diariamente</b> y <b>Ejecutar inmediatamente</b>. Tocá <b>Siguiente</b>.</li>
         <li><b>Nueva automatización en blanco</b> → buscá la acción <b>Mostrar notificación</b>.</li>
         <li>Escribí el texto: <b>"Anotá cómo dormiste (10 s)"</b> y tocá <b>OK</b>.</li>
-        <li><b>Agua sin abrir la app:</b> creá un atajo <b>Tomé agua</b> con la acción <b>Registrar muestra de salud</b> (Tipo: Agua, 250 mL). Después: Configuración → Accesibilidad → Tocar → <b>Tocar atrás</b> → Doble toque → <b>Tomé agua</b>. Dos toquecitos en la espalda del iPhone y listo.</li>
-        <li><b>Pasos en la app:</b> creá un atajo (no automatización) llamado exactamente <b>Pasos Hábitos</b> con 3 acciones: <b>Buscar muestras de salud</b> (Pasos, Fecha de inicio es hoy) → <b>Calcular estadísticas</b> (Suma) → <b>Copiar al portapapeles</b>. Después, en Hoy tocá <b>Actualizar</b>, volvé a la app y tocá <b>Pegar pasos</b>.</li>
+        <li><b>Pasos:</b> mirá la sección <b>Pasos automáticos</b>, más arriba.</li>
         <li>Repetí con <b>13:30</b> "Después de almorzar: 10 min caminando" y <b>23:45</b> "Cierre del día: gastos, baño, celular afuera".</li>
       </ol><p class="sub small">Tip: tocá la notificación y abrí la app desde el ícono de inicio.</p></details></section>
     <section><h2>Ayuda</h2><details class="help"><summary>¿Cómo funciona la app?</summary><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)">
@@ -791,6 +842,7 @@ if(S.seedV<5){const ar=S.habitos.find(h=>h.id==='arranque');if(ar&&!ar.steps)ar.
 if(S.seedV<6){const es=S.habitos.find(h=>h.id==='estudio');if(es&&es.num){es.num.def=60;es.num.defMin=15;}if(!S.habitos.find(h=>h.id==='padel'))S.habitos.push({id:'padel',name:'Pádel',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});S.seedV=6;save();}
 if(S.seedV<7){const t0=todayStr0();if(!S.habitos.find(h=>h.id==='fyv'))S.habitos.push({id:'fyv',name:'Frutas y verduras',days:[0,1,2,3,4,5,6],from:t0,active:true,time:'',moment:'tarde',min:'3 porciones',goal:'g_fisico',num:{label:'Porciones',unit:'porc.',step:1,target:5,autoDone:true}});if(!S.habitos.find(h=>h.id==='respira'))S.habitos.push({id:'respira',name:'Respiración 5 min',days:[0,1,2,3,4,5,6],opt:true,breath:true,from:t0,active:true,time:'',moment:'noche',min:'',goal:'g_mente',num:null});S.salud.tests=S.salud.tests||[];S.expHist=S.expHist||[];S.seedV=7;save();}
 if(S.seedV<8){if(!S.habitos.find(h=>h.id==='correr'))S.habitos.push({id:'correr',name:'Correr',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});if(S.salud.bici==null)S.salud.bici=30;S.seedV=8;save();}
+if(!S.salud.sync){const a=new Uint8Array(14);crypto.getRandomValues(a);S.salud.sync='hab-'+Array.from(a,x=>'abcdefghijkmnpqrstuvwxyz23456789'[x%32]).join('');save();}
 
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 
@@ -888,13 +940,14 @@ function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(-
   R.forEach((r,i)=>{const rad=c-sw/2-i*(sw+gap),C=2*Math.PI*rad,off=C*(1-Math.max(0,Math.min(1,r[1])));
     o+=`<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-opacity=".12" stroke-width="${sw}"/><circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-width="${sw}" stroke-linecap="round" class="rfg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${off.toFixed(1)}"/>`;});
   return `<svg viewBox="0 0 ${sz} ${sz}" class="fit">${o}</svg>`;}
-function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T),cols=['olive','sand','graph'];
-  box.innerHTML=`<div class="bx"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy</span><div class="score lvw ${b?'l'+b.lvl:''}">${b?b.lvl:'<span style="color:var(--faint);font-size:30px;letter-spacing:-.02em">Sin datos</span>'}</div><span class="lv3${b&&b.lvl==='Baja'?' low':''}">${b?(b.debt>=1?'Deuda de sueño: '+fmtH(b.debt):'Sin deuda de sueño'):'Anotá cómo dormiste'}</span></div></div>
-   <div class="leg">${R.map((r,i)=>`<div><span><i class="${cols[i]}"></i>${r[0]}</span><b class="num">${r[2]}</b></div>`).join('')}</div>
-   ${b?`<div class="callout"><p class="plan">${planText(T,b)}</p></div>`:''}
-   ${quickRow(T)}`;
-  let HT=b?healthTip(T):null;if(HT&&HT[0]==='warm')HT=null;if(b&&HT){const [cls,html,lk]=HT,tp=document.createElement('p');tp.className='tip'+(cls?' warm':'');tp.innerHTML=html;
-    if(lk){const k=document.createElement('button');k.type='button';k.className='link';k.textContent=lk[0];k.onclick=lk[1];tp.appendChild(document.createElement('br'));tp.appendChild(k);}const co=box.querySelector('.callout');if(co)co.appendChild(tp);}wireQuick(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
+function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T);
+  box.innerHTML=(b?`<button type="button" class="bx bxb" id="ringsB" aria-label="Ver tus 3 anillos"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy</span><div class="score lvw l${b.lvl}">${b.lvl}</div><span class="lv3${b.lvl==='Baja'?' low':''}">${b.debt>=1?'Deuda de sueño: '+fmtH(b.debt):'Sin deuda de sueño'}</span></div></button>
+   <div class="callout"><p class="plan">${planText(T,b)}</p></div>`:'')+quickRow(T);
+  const rb=box.querySelector('#ringsB');if(rb)rb.onclick=()=>openRings(T);
+  wireQuick(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
+function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Lo que dormiste contra tu meta','Gimnasio, pádel y correr esta semana','Estudio e Innova de hoy'];
+  SI.innerHTML=`<div><h3>Tus 3 anillos</h3><p class="sub small">Se llenan solos con lo que marcás.</p></div><div class="rgl">${R.map((r,i)=>`<div class="spread rowx"><span class="rgn"><i class="dot ${cols[i]}"></i><span><b>${r[0]}</b><br><span class="sub small">${dsc[i]}</span></span></span><b class="num">${r[2]}</b></div>`).join('')}</div><button class="btn primary" type="button" id="ok">Listo</button>`;
+  SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
 function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i]=!cur[i];if(cur[i])POP={id:h.id+'#'+i,t:Date.now()};const k=cur.filter(Boolean).length,prev=Object.assign({},S.dias[T]||{}),was=dayDone(T);
   patchDay(T,{['s_'+h.id]:cur,[h.id]:k===n?2:k>0?1:0});renderAll();vib(8);
@@ -903,7 +956,7 @@ function habRow(T,h){const v=st(T,h.id),n=nv(T,h.id),sk=streak(h),r=document.cre
   r.className='hrw'+(v===2?' done':v===1?' half':v===-1?' free':'')+(POP.id===h.id&&Date.now()-POP.t<700?' pop':'');
   const meta=[];if(v===2)meta.push('Hecho');else if(v===1)meta.push('Mínimo');else if(v===-1)meta.push('Libre');
   if(h.num&&n)meta.push(round1(n)+(h.num.target?' de '+h.num.target:'')+(h.num.unit?' '+h.num.unit:''));if(sk>1)meta.push('racha '+sk);
-  if(h.steps&&h.steps.length&&v!==2){const k=stepsOf(T,h).filter(Boolean).length;if(k)meta.push(k+' de '+h.steps.length);}if(h.breath&&!v)meta.push('Opcional · 5 min guiado');else if(h.opt&&!v)meta.push('Opcional');else if(!v&&quotaFree(h,T))meta.push('Opcional esta semana');
+  if(h.steps&&h.steps.length&&v!==2){const k=stepsOf(T,h).filter(Boolean).length;if(k)meta.push(k+' de '+h.steps.length);}if(h.breath&&!v)meta.push('5 min guiado');else if(!v&&!h.opt&&quotaFree(h,T))meta.push('Ya cumpliste la semana');
   r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v>0?'ok':''}"></span></button>`;
   r.querySelector('b').textContent=h.name;const sp=r.querySelector('.info span');sp.textContent=meta.join(' · ');if(!meta.length)sp.remove();
   const ck=r.querySelector('.ck2');ck.setAttribute('aria-label',h.name+(v>0?': hecho, tocá para desmarcar':': tocá para marcar hecho'));
@@ -915,23 +968,28 @@ function expRow(T){const E=S.exp,d=expDay(T),v=(E.log||{})[T]===1,r=document.cre
   r.querySelector('b').textContent=E.title;const tg=()=>{E.log=E.log||{};if(v)delete E.log[T];else E.log[T]=1;save();vib(8);renderAll();if(!v)toast('Sumado al experimento');};
   r.querySelector('.ck2').onclick=tg;r.querySelector('.info').onclick=tg;return r;}
 function evRow(icon,txt,time){const r=document.createElement('div');r.className='evr';r.innerHTML=`<span class="ic2">${icon}</span><span><b></b></span><span class="tm2">${esc(time)}</span>`;r.querySelector('b').textContent=txt;return r;}
+let openGrp={};
 function renderDay(T){const box=document.getElementById('day'),now=momNow();box.innerHTML='';
-  if(openDayKey!==T){openDayKey=T;openMom=null;}
-  const G={manana:[],tarde:[],noche:[]};
-  HABS().filter(h=>sched(h,T)).forEach(h=>{const t=htime(h),m=h.time?momOfTime(h.time):(h.moment||'manana');G[m].push({k:'h',h,key:sortKey(t)});});
-  if(S.exp){const d=expDay(T);if(d>=1&&d<=14){const m=['mate','caminar'].includes(S.exp.k)?'tarde':'noche';G[m].push({k:'x',key:-1});}}
-  const order=['manana','tarde','noche'],ni=order.indexOf(now);
-  MOMS.forEach(([id,name],i)=>{const items=G[id].sort((a,b)=>a.key-b.key),hs=items.filter(x=>x.k==='h').map(x=>x.h);if(!items.length)return;
-    const req=hs.filter(h=>counts(h,T)),dn=req.filter(h=>st(T,h.id)>0).length,pending=req.length-dn;
-    const def=i===ni,isOpen=openMom?openMom[id]:def;
-    const el=document.createElement('section');el.className='mom'+(i===ni?' now':'')+(isOpen?' open':'');
-    el.innerHTML=`<header role="button" tabindex="0" aria-expanded="${isOpen}"><h3>${name}${i===ni?'<span class="tag">AHORA</span>':''}</h3><span class="c">${req.length?(pending?dn+' / '+req.length:'Listo ✓'):''}${SVGI.chev}</span></header>`;
-    const hd=el.querySelector('header'),tg=()=>{openMom=openMom||{manana:false,tarde:false,noche:false};if(!openMom.__init){MOMS.forEach(([k],j)=>{openMom[k]=j===ni||(j<ni&&G[k].some(x=>x.k==='h'&&counts(x.h,T)&&st(T,x.h.id)===0));});openMom.__init=1;}openMom[id]=!isOpen;renderDay(T);};
-    hd.onclick=tg;hd.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tg();}};
-    if(isOpen){const rows=document.createElement('div');rows.className='rows';items.forEach(it=>rows.appendChild(it.k==='h'?habRow(T,it.h):it.k==='x'?expRow(T):evRow(it.ic,it.t,it.time)));el.appendChild(rows);}
-    else{const pk=document.createElement('p');pk.className='peek';pk.textContent=items.map(x=>x.k==='h'?x.h.name:x.k==='x'?'Experimento':x.t).join(' · ');el.appendChild(pk);}
-    box.appendChild(el);});
-  if(!box.children.length)box.innerHTML='<p class="empty">Hoy no toca ningún hábito.</p>';}
+  if(openDayKey!==T){openDayKey=T;openGrp={};}
+  const mi=m=>MOMS.findIndex(x=>x[0]===m),items=[];
+  HABS().filter(h=>sched(h,T)).forEach(h=>{const m=h.time?momOfTime(h.time):(h.moment||'manana');items.push({k:'h',h,m,key:mi(m)*10000+sortKey(htime(h))});});
+  if(S.exp){const d=expDay(T);if(d>=1&&d<=14){const m=['mate','caminar'].includes(S.exp.k)?'tarde':'noche';items.push({k:'x',m,key:mi(m)*10000-1});}}
+  if(!items.length){box.innerHTML='<p class="empty">Hoy no toca ningún hábito.</p>';return;}
+  items.sort((a,b)=>a.key-b.key);
+  const isDone=it=>it.k==='h'?st(T,it.h.id)!==0:((S.exp.log||{})[T]===1),isOpt=it=>it.k==='h'&&(it.h.opt||it.h.breath||quotaFree(it.h,T));
+  const reqs=items.filter(it=>!isOpt(it)&&!(it.k==='h'&&st(T,it.h.id)===-1)),dn=reqs.filter(isDone).length;
+  const main=items.filter(it=>!isOpt(it)||isDone(it)),opt=items.filter(it=>isOpt(it)&&!isDone(it));
+  const rowOf=it=>it.k==='h'?habRow(T,it.h):expRow(T);
+  const hd=document.createElement('div');hd.className='dhd';hd.innerHTML=`<h2>Para hoy</h2><span class="c num${reqs.length&&dn===reqs.length?' ok':''}">${reqs.length?(dn===reqs.length?'Listo ✓':dn+' de '+reqs.length):''}</span>`;box.appendChild(hd);
+  const list=document.createElement('div');list.className='rows flat';let last='';
+  main.forEach(it=>{if(it.m!==last){last=it.m;const l=document.createElement('p');l.className='mlab'+(it.m===now?' now':'');l.textContent=MOMS[mi(it.m)][1]+(it.m===now?' · ahora':'');list.appendChild(l);}list.appendChild(rowOf(it));});
+  box.appendChild(list);
+  if(opt.length){const g=document.createElement('section'),op=!!openGrp.opt;g.className='grp'+(op?' open':'');
+    g.innerHTML=`<button type="button" class="ghd" aria-expanded="${op}"><span><b>Opcionales</b><small></small></span>${SVGI.chev}</button>`;
+    g.querySelector('small').textContent=opt.map(it=>it.k==='h'?it.h.name:'Experimento').join(' · ');
+    g.querySelector('.ghd').onclick=()=>{openGrp.opt=!op;renderDay(T);};
+    if(op){const rows=document.createElement('div');rows.className='rows flat';opt.forEach(it=>rows.appendChild(rowOf(it)));g.appendChild(rows);}
+    box.appendChild(g);}}
 function renderRevRow(T){const el=document.getElementById('revRow'),d=dow(T),PM=planMonday(),PP=(S.semanas[PM]&&S.semanas[PM].prio)||[],hot=d===0||d===1&&!(S.semanas[add(mondayOf(T),-7)]||{}).feel&&d===1;
   const done=PP.filter(p=>p.done).length;
   el.className='revrow'+(d===0?' hot':'');
@@ -1157,7 +1215,7 @@ const SC_NAME='Pasos Hábitos';let PEND=false;try{PEND=sessionStorage.getItem('p
 function stepsRow(T){const d=(S.dias[T]||{}).pasosHoy,pct=d?Math.min(100,Math.round(d.n/8000*100)):0;
   return `<div class="stl"><div class="stl-t"><span class="k">Pasos de hoy</span><b class="num">${d?fmtN(d.n):'—'}</b><span class="sub small">${d?'de 8.000 · actualizado '+d.t:'Tocá Actualizar para traerlos de Salud'}</span></div>${PEND?'<button class="btn primary" type="button" id="stPasteNow">Pegar pasos</button>':'<button class="btn" type="button" id="stUpd">Actualizar</button>'}<div class="track ol" style="grid-column:1/-1;height:5px"><i style="width:${pct}%"></i></div></div>`;}
 function wireSteps(T){const u=document.getElementById('stUpd');if(u)u.onclick=()=>{PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);};
-  const pz=document.getElementById('stPasteNow');if(pz)pz.onclick=async()=>{try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM()}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();};}
+  const pz=document.getElementById('stPasteNow');if(pz)pz.onclick=async()=>{try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();};}
 function avgFyv(a,b){const h=HABS().find(x=>x.id==='fyv');if(!h)return null;let n=0,c=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){if(!sched(h,s))continue;if(s===todayStr()&&!nv(s,h.id))continue;n+=nv(s,h.id);c++;}return c?n/c:null;}
 const EXPS=[{k:'mate',t:'Último mate a las 16:30',d:'Nada de mate ni café después de las 16:30.'},{k:'cama',t:'A dormir antes de la 1',d:'Acostarte antes de la 1:00 todas las noches.'},{k:'pantalla',t:'Celular afuera 30 min antes',d:'El celular fuera de la pieza 30 minutos antes de dormir.'},{k:'caminar',t:'Caminar 10 min después de almorzar',d:'Una caminata corta después del almuerzo.'},{k:'fyv',t:'5 porciones de frutas y verduras',d:'Llegar a 5 porciones todos los días.'},{k:'respira',t:'Respirar 5 min antes de dormir',d:'Suspiro cíclico guiado cada noche.'}];
 function expStats(a,b){const T=todayStr(),e=b>T?T:b,sl=sleepStats(a,e);return {sl,hab:rangeRatio(a,e),steps:avgSteps(a,e),fyv:avgFyv(a,e)};}
@@ -1238,17 +1296,43 @@ function wireWater(T){document.querySelectorAll('.wtr .wb').forEach(b=>b.onclick
 function avgWater(a,b){let n=0,c=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){const v=waterOf(s);if(s===todayStr())continue;if(v){n+=v;c++;}}return c?n/c:null;}
 
 
+
+/* ---------- pasos automáticos: Atajos manda los pasos a ntfy.sh y la app los lee ---------- */
+const SYNC_URL=t=>'https://ntfy.sh/'+t,syncLink=()=>SYNC_URL(S.salud.sync)+'/publish?message=';
+const dayOfTs=ts=>new Date(ts*1000).toLocaleDateString('en-CA',{timeZone:TZ});
+const hmOfTs=ts=>new Date(ts*1000).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'});
+const agoTxt=ts=>{const m=Math.round((Date.now()/1000-ts)/60);return m<2?'recién':m<60?'hace '+m+' min':'a las '+hmOfTs(ts);};
+let SYNC_BUSY=false,SYNC_TAP=0;try{SYNC_TAP=Number(sessionStorage.getItem('syncTap')||0);}catch(e){}
+async function syncSteps(){if(SYNC_BUSY||!S.salud.sync)return null;SYNC_BUSY=true;
+  try{const r=await fetch(SYNC_URL(S.salud.sync)+'/json?poll=1&since=latest',{cache:'no-store'});if(!r.ok)return null;
+    let m=null;(await r.text()).split('\n').forEach(l=>{try{const j=JSON.parse(l);if(j&&j.event==='message')m=j;}catch(e){}});
+    if(!m||!m.time)return null;
+    const n=parseInt(String(m.message||'').split(/[,|]/)[0].replace(/[^0-9]/g,''),10);if(!(n>=0&&n<100000))return null;
+    S.salud.syncLast=Math.max(S.salud.syncLast||0,m.time);
+    const day=dayOfTs(m.time),cur=(S.dias[day]||{}).pasosHoy;
+    if(cur&&cur.ts&&cur.ts>=m.time){save();return m;}
+    patchDay(day,{pasosHoy:{n,t:hmOfTs(m.time),ts:m.time,auto:1}});return m;}
+  catch(e){return null;}finally{SYNC_BUSY=false;}}
+async function syncAndRender(){const k=()=>JSON.stringify((S.dias[todayStr()]||{}).pasosHoy||null),before=k(),m=await syncSteps();
+  if(SYNC_TAP&&m&&m.time>=SYNC_TAP-20){SYNC_TAP=0;PEND=false;try{sessionStorage.removeItem('syncTap');sessionStorage.removeItem('pendPasos');}catch(e){}
+    const d=(S.dias[todayStr()]||{}).pasosHoy;renderAll();if(d)toast('Pasos actualizados: '+fmtN(d.n));return;}
+  if(SYNC_TAP&&Date.now()/1000-SYNC_TAP>90){SYNC_TAP=0;try{sessionStorage.removeItem('syncTap');}catch(e){}renderAll();return;}
+  if(k()!==before)renderAll();}
+function renderSyncCfg(){const el=document.getElementById('syncSt');if(!el)return;const L=S.salud.syncLast;
+  el.innerHTML=L?'<b style="color:var(--olive)">Funcionando.</b> Último dato: '+(dayOfTs(L)===todayStr()?'hoy':fmt(dayOfTs(L),{weekday:'long'}))+' a las '+hmOfTs(L)+'.':'Todavía no llegó ningún dato del atajo.';}
+
 /* ---------- fila rápida: Sueño · Pasos · Agua ---------- */
-function quickRow(T){const x=slp(T),d=(S.dias[T]||{}).pasosHoy,w=waterOf(T),g=waterGoal();
+function quickRow(T){const x=slp(T),d=(S.dias[T]||{}).pasosHoy,w=waterOf(T),g=waterGoal(),slOn=!!x&&!slEdit,busy=SYNC_TAP&&Date.now()/1000-SYNC_TAP<90;
   const tile=(id,k,val,sub,pct,cls,col)=>`<button type="button" class="qt ${cls||''}" id="${id}"><span class="k">${k}</span><b class="num">${val}</b><small>${sub}</small><span class="qb"><i style="width:${Math.max(0,Math.min(100,pct))}%;background:${col}"></i></span></button>`;
-  return `<div class="qrow">${
-    tile('qSl','Sueño',x?fmtH(slH(x)):'Anotar',x?x.b+' → '+x.w:'10 segundos',x?slH(x)/S.salud.meta*100:0,x?'':'pend','var(--olive)')}${
-    tile('qSt','Pasos',d?fmtN(d.n):'—',PEND?'Tocá para pegar':d?'a las '+d.t:'Tocá para traer',d?d.n/8000*100:0,PEND?'pend':'','var(--sand)')}${
+  const stSub=busy?'Actualizando…':PEND?'Tocá para pegar':d?(d.ts?agoTxt(d.ts):'a las '+d.t):(S.salud.syncLast?'Sin datos de hoy':'Tocá para traer');
+  return `<div class="qrow${slOn?'':' q2'}">${
+    slOn?tile('qSl','Sueño',fmtH(slH(x)),x.b+' → '+x.w,slH(x)/S.salud.meta*100,'','var(--olive)'):''}${
+    tile('qSt','Pasos',d?fmtN(d.n):'—',stSub,d?d.n/8000*100:0,PEND?'pend':'','var(--sand)')}${
     tile('qWa','Agua',fmtL(w),'de '+fmtL(g),w/g*100,'','var(--water)')}</div>`;}
-function stepsRun(){PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);}
-async function stepsPaste(T){try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM()}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();}
+function stepsRun(){SYNC_TAP=Math.floor(Date.now()/1000);try{sessionStorage.setItem('syncTap',String(SYNC_TAP));}catch(e){}if(!S.salud.syncLast){PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);}
+async function stepsPaste(T){try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();}
 function wireQuick(T){const q=id=>document.getElementById(id);
-  q('qSl').onclick=()=>{slEdit=true;renderAll();const b=q('slpBox');if(b)b.scrollIntoView({behavior:'smooth',block:'center'});};
+  const sl=q('qSl');if(sl)sl.onclick=()=>{slEdit=true;renderAll();window.scrollTo({top:0,behavior:'smooth'});};
   q('qSt').onclick=()=>PEND?stepsPaste(T):stepsRun();
   q('qWa').onclick=()=>openWaterSheet();}
 
@@ -1351,7 +1435,7 @@ function compactIns(){const w=document.querySelector('#insights .ins');if(!w||w.
 function saludWarn(T){const box=document.getElementById('salud'),wk=sleepStats(add(T,-6),T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7');
   if(!(wk&&wk.hd>=3&&!(turno&&turno.done)))return;const n=document.createElement('div');n.className='note warnx';n.innerHTML=`<b>${wk.hd} de ${wk.n} días con dolor de cabeza esta semana.</b> Si se mantiene varias semanas, vale una consulta con un clínico.`;box.children[0].after(n);}
 
-function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();compactExp(T);compactIns();saludWarn(T);renderPTab();}
+function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();renderSyncCfg();compactExp(T);compactIns();saludWarn(T);renderPTab();}
 
 /* ---------- hojas y formularios ---------- */
 const sheet=document.getElementById('sheet'),SI=document.getElementById('SI');
@@ -1455,11 +1539,29 @@ function openWaterSheet(){const T=todayStr(),draw=()=>{const w=waterOf(T),g=wate
   f.onclick=()=>{if(long){long=false;return;}addWater(250);};})();
 
 function applyTheme(t){if(t)document.documentElement.setAttribute('data-theme',t);else document.documentElement.removeAttribute('data-theme');}
-try{applyTheme(localStorage.getItem('micampo:theme'));}catch(e){}
-document.getElementById('themeBtn').onclick=()=>{const cur=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),nx=cur==='dark'?'light':'dark';applyTheme(nx);try{localStorage.setItem('micampo:theme',nx);}catch(e){}};
+/* ---------- tono de pantalla: suave a la mañana y a la noche ---------- */
+const TONE_K='micampo:tone',ICO_MOON='<svg class="i" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',ICO_SUN='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>';
+function toneCfg(){try{return JSON.parse(localStorage.getItem(TONE_K)||'null')||{m:'auto'};}catch(e){return {m:'auto'};}}
+function toneSave(c){try{localStorage.setItem(TONE_K,JSON.stringify(c));}catch(e){}}
+const softHr=h=>h<10||h>=21;
+function tonePeriod(){const h=curHr(),T=todayStr();return softHr(h)?(h>=21?add(T,1):T)+'s':T+'d';}
+function effTone(){const c=toneCfg();if(c.m!=='auto')return c.m;if(c.o&&c.p===tonePeriod())return c.o;return softHr(curHr())?'suave':'dia';}
+function applyTone(){const t=effTone();applyTheme(t==='suave'?'suave':t==='claro'?'light':t==='oscuro'?'dark':null);
+  const bg=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#ffffff';document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.setAttribute('content',bg));
+  const b=document.getElementById('themeBtn');if(b){const soft=t==='suave'||t==='oscuro';b.innerHTML=soft?ICO_SUN:ICO_MOON;b.setAttribute('aria-label',soft?'Pasar a tono claro':'Pasar a tono suave');}
+  const sel=document.getElementById('cfgTone');if(sel)sel.value=toneCfg().m;}
+applyTone();
+document.getElementById('themeBtn').onclick=()=>{const c=toneCfg(),t=effTone(),toSoft=!(t==='suave'||t==='oscuro');
+  if(c.m==='auto'){const p=tonePeriod(),nat=softHr(curHr())?'suave':'dia',nx=toSoft?'suave':'dia';toneSave(nx===nat?{m:'auto'}:{m:'auto',o:nx,p});toast(toSoft?'Tono suave'+(softHr(curHr())?'':' hasta las 21'):'Tono claro'+(softHr(curHr())?' hasta '+(curHr()>=21?'mañana':'las 10'):''));}
+  else{toneSave({m:toSoft?'suave':'claro'});toast(toSoft?'Tono suave':'Tono claro');}
+  applyTone();vib(8);};
+(function(){const tn=document.getElementById('cfgTone');if(tn)tn.onchange=()=>{toneSave({m:tn.value});applyTone();};
+  const sc=document.getElementById('syncCopy');if(sc)sc.onclick=async()=>{const l=syncLink(),o=document.getElementById('syncLinkTxt');try{await navigator.clipboard.writeText(l);toast('Enlace copiado: ahora pegalo en el atajo');}catch(e){toast('Copialo a mano desde abajo');}o.hidden=false;o.textContent=l;};
+  const sp=document.getElementById('syncTest');if(sp)sp.onclick=async()=>{const m=await syncSteps();renderAll();toast(m?'Funciona: último dato '+(dayOfTs(m.time)===todayStr()?'de hoy a las ':'del '+fmt(dayOfTs(m.time),{day:'numeric',month:'short'})+' a las ')+hmOfTs(m.time):'Todavía no llegó nada. Corré el atajo una vez y probá de nuevo.');};})();
 renderAll();
-let lastDay=todayStr();setInterval(()=>{const t=todayStr();if(t!==lastDay){lastDay=t;}renderHeader();renderHoy();renderSleep(todayStr());},60000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderAll();});
+let lastDay=todayStr(),SYNC_TICK=0;setInterval(()=>{const t=todayStr();if(t!==lastDay){lastDay=t;}renderHeader();renderHoy();renderSleep(todayStr());applyTone();if(++SYNC_TICK%3===0&&!document.hidden)syncAndRender();},60000);
+syncAndRender();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){renderAll();applyTone();syncAndRender();if(SYNC_TAP){setTimeout(syncAndRender,2500);setTimeout(syncAndRender,6000);}}});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
