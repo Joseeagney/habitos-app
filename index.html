@@ -767,6 +767,37 @@ header.top h1{grid-row:2;grid-column:1/-1;margin:0}
 .tkadd input{background:var(--soft)!important;border:0!important;border-radius:12px!important;padding:11px 14px!important;box-shadow:none!important}
 #v-hoy .rows.flat>.mlab{margin-top:10px}
 .view>section>.rowx:last-child{border-bottom:0!important}
+
+/* tareas: mover y personalizar */
+#v-hoy .rows.flat .tkr{grid-template-columns:40px 1fr 30px}
+.tkr .info b{display:flex;align-items:center;gap:6px}
+.tkf{width:14px;height:14px;flex:0 0 auto;fill:var(--olive);stroke:var(--olive);stroke-width:1.6;stroke-linejoin:round}
+.tmeta{font-size:12.5px;color:var(--muted)}.tmeta em{font-style:normal}.tmeta em.tm{color:var(--olive);font-weight:700}.tmeta em.late{color:var(--warn);font-weight:600}.tmeta em.ok{color:var(--olive);font-weight:600}
+.hdl{width:30px;height:40px;display:grid;place-items:center;color:var(--faint);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:grab}
+.hdl svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.tkr.shift{transition:transform .18s cubic-bezier(.2,.7,.2,1)}
+.tkr.drag{z-index:5;background:var(--bg);border-radius:14px;box-shadow:0 14px 34px -12px rgba(0,0,0,.35);transition:none!important}
+.tkr.drag::before{display:none}
+.tkmore{all:unset;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;padding:13px 0;cursor:pointer;font-size:13.5px;font-weight:700;color:var(--muted);border-top:1px solid var(--line)}
+.tkmore svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.tkmore.open svg{transform:rotate(180deg)}
+.tkopt{display:flex;flex-direction:column;background:var(--soft);border-radius:14px;padding:4px 14px}
+.tko{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;min-height:48px}
+.tko+.tko,.tkopt textarea{border-top:1px solid var(--line)!important}
+.tko>span{font-size:15px;font-weight:600}
+.tkwhen{display:flex;gap:6px}
+.tkwhen button,.tkdp{border:0;border-radius:99px;padding:7px 11px;font:inherit;font-size:13px;font-weight:700;background:var(--bg);color:var(--fg);cursor:pointer;position:relative;white-space:nowrap}
+.tkwhen button[aria-pressed="true"],.tkdp.on{background:var(--olive);color:var(--onc)}
+.tkdp input{position:absolute;inset:0;opacity:0;width:100%;height:100%;padding:0!important;border:0!important;cursor:pointer}
+.tkhr{display:flex;align-items:center;gap:10px}
+.tkhr input{width:auto!important;padding:6px 10px!important;border:0!important;background:var(--bg)!important;border-radius:10px!important;font-weight:700}
+button.tko{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 0;min-height:48px;cursor:pointer}
+.tkimp .sw{width:46px;height:28px;border-radius:99px;background:color-mix(in srgb,var(--fg) 14%,var(--bg));position:relative;transition:background .2s}
+.tkimp .sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.tkimp[aria-pressed="true"] .sw{background:var(--olive)}.tkimp[aria-pressed="true"] .sw::after{transform:translateX(18px)}
+.tkopt textarea{border:0!important;border-radius:0!important;background:transparent!important;padding:12px 0!important;resize:none;width:100%}
+#v-hoy .tkr .info .tt{font-size:inherit!important;color:inherit!important;font-weight:inherit!important;line-height:inherit!important}
+#v-hoy .rows.flat .hrw{row-gap:0}
 </style>
 </head>
 <body>
@@ -1412,29 +1443,70 @@ function renderSyncCfg(){const el=document.getElementById('syncSt');if(!el)retur
 
 /* ---------- TAREAS: escribís lo que tenés que hacer, tocás + y listo ---------- */
 function tasksOf(){if(!Array.isArray(S.tareas))S.tareas=[];return S.tareas;}
-function renderTasks(T){const L=document.getElementById('tkList'),c=document.getElementById('tkC');if(!L)return;
-  const all=tasksOf(),pend=all.filter(x=>!x.done),dnT=all.filter(x=>x.done===T);L.innerHTML='';
+const TK_FLAG='<svg class="tkf" viewBox="0 0 24 24" aria-label="Importante"><path d="M6 21V4h10.5l-1.6 4 1.6 4H6"/></svg>',TK_HDL='<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>';
+let TK_DRAG=false,TK_FUT=false;
+const tkVisible=(x,T)=>!x.done&&(!x.due||x.due<=T);
+function taskMeta(T,x){if(x.done)return [['ok','Hecha']];const m=[];if(x.hm)m.push(['tm',x.hm]);
+  if(x.due&&x.due>T)m.push(['',x.due===add(T,1)?'Mañana':fmt(x.due,{weekday:'short',day:'numeric',month:'short'})]);
+  else if(x.due&&x.due<T)m.push(['late','Vencida · '+(x.due===add(T,-1)?'ayer':fmt(x.due,{day:'numeric',month:'short'}))]);
+  else if(!x.due&&x.d<T)m.push(['',x.d===add(T,-1)?'Desde ayer':'Desde el '+fmt(x.d,{day:'numeric',month:'short'})]);
+  if(x.note)m.push(['',x.note.length>40?x.note.slice(0,40)+'…':x.note]);return m;}
+function renderTasks(T){const L=document.getElementById('tkList'),c=document.getElementById('tkC');if(!L||TK_DRAG)return;
+  const all=tasksOf(),pend=all.filter(x=>tkVisible(x,T)),fut=all.filter(x=>!x.done&&x.due&&x.due>T).sort((p,q)=>p.due<q.due?-1:p.due>q.due?1:0),dnT=all.filter(x=>x.done===T);L.innerHTML='';
   c.textContent=pend.length?pend.length+(pend.length===1?' pendiente':' pendientes'):(dnT.length?'Al día ✓':'');c.classList.toggle('ok',!pend.length&&dnT.length>0);
-  pend.concat(dnT).forEach(x=>L.appendChild(taskRow(T,x)));
-  if(!pend.length&&!dnT.length)L.innerHTML='<p class="tkh">Escribí lo que tenés que hacer y tocá <b>+</b>. Cuando lo hacés, lo tildás.</p>';}
-function taskRow(T,x){const r=document.createElement('div'),v=!!x.done;r.className='hrw tkr'+(v?' done':'');
-  const old=!v&&x.d<T?(x.d===add(T,-1)?'Desde ayer':'Desde el '+fmt(x.d,{day:'numeric',month:'short'})):'';
-  r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b>${v?'<span class="ok">Hecha</span>':old?'<span></span>':''}</button>`;
-  r.querySelector('b').textContent=x.t;if(old)r.querySelector('.info span').textContent=old;
+  pend.forEach(x=>L.appendChild(taskRow(T,x,true)));dnT.forEach(x=>L.appendChild(taskRow(T,x,false)));
+  if(!pend.length&&!dnT.length&&!fut.length)L.innerHTML='<p class="tkh">Escribí lo que tenés que hacer y tocá <b>+</b>. Cuando lo hacés, lo tildás.</p>';
+  if(fut.length){const g=document.createElement('button');g.type='button';g.className='tkmore';g.innerHTML=`<span>Próximas · ${fut.length}</span>${SVGI.chev}`;g.classList.toggle('open',TK_FUT);
+    g.onclick=()=>{TK_FUT=!TK_FUT;renderTasks(T);};L.appendChild(g);if(TK_FUT)fut.forEach(x=>L.appendChild(taskRow(T,x,false)));}
+  wireTaskDrag(L,T);}
+function taskRow(T,x,drag){const r=document.createElement('div'),v=!!x.done;r.className='hrw tkr'+(v?' done':'')+(x.imp?' imp':'');r.dataset.id=x.id;
+  r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b>${x.imp&&!v?TK_FLAG:''}<span class="tt"></span></b></button>${drag?`<span class="hdl" role="button" aria-label="Mantené apretado para mover">${TK_HDL}</span>`:'<span></span>'}`;
+  r.querySelector('.tt').textContent=x.t;
+  const mt=taskMeta(T,x);if(mt.length){const sp=document.createElement('span');sp.className='tmeta';mt.forEach(([cls,txt],i)=>{if(i){sp.appendChild(document.createTextNode(' · '));}const e=document.createElement('em');if(cls)e.className=cls;e.textContent=txt;sp.appendChild(e);});r.querySelector('.info').appendChild(sp);}
   const ck=r.querySelector('.ck2');ck.setAttribute('aria-label',x.t+(v?': hecha, tocá para desmarcar':': tocá para marcar hecha'));
   ck.onclick=()=>{const prev=x.done;x.done=v?null:T;save();vib(8);renderTasks(T);if(!v)toast('Hecha: '+x.t,()=>{x.done=prev;save();renderTasks(T);});};
   r.querySelector('.info').onclick=()=>openTask(T,x);return r;}
-function openTask(T,x){SI.innerHTML=`<div><h3>Tarea</h3></div><input id="tkEd" class="tkin2" type="text" maxlength="140" enterkeyhint="done" autocapitalize="sentences"><div class="inl"><button class="btn" type="button" id="tkDel">Borrar</button><button class="btn primary" type="button" id="tkSave" style="flex:1">Guardar</button></div>`;
-  const i=SI.querySelector('#tkEd');i.value=x.t;
-  const sv=()=>{const v=i.value.trim();if(v){x.t=v.slice(0,140);save();}sheet.close();renderTasks(T);};
-  SI.querySelector('#tkSave').onclick=sv;i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sv();}};
-  SI.querySelector('#tkDel').onclick=()=>{const all=tasksOf(),k=all.indexOf(x);if(k>=0){all.splice(k,1);save();}sheet.close();renderTasks(T);
+/* arrastrar para ordenar (como en Recordatorios) */
+function wireTaskDrag(L,T){L.querySelectorAll('.tkr .hdl').forEach(h=>{h.onpointerdown=e=>{const row=h.closest('.tkr');if(!row)return;e.preventDefault();
+  const rows=[...L.querySelectorAll('.tkr')].filter(x=>x.querySelector('.hdl')),idx=rows.indexOf(row);if(idx<0)return;
+  try{h.setPointerCapture(e.pointerId);}catch(err){}TK_DRAG=true;vib(10);
+  const y0=e.clientY,rh=row.getBoundingClientRect().height,mids=rows.map(x=>{const q=x.getBoundingClientRect();return q.top+q.height/2;});let to=idx;
+  row.classList.add('drag');rows.forEach(x=>{if(x!==row)x.classList.add('shift');});
+  const mv=ev=>{const dy=ev.clientY-y0;row.style.transform=`translateY(${dy}px)`;const cy=mids[idx]+dy;
+    to=0;mids.forEach((m,i)=>{if(i!==idx&&cy>m)to++;});
+    rows.forEach((x,i)=>{if(x===row)return;let sh=0;if(idx<to&&i>idx&&i<=to)sh=-rh;else if(to<idx&&i>=to&&i<idx)sh=rh;x.style.transform=sh?`translateY(${sh}px)`:'';});};
+  const end=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',end);h.removeEventListener('pointercancel',end);TK_DRAG=false;
+    if(to!==idx){const ids=rows.map(x=>x.dataset.id);const [m]=ids.splice(idx,1);ids.splice(to,0,m);
+      const all=tasksOf(),byId=Object.fromEntries(all.map(x=>[x.id,x])),set=new Set(ids);let k=0;S.tareas=all.map(x=>set.has(x.id)?byId[ids[k++]]:x);save();vib(8);}
+    renderTasks(T);};
+  h.addEventListener('pointermove',mv);h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);};});}
+/* personalizar: día, hora, importante y nota */
+function openTask(T,x){let due=x.due||null,imp=!!x.imp;
+  SI.innerHTML=`<div><h3>Tarea</h3></div><input id="tkEd" class="tkin2" type="text" maxlength="140" enterkeyhint="done" autocapitalize="sentences">
+   <div class="tkopt">
+     <div class="tko"><span>Cuándo</span><div class="tkwhen"><button type="button" data-w="hoy">Hoy</button><button type="button" data-w="man">Mañana</button><label class="tkdp"><span id="tkDl">Otro día</span><input type="date" id="tkDate"></label></div></div>
+     <div class="tko"><span>Hora</span><div class="tkhr"><input type="time" id="tkTime"><button type="button" class="link" id="tkNoT">Sin hora</button></div></div>
+     <button type="button" class="tko tkimp" id="tkImp"><span>Importante</span><i class="sw" aria-hidden="true"></i></button>
+     <textarea id="tkNote" rows="2" maxlength="300" placeholder="Nota (opcional)"></textarea>
+   </div>
+   <div class="inl"><button class="btn" type="button" id="tkDel">Borrar</button><button class="btn primary" type="button" id="tkSave" style="flex:1">Guardar</button></div>`;
+  const q=id=>SI.querySelector('#'+id),i=q('tkEd'),dt=q('tkDate'),tm=q('tkTime'),nt=q('tkNote');i.value=x.t;tm.value=x.hm||'';nt.value=x.note||'';dt.min=T;
+  const paint=()=>{const w=!due||due<=T?'hoy':due===add(T,1)?'man':'otro';SI.querySelectorAll('.tkwhen [data-w]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===w));
+    SI.querySelector('.tkdp').classList.toggle('on',w==='otro');q('tkDl').textContent=w==='otro'?fmt(due,{weekday:'short',day:'numeric',month:'short'}):'Otro día';
+    q('tkImp').setAttribute('aria-pressed',imp);q('tkNoT').hidden=!tm.value;};
+  SI.querySelectorAll('.tkwhen [data-w]').forEach(b=>b.onclick=()=>{due=b.dataset.w==='man'?add(T,1):null;paint();});
+  dt.onchange=()=>{if(dt.value)due=dt.value>T?dt.value:null;paint();};tm.oninput=paint;q('tkNoT').onclick=()=>{tm.value='';paint();};
+  q('tkImp').onclick=()=>{imp=!imp;paint();};paint();
+  const sv=()=>{const v=i.value.trim();if(v)x.t=v.slice(0,140);x.due=due;x.hm=tm.value||'';x.imp=imp;x.note=nt.value.trim().slice(0,300);save();sheet.close();renderTasks(T);
+    if(due&&due>T)toast('Movida a '+(due===add(T,1)?'mañana':fmt(due,{weekday:'long',day:'numeric'})));};
+  q('tkSave').onclick=sv;i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sv();}};
+  q('tkDel').onclick=()=>{const all=tasksOf(),k=all.indexOf(x);if(k>=0){all.splice(k,1);save();}sheet.close();renderTasks(T);
     toast('Tarea borrada',()=>{const a=tasksOf();a.splice(Math.min(k,a.length),0,x);save();renderTasks(T);});};
   if(!sheet.open)sheet.showModal();}
 (function(){const f=document.getElementById('tkForm'),i=document.getElementById('tkIn');if(!f)return;
   f.onsubmit=e=>{e.preventDefault();const v=i.value.trim();if(!v)return;const T=todayStr();
     S.tareas=tasksOf().filter(x=>!x.done||x.done>=add(T,-30));S.tareas.push({id:Date.now().toString(36),t:v.slice(0,140),d:T,done:null});
-    save();i.value='';vib(8);renderTasks(T);i.focus();};})();
+    save();i.value='';vib(8);renderTasks(T);i.focus();if(!S.tkTip){S.tkTip=1;save();setTimeout(()=>toast('Tip: tocá una tarea para ponerle día, hora o nota. Para moverla, arrastrá las tres rayitas.'),900);}};})();
 
 /* ---------- fila rápida: Sueño · Pasos · Agua ---------- */
 const QICO={qSl:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',qSt:'<svg viewBox="0 0 24 24"><path d="M8 3.5c1.7 0 2.6 2 2.6 4.4S9.4 12.3 8 12.3 5.4 10.2 5.4 7.9 6.3 3.5 8 3.5zM6.4 15.2h3.2M16 8.7c1.7 0 2.6 2 2.6 4.4s-1.2 4.4-2.6 4.4-2.6-2.1-2.6-4.4.9-4.4 2.6-4.4zM14.4 20.4h3.2"/></svg>',qWa:'<svg viewBox="0 0 24 24"><path d="M12 3.2c-.3 0-6.2 6.6-6.2 11a6.2 6.2 0 0 0 12.4 0c0-4.4-5.9-11-6.2-11z"/></svg>'};
