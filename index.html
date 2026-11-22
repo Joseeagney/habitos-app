@@ -914,7 +914,7 @@ html.recov-on body>:not(#recov):not(script){display:none!important}
       <li><b style="color:var(--fg)">Nunca fallar dos veces seguidas.</b> Si ayer no salió, hoy va aunque sea el mínimo.</li>
       <li><b style="color:var(--fg)">Día malo = versión mínima.</b> Cuenta igual.</li>
       <li><b style="color:var(--fg)">Imprevisto real = libre.</b> No suma ni resta.</li>
-      <li><b style="color:var(--fg)">Domingo a la noche:</b> 15 min para mirar la semana y elegir 3 prioridades.</li><li><b style="color:var(--fg)">Al volver de las canchas:</b> gastos, baño, celular afuera, lectura y a dormir.</li><li><b style="color:var(--fg)">Horario parejo:</b> levantarte siempre a la misma hora (±30 min), también el fin de semana. Es lo que más ordena el sueño.</li></ol>
+      <li><b style="color:var(--fg)">Domingo a la noche:</b> 15 min para mirar la semana y elegir 3 prioridades.</li><li><b style="color:var(--fg)">Antes de dormir:</b> gastos, baño, celular afuera, lectura y a dormir.</li><li><b style="color:var(--fg)">Horario parejo:</b> levantarte siempre a la misma hora (±30 min), también el fin de semana. Es lo que más ordena el sueño.</li></ol>
       <p class="sub small" style="margin-top:10px"><b>Batería (Alta, Media o Baja):</b> resume tu tiempo en cama, cuántas noches de la semana quedaron por debajo de tu meta, qué tan parejo es tu horario, si tuviste dolor de cabeza y si entrenaste dos días seguidos. Es orientativa, no un dato médico.</p><p class="sub small"><b>Experimento de 14 días:</b> elegís un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Muestra relaciones, no prueba causas.</p>
       <p class="sub small"><b>Constancia de un hábito:</b> sube con cada día que lo cumplís (el mínimo cuenta) y baja de a poco si fallás. Mide qué tan seguido lo hacés, no si ya es automático.</p></details></section>
   </main>
@@ -957,20 +957,20 @@ const SV=d=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+d+'</svg>',IC={moon:S
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['D','L','M','M','J','V','S'],ORDER=[1,2,3,4,5,6,0];
 const STAGES=['Iniciando','En construcción','Consolidado','Sostenido'],MOMENTS=[['manana','Mañana','09:00'],['tarde','Tarde','15:00'],['noche','Noche','23:30']];
 const SEED={habitos:[
- {id:'gym',name:'Gimnasio',days:[1,2,3,4],perWeek:3,from:'2026-10-12',active:true,time:'08:30',moment:'manana',min:'Ir igual y hacer 20 min',goal:'g_fisico',num:null},
- {id:'estudio',name:'Estudio autodidacta',days:[1,2,3,4,6],from:'2026-10-12',active:true,time:'10:00',moment:'manana',min:'15 min de agro',goal:'g_facu',num:{label:'Tiempo de estudio',unit:'min',step:15,autoDone:true}},
- {id:'innova',name:'Innova con Juan',days:[1,2,3,4,5,6],from:'2026-10-12',active:true,time:'15:00',moment:'tarde',min:'1 tarea concreta (publicar, responder o reponer)',goal:'g_innova',num:null},
+ {id:'gym',name:'Ejercicio',days:[1,2,3,4],perWeek:3,from:'2026-10-12',active:true,time:'08:30',moment:'manana',min:'Moverte 20 min',goal:'g_fisico',num:null},
+ {id:'estudio',name:'Estudio',days:[1,2,3,4,6],from:'2026-10-12',active:true,time:'10:00',moment:'manana',min:'15 min',goal:'g_facu',num:{label:'Tiempo de estudio',unit:'min',step:15,autoDone:true}},
+ {id:'innova',name:'Proyecto personal',days:[1,2,3,4,5,6],from:'2026-10-12',active:true,time:'15:00',moment:'tarde',min:'1 tarea concreta',goal:'g_innova',num:null},
  {id:'gastos',name:'Anotar gastos',days:[0,1,2,3,4,5,6],from:'2026-10-12',active:true,time:'',moment:'noche',min:'Anotar al menos el total del día',goal:'g_fin',num:null},
  {id:'leer',name:'Leer',days:[0,1,2,3,4,5,6],from:'2026-10-12',active:true,time:'',moment:'noche',min:'5 páginas',goal:'g_lectura',num:{label:'Minutos de lectura',unit:'min',step:5,autoDone:true}},
  {id:'sueno',name:'Dormir sin celular',days:[0,1,2,3,4,5,6],from:'2026-10-12',active:true,time:'',moment:'noche',min:'Celular afuera y 5 min de meditación',goal:'g_mente',num:{label:'Horas dormidas',unit:'h',step:.5,autoDone:false}}],
  objetivos:[
- {id:'g_facu',title:'Terminar la tecnicatura',why:'Aprobar el 100% de las materias en fecha y poder explicar con claridad la producción agropecuaria.',deadline:'2026-12-31',metrics:[{id:'m1',label:'Horas de estudio (1 por día)',type:'sum',habit:'estudio',target:50,unit:'h',scale:60}],hitos:[{id:'t1',t:'Averiguar la fecha del examen de la intensiva',done:false}]},
- {id:'g_innova',title:'Hacer crecer Innova con Juan',why:'Emprender en serio: que el negocio crezca y genere ingresos.',deadline:'2026-12-31',metrics:[{id:'m2',label:'Días trabajados en Innova',type:'count',habit:'innova',target:null,unit:'',scale:1}],hitos:[{id:'t2',t:'Cargar todo el stock en la app',done:false},{id:'t3',t:'Terminar la Etapa E de la app',done:false}]},
- {id:'g_fisico',title:'Un cuerpo que me represente',why:'Constancia con el gimnasio y comida casera y sana.',deadline:'2026-12-31',metrics:[{id:'m3',label:'Entrenamientos (3 por semana)',type:'count',habit:'gym',target:34,unit:'',scale:1},{id:'m4',label:'Peso',type:'log',target:null,unit:'kg',scale:1,log:[]}],hitos:[{id:'t4',t:'Registrar el peso inicial',done:false}]},
- {id:'g_fin',title:'Crecimiento financiero',why:'Saber en qué se va la plata, ahorrar e invertir pensando en el corto y el largo plazo.',deadline:'2026-12-31',metrics:[{id:'m5',label:'Días con gastos anotados',type:'count',habit:'gastos',target:null,unit:'',scale:1}],hitos:[{id:'t5',t:'Elegir dónde invertir los ahorros',done:false}]},
- {id:'g_lectura',title:'Leer 1 libro cada 4 a 6 semanas',why:'Ser autodidacta: aprender todos los días por mi cuenta.',deadline:'2026-12-31',metrics:[{id:'m6',label:'Libros terminados',type:'counter',target:2,unit:'',scale:1,cur:0}],hitos:[{id:'t6',t:'Elegir el primer libro',done:false}]},
+ {id:'g_facu',title:'Aprender algo nuevo',why:'Estudiar un poco todos los días.',deadline:'',metrics:[{id:'m1',label:'Horas de estudio (1 por día)',type:'sum',habit:'estudio',target:50,unit:'h',scale:60}],hitos:[]},
+ {id:'g_innova',title:'Avanzar mi proyecto',why:'Un paso concreto por día.',deadline:'',metrics:[{id:'m2',label:'Días trabajados en el proyecto',type:'count',habit:'innova',target:null,unit:'',scale:1}],hitos:[]},
+ {id:'g_fisico',title:'Estar en forma',why:'Constancia con el ejercicio y comida casera.',deadline:'',metrics:[{id:'m3',label:'Entrenamientos (3 por semana)',type:'count',habit:'gym',target:null,unit:'',scale:1},{id:'m4',label:'Peso',type:'log',target:null,unit:'kg',scale:1,log:[]}],hitos:[]},
+ {id:'g_fin',title:'Ordenar mis gastos',why:'Saber en qué se va la plata.',deadline:'',metrics:[{id:'m5',label:'Días con gastos anotados',type:'count',habit:'gastos',target:null,unit:'',scale:1}],hitos:[]},
+ {id:'g_lectura',title:'Leer más',why:'Un rato de lectura cada día.',deadline:'',metrics:[{id:'m6',label:'Libros terminados',type:'counter',target:2,unit:'',scale:1,cur:0}],hitos:[]},
  {id:'g_mente',title:'Claridad mental',why:'Dormir 7 a 8 horas, sin celular antes de dormir.',deadline:'',metrics:[{id:'m7',label:'Noches sin celular',type:'count',habit:'sueno',target:null,unit:'',scale:1}],hitos:[]}],
- fijos:[{id:'f1',name:'Trabajo en las canchas',time:'19:00',days:[1,2,3,4,5,6],until:''},{id:'f2',name:'Facultad',time:'08:30',days:[5],until:'2026-11-13'}],
+ fijos:[],
  dias:{},semanas:{},backup:'',seedV:3};
 
 /* ---------- estado y guardado local ---------- */
@@ -1042,9 +1042,9 @@ if(S.seedV<4){S.salud=S.salud||{meta:8,wake:'08:30',start:null};
   const lr=S.habitos.find(h=>h.id==='leer');if(lr&&sh)lr.active=false;
   if(!S.habitos.find(h=>h.id==='arranque'))S.habitos.unshift({id:'arranque',name:'Arranque: agua y luz',days:[0,1,2,3,4,5,6],from:todayStr0(),active:true,time:'08:30',moment:'manana',min:'Vaso de agua y 2 min afuera',goal:'g_mente',num:null});
   let gm=S.objetivos.find(g=>g.id==='g_mente');if(!gm){gm={id:'g_mente',deadline:'',metrics:[],hitos:[]};S.objetivos.push(gm);}
-  gm.title='Dormir y despertar bien';gm.why='Dormir 8 h con horario parejo y despertar sin dolor de cabeza: la base de la energía, el estudio y el gimnasio.';
+  gm.title='Dormir y despertar bien';gm.why='Dormir con horario parejo y despertar descansado.';
   gm.metrics=[{id:'m8',label:'Horas de sueño (promedio 7 días)',type:'sleep',target:8,unit:'h',scale:1}].concat((gm.metrics||[]).filter(m=>m.habit==='sueno').map(m=>Object.assign(m,{label:'Noches con cierre del día'})));
-  gm.hitos=(gm.hitos||[]).concat([{id:'t7',t:'Sacar turno con clínico u otorrino (ronquidos y dolor de cabeza)',done:false},{id:'t8',t:'Ir a la consulta y anotar qué indicaron',done:false}]);
+  
   S.seedV=4;save();}
 S.salud=S.salud||{meta:8,wake:'08:30',start:null};
 if(S.seedV<5){const ar=S.habitos.find(h=>h.id==='arranque');if(ar&&!ar.steps)ar.steps=['Vaso de agua','Luz afuera 5 min'];const ci=S.habitos.find(h=>h.id==='sueno');if(ci&&!ci.steps)ci.steps=['Baño','Celular afuera','Leer'];S.seedV=5;save();}
@@ -1142,7 +1142,7 @@ function planText(T,b){const bed=bedTarget(),mate=m2hm(hm2m(bed)-9*60),hr=curHr(
   if(hr>=20||hr<5)return b.lvl==='Baja'?`Hoy la batería estuvo baja: priorizá dormir. <b>A la cama a las ${bed}</b>, con el celular afuera.`:`Cerrá bien el día: <b>a dormir a las ${bed}</b> para llegar a ${fmtH(S.salud.meta)}.`;
   const L=b.lvl==='Baja'?[gT&&!gD?'gimnasio en versión mínima':null,`<b>a dormir a las ${bed}</b>`]
    :b.lvl==='Media'?[gT&&!gD?'entrená sin forzar':null,hr<13?'lo más difícil de estudio a la mañana':null,hr<16?`<b>último mate a las ${mate}</b>`:`<b>a dormir a las ${bed}</b>`]
-   :[gT&&!gD?'<b>entrená fuerte</b>':null,hr<13?'lo más difícil de estudio ahora, que es tu mejor momento':'aprovechá la tarde para <b>Innova</b>',hr<16?`último mate a las ${mate}`:null];
+   :[gT&&!gD?'<b>entrená fuerte</b>':null,hr<13?'lo más difícil de estudio ahora, que es tu mejor momento':'aprovechá la tarde para <b>'+esc((HABS().find(h=>h.id==='innova')||{name:'tu proyecto'}).name)+'</b>',hr<16?`último mate a las ${mate}`:null];
   const x=L.filter(Boolean),txt=x.length>1?x.slice(0,-1).join(', ')+' y '+x[x.length-1]:x[0];
   return (b.lvl==='Baja'?'Día de batería baja: ':b.lvl==='Media'?'Día normal: ':'Buen día: ')+txt+'.';}
 function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(--sand)','var(--graph)'];let o='';
@@ -1155,7 +1155,7 @@ function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ri
    <p class="plan">${planText(T,b)}</p></div>`:'')+quickRow(T);
   const rb=box.querySelector('#ringsB');if(rb)rb.onclick=()=>openRings(T);
   wireQuick(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
-function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Tiempo en cama contra tu meta','Gimnasio, pádel y correr esta semana','Estudio e Innova de hoy'];
+function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Tiempo en cama contra tu meta','Gimnasio, pádel y correr esta semana','Estudio y proyecto de hoy'];
   SI.innerHTML=`<div><h3>Tus 3 anillos</h3><p class="sub small">Se llenan solos con lo que marcás.</p></div><div class="rgl">${R.map((r,i)=>`<div class="spread rowx"><span class="rgn"><i class="dot ${cols[i]}"></i><span><b>${r[0]}</b><br><span class="sub small">${dsc[i]}</span></span></span><b class="num">${r[2]}</b></div>`).join('')}</div><button class="btn primary" type="button" id="ok">Listo</button>`;
   SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
@@ -1296,7 +1296,7 @@ function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSlee
   paint();return el;}
 let slEdit=false;
 function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7'),wk=sleepStats(add(T,-6),T);
-  if(wk&&wk.hd>=3&&turno&&!turno.done)return ['warm',`<b>${wk.hd} de ${wk.n} días con dolor de cabeza.</b> Junto con los ronquidos, conviene que lo vea un médico (clínico u otorrino) para descartar apnea del sueño.`,['Ver objetivo',()=>openGoalDetail(gm)]];
+  if(wk&&wk.hd>=3&&turno&&!turno.done)return ['warm',`<b>${wk.hd} de ${wk.n} días con dolor de cabeza.</b> Si se repite varias semanas, conviene consultar con un médico.`,['Ver objetivo',()=>openGoalDetail(gm)]];
   if(x&&slH(x)<S.salud.meta-1&&hr>=12&&hr<16)return ['',`Anoche estuviste <b>${fmtH(slH(x))}</b> en cama. Si podés, esta noche <b>acostate a las ${bedTarget()}</b>.`];
   const gy=HABS().find(h=>h.id==='gym');if(gy&&st(T,gy.id)>0&&hr<14)return ['',`Después del gimnasio: sumá al mate <b>algo con proteína</b> (huevo, queso, yogur o leche). Ayuda a recuperar y a ganar músculo.`];
   if(hr>=12&&hr<21&&waterOf(T)<waterGoal()*(hr<16?.35:.6))return ['',`Vas <b>${fmtL(waterOf(T))}</b> de agua. Tomá un vaso ahora: con calor, poca hidratación baja la energía y la concentración.`];

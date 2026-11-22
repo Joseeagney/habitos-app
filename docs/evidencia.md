@@ -49,7 +49,7 @@ Los grados B y C muestran **relación**, no prueban que una cosa cause la otra.
 
 ### 1.6 Apnea del sueño (ronquidos + dolor de cabeza al despertar) — Grado A (como prueba de detección)
 - **Qué dice:** el cuestionario STOP-Bang con 3 o más puntos detecta el 94% de las apneas moderadas a graves, pero da muchos falsos positivos (por eso es un filtro y no un diagnóstico).
-- **Cómo lo usa la app:** Chequeo de apnea en Salud; aviso si hay 3 o más días con dolor de cabeza en la semana.
+- **Cómo lo usa la app:** aviso si hay 3 o más días con dolor de cabeza en la semana, para consultar con un profesional. No diagnostica.
 - **Fuentes:** [STOP-Bang (Nagappa 2015, resumen)](https://metricgate.com/docs/stop-bang-osa-screening/) · [Morning headache in habitual snorers](https://pubmed.ncbi.nlm.nih.gov/21602422/) · [Apnea en roncadores (Shao 2015)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4357371)
 
 ---
@@ -155,15 +155,15 @@ Los grados B y C muestran **relación**, no prueban que una cosa cause la otra.
 ## 7. Herramientas con presupuesto mínimo (ordenadas por impacto por peso)
 
 ### Gratis (hacelo ya)
-1. **Turno médico** (hospital público o centro de salud): la consulta por ronquidos y dolor de cabeza es lo de mayor impacto posible. Gratis en el sistema público.
+1. **Consulta médica** (hospital público o centro de salud) si un síntoma se repite durante semanas, por ejemplo ronquidos fuertes con dolor de cabeza al despertar. Gratis en el sistema público.
 2. **iPhone + app Salud**: pasos automáticos (activar Movimiento y forma física).
 3. **Esta app + Atajos**: registro, recordatorios, pasos.
 4. **Luz del día y caminar**: gratis y con evidencia B.
-5. **Bici al trabajo**: ya lo hacés; mantenelo.
-6. **Despertador fuera del celular**: ya lo tenés.
+5. **Bici o caminata para ir a trabajar o estudiar**: suma actividad sin tiempo extra.
+6. **Despertador fuera del celular**: ayuda a dejar el celular lejos de la cama.
 
 ### Muy barato (menos de $15.000)
-7. **Cinta métrica** para la cintura del test del mes.
+7. **Cinta métrica** para medir la cintura de vez en cuando.
 8. **Botella de 1 L** (o una que ya tengas): con 2 botellas por día llegás a la meta de agua sin contar vasos.
 9. **Frutas y verduras de estación** en verdulería o feria: suelen salir más baratas que los ultraprocesados.
 
@@ -176,7 +176,7 @@ Los grados B y C muestran **relación**, no prueban que una cosa cause la otra.
 ---
 
 ## 8. Pendientes de investigar (para el loop semanal)
-- Cena tardía (después de las canchas) y calidad de sueño.
+- Cena tardía (después de trabajar de noche) y calidad de sueño.
 - Cómo medir ultraprocesados en menos de 5 segundos por día.
 - Siestas y su relación con el horario parejo en personas que trabajan de noche.
 - Calor y sueño: temperatura del cuarto, ventilador.
@@ -185,4 +185,5 @@ Los grados B y C muestran **relación**, no prueban que una cosa cause la otra.
 ---
 
 ## Registro de cambios
+- **2026-11-22:** sin datos personales; textos generales.
 - **2026-11-05:** versión inicial con 22 temas, herramientas de bajo costo y pendientes.
