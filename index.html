@@ -644,7 +644,7 @@ nav.tabs{padding-right:70px;padding-left:70px}
 .qt small{font-size:11px;color:var(--faint);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .qt .qb{display:block;height:3px;border-radius:2px;background:color-mix(in srgb,var(--fg) 8%,var(--bg));margin-top:7px;overflow:hidden}.qt .qb i{display:block;height:100%;border-radius:2px;transition:width .6s}
 .qt.pend{border-color:color-mix(in srgb,var(--olive) 55%,var(--line));background:color-mix(in srgb,var(--olive) 7%,var(--bg))}.qt.pend b{color:var(--olive)}
-.segtab{display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:11px;background:color-mix(in srgb,var(--fg) 6%,var(--bg))}
+.segtab{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:3px;border-radius:11px;background:color-mix(in srgb,var(--fg) 6%,var(--bg))}
 .segtab button{all:unset;text-align:center;padding:8px 0;border-radius:8px;font-weight:650;font-size:14px;color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
 .segtab button[aria-selected=true]{background:var(--bg);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px var(--line)}
 .lrows{display:flex;flex-direction:column}
@@ -850,13 +850,14 @@ html.recov-on body>:not(#recov):not(script){display:none!important}
   </main>
 
   <main id="v-prog" class="view" hidden>
-    <div class="segtab" id="progSeg" role="tablist"><button type="button" data-p="res" role="tab">Resumen</button><button type="button" data-p="sal" role="tab">Salud</button></div>
+    <div class="segtab" id="progSeg" role="tablist"><button type="button" data-p="res" role="tab">Resumen</button><button type="button" data-p="sal" role="tab">Salud</button><button type="button" data-p="obj" role="tab">Objetivos</button></div>
     <section id="campo" data-pg="res"></section>
     <section id="habl" data-pg="res"></section>
     <section id="insights" data-pg="res"></section>
     <section id="salud" data-pg="sal"></section>
     <section id="expP" data-pg="sal"></section>
-    <div class="lrows" data-pg="res"><button type="button" class="revrow" id="histRow"><div><b>Historial y objetivos</b><br><span>Calendario para corregir días y tus objetivos</span></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <section style="gap:14px" data-pg="obj"><div class="spread"><h2>Objetivos</h2><button class="link" type="button" id="newGoal">Nuevo objetivo</button></div><div id="goals" style="display:flex;flex-direction:column;gap:10px"></div></section>
+    <div class="lrows" data-pg="res"><button type="button" class="revrow" id="histRow"><div><b>Historial</b><br><span>Calendario para corregir días</span></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
     <button type="button" class="revrow" id="revRow2"><div><b>Repaso y prioridades</b><br><span>Un minuto por semana · copia de seguridad</span></div><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div>
   </main>
 
@@ -871,7 +872,6 @@ html.recov-on body>:not(#recov):not(script){display:none!important}
       <div class="cal" id="cal"></div>
       <p class="sub small" style="text-align:center">Tocá un día para verlo o corregirlo</p>
     </section>
-    <section style="gap:14px"><div class="spread"><h2>Objetivos</h2><button class="link" type="button" id="newGoal">Nuevo objetivo</button></div><div id="goals" style="display:flex;flex-direction:column;gap:10px"></div></section>
   </main>
 
   <main id="v-aj" class="view" hidden>
@@ -1045,7 +1045,7 @@ if(S.seedV<4){S.salud=S.salud||{meta:8,wake:'08:30',start:null};
   if(!S.habitos.find(h=>h.id==='arranque'))S.habitos.unshift({id:'arranque',name:'Arranque: agua y luz',days:[0,1,2,3,4,5,6],from:todayStr0(),active:true,time:'08:30',moment:'manana',min:'Vaso de agua y 2 min afuera',goal:'g_mente',num:null});
   let gm=S.objetivos.find(g=>g.id==='g_mente');if(!gm){gm={id:'g_mente',deadline:'',metrics:[],hitos:[]};S.objetivos.push(gm);}
   gm.title='Dormir y despertar bien';gm.why='Dormir con horario parejo y despertar descansado.';
-  gm.metrics=[{id:'m8',label:'Horas de sueño (promedio 7 días)',type:'sleep',target:8,unit:'h',scale:1}].concat((gm.metrics||[]).filter(m=>m.habit==='sueno').map(m=>Object.assign(m,{label:'Noches con cierre del día'})));
+  gm.metrics=[{id:'m8',label:'Horas en cama (promedio 7 días)',type:'sleep',target:8,unit:'h',scale:1}].concat((gm.metrics||[]).filter(m=>m.habit==='sueno').map(m=>Object.assign(m,{label:'Noches con cierre del día'})));
   
   S.seedV=4;save();}
 S.salud=S.salud||{meta:8,wake:'08:30',start:null};
@@ -1055,6 +1055,7 @@ if(S.seedV<7){const t0=todayStr0();if(!S.habitos.find(h=>h.id==='fyv'))S.habitos
 if(S.seedV>=8&&S.seedV<9){const lr=S.habitos.find(h=>h.id==='leer');if(lr&&(!lr.num||lr.num.unit==='min')){lr.num={label:'Páginas',unit:'pág.',step:5,target:10,autoDone:true};lr.min='1 página';}S.seedV=9;save();}
 if(S.seedV<8){if(!S.habitos.find(h=>h.id==='correr'))S.habitos.push({id:'correr',name:'Correr',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});if(S.salud.bici==null)S.salud.bici=30;S.seedV=8;save();
   const lr=S.habitos.find(h=>h.id==='leer');if(lr&&(!lr.num||lr.num.unit==='min')){lr.num={label:'Páginas',unit:'pág.',step:5,target:10,autoDone:true};lr.min='1 página';}S.seedV=9;save();}
+if(S.seedV===9){(S.objetivos||[]).forEach(g=>(g.metrics||[]).forEach(m=>{if(m.type==='sleep'&&/^Horas de sueño/.test(m.label||''))m.label=m.label.replace('Horas de sueño','Horas en cama');}));S.seedV=10;save();}
 if(!S.salud.sync){const a=new Uint8Array(14);crypto.getRandomValues(a);S.salud.sync='hab-'+Array.from(a,x=>'abcdefghijkmnpqrstuvwxyz23456789'[x%32]).join('');save();}
 
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
@@ -1072,10 +1073,12 @@ const HABS=()=>S.habitos,GOALS=()=>S.objetivos;
 const st=(s,k)=>{const v=S.dias[s]&&S.dias[s][k];return typeof v==='number'?v:0;};
 const nv=(s,k)=>{const v=S.dias[s]&&S.dias[s]['n_'+k];return typeof v==='number'?v:0;};
 const started=(h,s)=>h.active!==false&&(!h.from||s>=h.from);
-const sched=(h,s)=>started(h,s)&&(h.days||[]).includes(dow(s));
-const quotaFree=(h,s)=>{if(!h.perWeek||st(s,h.id)>0)return false;const m=mondayOf(s),T=todayStr(),ds=[0,1,2,3,4,5,6].map(k=>add(m,k)).filter(d=>sched(h,d));
-  if(ds.filter(d=>d!==s&&st(d,h.id)>0).length>=h.perWeek)return true;if(s>=T)return false;
-  return ds.filter(d=>d<=s&&st(d,h.id)===0).length<=ds.length-h.perWeek;};
+// Configuración vigente en una fecha: h.hist guarda las anteriores, cada una válida hasta 'hasta' (sin incluir).
+const cfgAt=(h,s)=>{const H=h.hist;if(H&&H.length)for(const c of H)if(s<c.hasta)return c;return h;};
+const sched=(h,s)=>started(h,s)&&(cfgAt(h,s).days||[]).includes(dow(s));
+const quotaFree=(h,s)=>{const pw=cfgAt(h,s).perWeek;if(!pw||st(s,h.id)>0)return false;const m=mondayOf(s),T=todayStr(),ds=[0,1,2,3,4,5,6].map(k=>add(m,k)).filter(d=>sched(h,d));
+  if(ds.filter(d=>d!==s&&st(d,h.id)>0).length>=pw)return true;if(s>=T)return false;
+  return ds.filter(d=>d<=s&&st(d,h.id)===0).length<=ds.length-pw;};
 const counts=(h,s)=>!h.opt&&sched(h,s)&&st(s,h.id)!==-1&&!quotaFree(h,s);
 const goalById=id=>GOALS().find(g=>g.id===id);
 const uid=p=>p+Math.random().toString(36).slice(2,8);
@@ -1743,7 +1746,7 @@ function openHabitSheet(h,t){const draw=()=>{const v=st(t,h.id),n=nv(t,h.id),g=g
     SI.querySelectorAll('[data-n]').forEach(x=>x.onclick=()=>setN(nv(t,h.id)+Number(x.dataset.n)*(h.num.step||1)));
     const inp=SI.querySelector('#sn');if(inp)inp.onchange=()=>{const x=parseFloat(inp.value.replace(',','.'));setN(isNaN(x)?0:x);};
     SI.querySelector('#ok').onclick=()=>sheet.close();};draw();if(!sheet.open)sheet.showModal();}
-function openHab(h){const isNew=!h;h=h?JSON.parse(JSON.stringify(h)):{id:uid('h'),name:'',days:[1,2,3,4],time:'',moment:'manana',min:'',goal:'',num:null,active:true,from:todayStr()};
+function openHab(h){const isNew=!h,old=h?{days:(h.days||[]).slice(),perWeek:h.perWeek||null}:null;h=h?JSON.parse(JSON.stringify(h)):{id:uid('h'),name:'',days:[1,2,3,4],time:'',moment:'manana',min:'',goal:'',num:null,active:true,from:todayStr()};
   SI.innerHTML=`<form id="f" style="display:flex;flex-direction:column;gap:16px"><h3>${isNew?'Nuevo hábito':'Editar hábito'}</h3>
    <label class="fl"><span>Nombre</span><input id="nm" required value="${esc(h.name)}"></label>
    <div class="fl"><span>Días</span>${daypick(h.days)}</div>
@@ -1759,7 +1762,8 @@ function openHab(h){const isNew=!h;h=h?JSON.parse(JSON.stringify(h)):{id:uid('h'
    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ac" ${h.active!==false?'checked':''}> Activo (destildá para pausarlo)</label>${foot(isNew)}</form>`;
   const f=SI.querySelector('#f');f.onsubmit=e=>{e.preventDefault();const q=id=>f.querySelector('#'+id);h.name=q('nm').value.trim()||'Hábito';h.days=[...f.querySelectorAll('input[name=d]:checked')].map(x=>Number(x.value));h.time=q('tm').value||'';h.moment=q('mo').value;h.from=q('fr').value||'';h.goal=q('go').value;h.min=q('mi').value.trim();const sp=q('stp').value.split(',').map(x=>x.trim()).filter(Boolean);h.steps=sp.length?sp:null;const pw=parseInt(q('pw').value,10);h.perWeek=pw>0&&pw<h.days.length?pw:null;h.active=q('ac').checked;
     const nl=q('nl').value.trim();h.num=nl?{label:nl,unit:q('nu').value.trim(),step:parseFloat(q('ns').value.replace(',','.'))||1,autoDone:q('ad').checked}:null;
-    const i=HABS().findIndex(x=>x.id===h.id);if(i>=0)S.habitos[i]=h;else S.habitos.push(h);save();sheet.close();toast(isNew?'Hábito creado':'Guardado');};
+    let past=false;const T0=todayStr();if(old&&h.from&&h.from<T0&&(old.days.slice().sort().join()!==h.days.slice().sort().join()||old.perWeek!==(h.perWeek||null))){h.hist=(h.hist||[]).filter(c=>c.hasta<T0).concat([{hasta:T0,days:old.days,perWeek:old.perWeek}]);past=true;}
+    const i=HABS().findIndex(x=>x.id===h.id);if(i>=0)S.habitos[i]=h;else S.habitos.push(h);save();sheet.close();toast(isNew?'Hábito creado':past?'Guardado · vale desde hoy, los días anteriores no cambian':'Guardado');};
   wire(f,()=>{S.habitos=S.habitos.filter(x=>x.id!==h.id);});if(!sheet.open)sheet.showModal();}
 function openFix(x){const isNew=!x;x=x?JSON.parse(JSON.stringify(x)):{id:uid('f'),name:'',time:'',days:[1,2,3,4,5],until:''};
   SI.innerHTML=`<form id="f" style="display:flex;flex-direction:column;gap:16px"><h3>${isNew?'Nuevo bloque fijo':'Editar bloque'}</h3>
