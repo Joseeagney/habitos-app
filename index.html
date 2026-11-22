@@ -798,6 +798,17 @@ button.tko{all:unset;box-sizing:border-box;display:flex;justify-content:space-be
 .tkopt textarea{border:0!important;border-radius:0!important;background:transparent!important;padding:12px 0!important;resize:none;width:100%}
 #v-hoy .tkr .info .tt{font-size:inherit!important;color:inherit!important;font-weight:inherit!important;line-height:inherit!important}
 #v-hoy .rows.flat .hrw{row-gap:0}
+/* P0: modo recuperación y aviso de guardado */
+.recov{position:fixed;inset:0;z-index:100;background:var(--page,var(--bg));color:var(--fg);overflow-y:auto;padding:calc(32px + env(safe-area-inset-top,0px)) 20px calc(32px + env(safe-area-inset-bottom,0px))}
+.recov-in{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.recov .why{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.45;color:var(--muted);background:var(--soft);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
+.recov-act{display:flex;flex-direction:column;gap:8px}
+.recov-ok{display:flex;flex-direction:column;gap:10px;background:var(--soft);border-radius:16px;padding:14px}
+#recovMsg:empty{display:none}
+html.recov-on body>:not(#recov):not(script){display:none!important}
+.savebar{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));z-index:50;max-width:520px;margin:0 auto;background:var(--warn-s);color:var(--fg);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 28px -14px rgba(0,0,0,.35)}
+.savebar b{color:var(--warn)}
+.savebar .btn{min-height:42px;padding:8px 16px}
 </style>
 </head>
 <body>
@@ -886,6 +897,7 @@ button.tko{all:unset;box-sizing:border-box;display:flex;justify-content:space-be
       <p class="sub small">El tono suave es oscuro y cálido, sin luz azul fuerte: no encandila al despertarte ni antes de dormir. También lo cambiás con el ícono de la luna o el sol, arriba.</p></section>
     <section><h2>Copia de seguridad</h2>
       <p class="sub small">Tus datos se guardan en este celular. Hacé una copia de vez en cuando por si cambiás de teléfono o borrás Safari.</p>
+      <p class="sub small num" id="dataLine"></p>
       <div class="inl"><button class="btn" type="button" id="expBtn">Guardar copia</button><button class="btn" type="button" id="impBtn">Restaurar copia</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>
       <p class="sub small" id="lastBk"></p></section>
     <section><h2>Recordatorios</h2>
@@ -914,6 +926,28 @@ button.tko{all:unset;box-sizing:border-box;display:flex;justify-content:space-be
   <button type="button" data-v="prog">Progreso</button>
 </div></nav>
 <canvas id="confetti" aria-hidden="true"></canvas>
+<div class="savebar" id="saveBar" role="alert" hidden>
+  <p><b>No se pudo guardar el último cambio.</b> <span class="sub">Puede faltar espacio en el celular. Lo que hiciste sigue en pantalla: reintentá o exportá una copia.</span></p>
+  <div class="inl"><button class="btn primary" type="button" id="saveRetry">Reintentar</button><button class="btn" type="button" id="saveExp">Exportar copia</button></div>
+</div>
+<div class="recov" id="recov" role="alertdialog" aria-modal="true" aria-labelledby="recovT" aria-describedby="recovD" hidden>
+  <div class="recov-in">
+    <h1 id="recovT">No pude leer tus datos</h1>
+    <p id="recovD"></p>
+    <p class="why" id="recovWhy"></p>
+    <div class="recov-act">
+      <button class="btn primary" type="button" id="recovExp">Exportar el texto original</button>
+      <button class="btn" type="button" id="recovImp">Restaurar una copia</button>
+      <input type="file" id="recovFile" accept="application/json,.json" hidden>
+    </div>
+    <div class="recov-ok" id="recovOk" hidden>
+      <p class="small" id="recovSum"></p>
+      <p class="sub small">Al confirmar, el texto dañado se guarda aparte en este celular y tus datos se reemplazan por esta copia.</p>
+      <div class="recov-act"><button class="btn primary" type="button" id="recovYes">Reemplazar por esta copia</button><button class="btn" type="button" id="recovNo">Cancelar</button></div>
+    </div>
+    <p class="small" id="recovMsg" role="status" aria-live="polite"></p>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <dialog id="sheet"><div class="grab"></div><div class="in" id="SI"></div></dialog>
 
@@ -942,9 +976,65 @@ const SEED={habitos:[
 /* ---------- estado y guardado local ---------- */
 let S;
 const todayStr0=()=>new Date().toLocaleDateString('en-CA',{timeZone:'America/Argentina/Buenos_Aires'});
-function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):JSON.parse(JSON.stringify(SEED));}catch(e){S=JSON.parse(JSON.stringify(SEED));}
+let RECOVERY=null,LAST_SAVE=0,SAVE_ERR=null,saveT=null;
+const isObj=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
+// Forma básica de los datos: '' si está bien, o el motivo del problema.
+function shapeErr(d){if(!isObj(d))return 'no son un objeto';
+  for(const k of ['habitos','objetivos','fijos','tareas'])if(d[k]!=null&&!Array.isArray(d[k]))return '"'+k+'" no es una lista';
+  for(const k of ['dias','semanas','salud'])if(d[k]!=null&&!isObj(d[k]))return '"'+k+'" no tiene el formato esperado';
+  return '';}
+// Lectura segura: si lo guardado no se puede leer, no se reemplaza por la plantilla y no se escribe nada.
+function load(){let r=null;
+  try{r=localStorage.getItem(KEY);}catch(e){return enterRecovery(null,'No se pudo acceder al almacenamiento del celular ('+((e&&e.name)||'error')+').');}
+  if(r===null)S=JSON.parse(JSON.stringify(SEED));
+  else{let d;try{d=JSON.parse(r);}catch(e){return enterRecovery(r,'El texto guardado está incompleto o dañado ('+((e&&e.message)||'no es JSON')+').');}
+    const why=shapeErr(d);if(why)return enterRecovery(r,'Los datos guardados '+why+'.');
+    S=d;}
   ['habitos','objetivos','fijos'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(SEED[k]));});S.dias=S.dias||{};S.semanas=S.semanas||{};}
-let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('No se pudo guardar: el celular no tiene espacio');}},150);}
+// Guardado: 150 ms después de cada cambio, y en el momento si la app se oculta o se cierra.
+function writeNow(){clearTimeout(saveT);saveT=null;if(RECOVERY)return false;
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){SAVE_ERR=e;saveBar();return false;}
+  LAST_SAVE=Date.now();if(SAVE_ERR){SAVE_ERR=null;saveBar();}renderDataLine();return true;}
+function save(){if(RECOVERY)return;clearTimeout(saveT);saveT=setTimeout(writeNow,150);}
+function flushSave(){if(saveT!==null||SAVE_ERR)writeNow();}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSave();});
+window.addEventListener('pagehide',flushSave);
+function saveBar(){const b=document.getElementById('saveBar');if(b)b.hidden=!SAVE_ERR;}
+function renderDataLine(){const el=document.getElementById('dataLine');if(!el||RECOVERY||!S)return;const pl=(n,a,b)=>n+' '+(n===1?a:b);
+  el.textContent='Datos: '+pl(Object.keys(S.dias||{}).length,'día','días')+' · '+pl((S.habitos||[]).length,'hábito','hábitos')+' · '+pl(Array.isArray(S.tareas)?S.tareas.length:0,'tarea','tareas')+' · '
+    +(LAST_SAVE?'último guardado '+new Date(LAST_SAVE).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}):'sin cambios desde que abriste');}
+// Modo recuperación: muestra el problema, deja exportar el texto original y restaurar una copia. Mientras dure, la app no escribe.
+function enterRecovery(raw,why){RECOVERY={raw,why,exported:false};clearTimeout(saveT);saveT=null;
+  if(!S)S=JSON.parse(JSON.stringify(SEED));// relleno solo en memoria, para que el resto de la app no falle; nunca se guarda
+  const el=document.getElementById('recov');if(!el)return;
+  document.getElementById('recovD').textContent=raw!=null
+    ?'Lo que tenías guardado queda como estaba: no se borró ni se cambió nada. Primero exportá el texto original y después restaurá tu última copia de seguridad.'
+    :'La app no pudo acceder al almacenamiento del celular y se detuvo para no pisar nada. Restaurá tu última copia de seguridad o volvé a abrir la app más tarde.';
+  document.getElementById('recovWhy').textContent=why;document.getElementById('recovExp').hidden=raw==null;
+  wireRecovery();el.hidden=false;document.documentElement.classList.add('recov-on');}
+function recovMsg(t){const m=document.getElementById('recovMsg');if(m)m.textContent=t||'';}
+async function exportRaw(){const raw=RECOVERY&&RECOVERY.raw;if(raw==null)return;
+  const name='habitos-texto-original-'+todayStr0()+'.txt',blob=new Blob([raw],{type:'text/plain'});
+  try{const file=new File([blob],name,{type:'text/plain'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Texto original de Hábitos App'});RECOVERY.exported=true;recovMsg('Listo. Guardá ese archivo en un lugar seguro.');return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+  RECOVERY.exported=true;recovMsg('Listo: se descargó el texto original.');}
+let RECOV_WIRED=false;
+function wireRecovery(){if(RECOV_WIRED)return;RECOV_WIRED=true;let pend=null;const $=id=>document.getElementById(id);
+  $('recovExp').onclick=exportRaw;
+  $('recovImp').onclick=()=>{recovMsg('');$('recovFile').click();};
+  $('recovFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const fr=new FileReader();
+    fr.onload=()=>{let d=null;try{d=JSON.parse(fr.result);}catch(_){}
+      if(!d||shapeErr(d)||!Array.isArray(d.habitos)||!isObj(d.dias)){pend=null;$('recovOk').hidden=true;recovMsg('Ese archivo no es una copia válida de Hábitos App. No se tocó nada.');return;}
+      pend=d;const pl=(n,a,b)=>n+' '+(n===1?a:b),bk=typeof d.backup==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d.backup)?' del '+d.backup.split('-').reverse().join('/'):'';
+      $('recovSum').textContent='Copia'+bk+': '+pl(Object.keys(d.dias).length,'día','días')+' · '+pl(d.habitos.length,'hábito','hábitos')+' · '+pl(Array.isArray(d.tareas)?d.tareas.length:0,'tarea','tareas')+'.';
+      $('recovOk').hidden=false;recovMsg('');};
+    fr.onerror=()=>recovMsg('No se pudo leer el archivo.');fr.readAsText(f);};
+  $('recovNo').onclick=()=>{pend=null;$('recovOk').hidden=true;recovMsg('');};
+  $('recovYes').onclick=()=>{if(!pend)return;const raw=RECOVERY&&RECOVERY.raw;
+    if(raw!=null){let kept=false;try{localStorage.setItem(KEY+':rescate:'+Date.now(),raw);kept=true;}catch(_){}
+      if(!kept&&!RECOVERY.exported){recovMsg('No hay lugar para guardar aparte el texto dañado. Primero tocá «Exportar el texto original» y después confirmá de nuevo.');return;}}
+    try{localStorage.setItem(KEY,JSON.stringify(pend));}catch(_){recovMsg('No se pudo guardar la copia: el celular no tiene espacio.');return;}
+    location.reload();};}
 load();if((S.seedV||0)<2){if(!Object.keys(S.dias).length){['habitos','objetivos','fijos'].forEach(k=>S[k]=JSON.parse(JSON.stringify(SEED[k])));}S.seedV=2;save();}
 if(S.seedV<3){const g=S.habitos.find(h=>h.id==='gym');if(g&&!g.perWeek){g.days=[1,2,3,4];g.perWeek=3;}S.seedV=3;save();}
 if(S.seedV<4){S.salud=S.salud||{meta:8,wake:'08:30',start:null};
@@ -1432,7 +1522,7 @@ async function syncSteps(){if(SYNC_BUSY||!S.salud.sync)return null;SYNC_BUSY=tru
     if(cur&&cur.ts&&cur.ts>=m.time){save();return m;}
     patchDay(day,{pasosHoy:{n,t:hmOfTs(m.time),ts:m.time,auto:1}});return m;}
   catch(e){return null;}finally{SYNC_BUSY=false;}}
-async function syncAndRender(){const k=()=>JSON.stringify((S.dias[todayStr()]||{}).pasosHoy||null),before=k(),m=await syncSteps();
+async function syncAndRender(){if(RECOVERY)return;const k=()=>JSON.stringify((S.dias[todayStr()]||{}).pasosHoy||null),before=k(),m=await syncSteps();
   if(SYNC_TAP&&m&&m.time>=SYNC_TAP-20){SYNC_TAP=0;PEND=false;try{sessionStorage.removeItem('syncTap');sessionStorage.removeItem('pendPasos');}catch(e){}
     const d=(S.dias[todayStr()]||{}).pasosHoy;renderAll();if(d)toast('Pasos actualizados: '+fmtN(d.n));return;}
   if(SYNC_TAP&&Date.now()/1000-SYNC_TAP>90){SYNC_TAP=0;try{sessionStorage.removeItem('syncTap');}catch(e){}renderAll();return;}
@@ -1624,7 +1714,7 @@ function compactIns(){const w=document.querySelector('#insights .ins');if(!w||w.
 function saludWarn(T){const box=document.getElementById('salud'),wk=sleepStats(add(T,-6),T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7');
   if(!(wk&&wk.hd>=3&&!(turno&&turno.done)))return;const n=document.createElement('div');n.className='note warnx';n.innerHTML=`<b>${wk.hd} de ${wk.n} días con dolor de cabeza esta semana.</b> Si se mantiene varias semanas, vale una consulta con un clínico.`;box.children[0].after(n);}
 
-function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();renderSyncCfg();compactExp(T);compactIns();saludWarn(T);renderPTab();}
+function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();renderSyncCfg();compactExp(T);compactIns();saludWarn(T);renderPTab();renderDataLine();}
 
 /* ---------- hojas y formularios ---------- */
 const sheet=document.getElementById('sheet'),SI=document.getElementById('SI');
@@ -1697,6 +1787,8 @@ document.getElementById('expBtn').onclick=async()=>{S.backup=todayStr();save();c
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);renderAll();toast('Copia guardada');};
 document.getElementById('bkNow').onclick=()=>document.getElementById('expBtn').click();
 document.getElementById('impBtn').onclick=()=>document.getElementById('impFile').click();
+document.getElementById('saveRetry').onclick=()=>{if(writeNow())toast('Guardado');else toast('Todavía no se pudo guardar');};
+document.getElementById('saveExp').onclick=()=>document.getElementById('expBtn').click();
 document.getElementById('impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.habitos)||typeof d.dias!=='object')throw 0;localStorage.setItem(KEY,JSON.stringify(d));load();renderAll();toast('Copia restaurada');}catch(err){toast('Ese archivo no es una copia de Hábitos App');}e.target.value='';};r.readAsText(f);};
 
 /* ---------- navegación ---------- */
@@ -1751,7 +1843,7 @@ renderAll();
 let lastDay=todayStr(),SYNC_TICK=0;setInterval(()=>{const t=todayStr();if(t!==lastDay){lastDay=t;}renderHeader();renderHoy();renderSleep(todayStr());applyTone();if(++SYNC_TICK%3===0&&!document.hidden)syncAndRender();},60000);
 syncAndRender();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){renderAll();applyTone();syncAndRender();if(SYNC_TAP){setTimeout(syncAndRender,2500);setTimeout(syncAndRender,6000);}}});
-if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});// busca una versión nueva del service worker en cada apertura
 </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 // Hábitos App: funciona sin internet. Cambiá VERSION cuando actualices la app.
-const VERSION = 'habitos-app-v28';
+const VERSION = 'habitos-app-v29';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -11,14 +11,20 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // Página: primero internet (para recibir actualizaciones), si no hay, la copia guardada.
+  // Página: primero internet (para recibir actualizaciones). Solo se guarda una respuesta correcta;
+  // si el servidor responde con error o no hay internet, se abre la copia guardada.
   if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', cp)); return r; })
-      .catch(() => caches.match('./index.html')));
+    e.respondWith(fetch(req).then(r => {
+      if (r.ok) { const cp = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', cp)); return r; }
+      return caches.match('./index.html').then(hit => hit || r);
+    }).catch(() => caches.match('./index.html')));
     return;
   }
-  // Fuentes y archivos: la copia guardada primero, y se guarda lo nuevo.
+  // Fuentes y archivos: la copia guardada primero; de lo nuevo solo se guardan respuestas correctas.
   if (url.origin === location.origin || url.host.includes('fonts.g')) {
-    e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => { const cp = r.clone(); caches.open(VERSION).then(c => c.put(req, cp)); return r; })));
+    e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
+      if (r.ok || (r.type === 'opaque' && url.origin !== location.origin)) { const cp = r.clone(); caches.open(VERSION).then(c => c.put(req, cp)); }
+      return r;
+    })));
   }
 });
