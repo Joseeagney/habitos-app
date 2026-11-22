@@ -509,6 +509,8 @@ body::before{display:none}html{background:var(--bg)}
 #v-hoy .mom .rows{padding:0}
 #v-hoy .mom .peek{padding:10px 0 0;margin:0}
 #v-hoy .hrw{padding:14px 0;border-radius:0;grid-template-columns:36px 1fr}
+#v-hoy .hrw.hasplus{grid-template-columns:36px 1fr auto}
+#v-hoy .hrw.hasplus .plus{grid-row:1;grid-column:3;align-self:center;white-space:nowrap}
 #v-hoy .hrw+.hrw,#v-hoy .rows>*+*{border-top:1px solid var(--line)}
 #v-hoy .hrw .ck2{width:24px;height:24px;border-width:1.6px;margin-top:1px}
 #v-hoy .hrw .ck2 svg{width:14px;height:14px;stroke-width:3}
@@ -1050,7 +1052,9 @@ S.salud=S.salud||{meta:8,wake:'08:30',start:null};
 if(S.seedV<5){const ar=S.habitos.find(h=>h.id==='arranque');if(ar&&!ar.steps)ar.steps=['Vaso de agua','Luz afuera 5 min'];const ci=S.habitos.find(h=>h.id==='sueno');if(ci&&!ci.steps)ci.steps=['Baño','Celular afuera','Leer'];S.seedV=5;save();}
 if(S.seedV<6){const es=S.habitos.find(h=>h.id==='estudio');if(es&&es.num){es.num.def=60;es.num.defMin=15;}if(!S.habitos.find(h=>h.id==='padel'))S.habitos.push({id:'padel',name:'Pádel',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});S.seedV=6;save();}
 if(S.seedV<7){const t0=todayStr0();if(!S.habitos.find(h=>h.id==='fyv'))S.habitos.push({id:'fyv',name:'Frutas y verduras',days:[0,1,2,3,4,5,6],from:t0,active:true,time:'',moment:'tarde',min:'3 porciones',goal:'g_fisico',num:{label:'Porciones',unit:'porc.',step:1,target:5,autoDone:true}});if(!S.habitos.find(h=>h.id==='respira'))S.habitos.push({id:'respira',name:'Respiración 5 min',days:[0,1,2,3,4,5,6],opt:true,breath:true,from:t0,active:true,time:'',moment:'noche',min:'',goal:'g_mente',num:null});S.salud.tests=S.salud.tests||[];S.expHist=S.expHist||[];S.seedV=7;save();}
-if(S.seedV<8){if(!S.habitos.find(h=>h.id==='correr'))S.habitos.push({id:'correr',name:'Correr',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});if(S.salud.bici==null)S.salud.bici=30;S.seedV=8;save();}
+if(S.seedV>=8&&S.seedV<9){const lr=S.habitos.find(h=>h.id==='leer');if(lr&&(!lr.num||lr.num.unit==='min')){lr.num={label:'Páginas',unit:'pág.',step:5,target:10,autoDone:true};lr.min='1 página';}S.seedV=9;save();}
+if(S.seedV<8){if(!S.habitos.find(h=>h.id==='correr'))S.habitos.push({id:'correr',name:'Correr',days:[0,1,2,3,4,5,6],opt:true,from:todayStr0(),active:true,time:'',moment:'tarde',min:'',goal:'g_fisico',num:null});if(S.salud.bici==null)S.salud.bici=30;S.seedV=8;save();
+  const lr=S.habitos.find(h=>h.id==='leer');if(lr&&(!lr.num||lr.num.unit==='min')){lr.num={label:'Páginas',unit:'pág.',step:5,target:10,autoDone:true};lr.min='1 página';}S.seedV=9;save();}
 if(!S.salud.sync){const a=new Uint8Array(14);crypto.getRandomValues(a);S.salud.sync='hab-'+Array.from(a,x=>'abcdefghijkmnpqrstuvwxyz23456789'[x%32]).join('');save();}
 
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
@@ -1092,6 +1096,7 @@ function metricValue(m){if(m.type==='count'){let n=0;for(const s in S.dias)if(st
 function goalPct(g){const p=[];(g.metrics||[]).forEach(m=>{const tg=Number(m.target);if(m.type!=='log'&&tg>0)p.push(Math.min(1,metricValue(m)/tg));});const H=g.hitos||[];if(H.length)p.push(H.filter(x=>x.done).length/H.length);return p.length?Math.round(p.reduce((a,b)=>a+b,0)/p.length*100):0;}
 
 /* ---------- acciones ---------- */
+const TAPS={};function tapOk(k,ms){const n=Date.now();if(TAPS[k]&&n-TAPS[k]<(ms||400))return false;TAPS[k]=n;return true;}
 function patchDay(s,p){S.dias[s]=Object.assign({},S.dias[s]||{},p);save();}
 function restore(s,prev){S.dias[s]=prev;save();renderAll();}
 function toast(m,undo){const t=document.getElementById('toast');t.innerHTML='';const sp=document.createElement('span');sp.textContent=m;t.appendChild(sp);
@@ -1170,8 +1175,9 @@ function habRow(T,h){const v=st(T,h.id),n=nv(T,h.id),sk=streak(h),r=document.cre
   r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v>0?'ok':''}"></span></button>`;
   r.querySelector('b').textContent=h.name;const sp=r.querySelector('.info span');sp.textContent=meta.join(' · ');if(!meta.length)sp.remove();
   const ck=r.querySelector('.ck2');ck.setAttribute('aria-label',h.name+(v>0?': hecho, tocá para desmarcar':': tocá para marcar hecho'));
-  ck.onclick=()=>{if(h.steps&&h.steps.length){const all=v===2?[]:h.steps.map(()=>true);patchDay(T,{['s_'+h.id]:all});}setState(T,h.id,v===2?0:2,true);};
+  ck.onclick=()=>{if(!tapOk('ck'+h.id))return;if(h.steps&&h.steps.length){const all=v===2?[]:h.steps.map(()=>true);patchDay(T,{['s_'+h.id]:all});}setState(T,h.id,v===2?0:2,true);};
   r.querySelector('.info').onclick=()=>h.breath?openBreath(T,h):openHabitSheet(h,T);
+  if(h.num&&h.num.label&&T===todayStr()){r.classList.add('hasplus');r.appendChild(plusBtn(T,h));}
   return r;}
 function expRow(T){const E=S.exp,d=expDay(T),v=(E.log||{})[T]===1,r=document.createElement('div');r.className='hrw'+(v?' done':'');
   r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v?'ok':''}">Experimento · día ${d} de 14</span></button>`;
@@ -1253,7 +1259,7 @@ function checkBtn(T,h,v){const b=document.createElement('button');b.type='button
   b.addEventListener('pointerup',clear);b.addEventListener('pointerleave',clear);b.addEventListener('pointercancel',clear);
   b.addEventListener('contextmenu',e=>e.preventDefault());
   b.onclick=e=>{if(long){long=false;return;}setState(T,h.id,v===0?2:0,true);};return b;}
-function plusBtn(T,h){const b=document.createElement('button');b.type='button';b.className='plus';const st0=h.num.step||1;b.textContent='+'+st0+(h.num.unit?' '+h.num.unit:'');b.setAttribute('aria-label','Sumar '+st0+' a '+h.num.label);b.onclick=()=>addNum(T,h);return b;}
+function plusBtn(T,h){const b=document.createElement('button');b.type='button';b.className='plus';const st0=h.num.step||1;b.textContent='+'+st0+(h.num.unit?' '+h.num.unit:'');b.setAttribute('aria-label','Sumar '+st0+' a '+h.num.label);b.onclick=()=>{if(tapOk('n'+h.id,300))addNum(T,h);};return b;}
 function swipe(onDone){const w=document.createElement('div');w.className='swipe';w.setAttribute('role','button');w.setAttribute('tabindex','0');w.setAttribute('aria-label','Deslizá para marcar como hecho, o presioná Enter');
   w.innerHTML='<span class="fill"></span><span class="lbl">Deslizá para completar</span><span class="knob"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>';
   const k=w.querySelector('.knob'),fill=w.querySelector('.fill');let sx=null,max=0,done=false;
@@ -1807,18 +1813,23 @@ function renderFab(){const T=todayStr(),w=waterOf(T),g=waterGoal(),c=document.ge
 function addWater(ml){const T=todayStr(),prev=Object.assign({},S.dias[T]||{}),was=waterOf(T)>=waterGoal();patchDay(T,{agua:((S.dias[T]||{}).agua||0)+ml});vib(10);
   const f=document.getElementById('wfab');f.classList.remove('splash');void f.offsetWidth;f.classList.add('splash');renderFab();renderBat(T);
   const now=waterOf(T);if(!was&&now>=waterGoal()){confetti();toast('¡Meta de agua cumplida! '+fmtL(now),()=>{restore(T,prev);renderFab();});}else toast('+'+ml+' ml · '+fmtL(now)+' de '+fmtL(waterGoal()),()=>{restore(T,prev);renderFab();});}
+function addMate(T){const m=S.salud.mate;if(!m)return;const prev=Object.assign({},S.dias[T]||{}),d=S.dias[T]||{};patchDay(T,{agua:(d.agua||0)+m.ml,mateMl:(d.mateMl||0)+m.ml});vib(10);renderFab();renderBat(T);toast('Mate: +'+m.ml+' ml (estimado) · '+fmtL(waterOf(T)),()=>{restore(T,prev);renderFab();});}
 function openWaterSheet(){const T=todayStr(),draw=()=>{const w=waterOf(T),g=waterGoal();
   SI.innerHTML=`<div><h3>Agua de hoy</h3><p class="sub small">${fmtL(w)} de ${fmtL(g)} · el mate también cuenta</p></div><div class="track" style="height:8px"><i style="width:${Math.min(100,Math.round(w/g*100))}%;background:var(--water)"></i></div>
    <div class="wopts">${[[150,'Taza','150 ml'],[250,'Vaso','250 ml'],[500,'Botella','500 ml'],[750,'Botella grande','750 ml']].map(([ml,l,sub])=>`<button class="btn" type="button" data-ml="${ml}"><b>${l}</b><small>${sub}</small></button>`).join('')}</div>
+   <button class="btn" type="button" id="wMate" style="width:100%"><b>Mate</b><small style="display:block;font-size:11.5px;color:var(--muted);font-weight:600">${S.salud.mate?'tu parte: '+S.salud.mate.ml+' ml (estimado)':'configuralo una vez'}</small></button><div id="mateCfg" hidden></div>
    <div class="inl"><button class="btn" type="button" id="wUndo" ${((S.dias[T]||{}).agua||0)>0?'':'disabled'}>Quitar 250 ml</button><button class="btn primary" type="button" id="ok" style="flex:1">Listo</button></div>`;
   SI.querySelectorAll('[data-ml]').forEach(b=>b.onclick=()=>{addWater(Number(b.dataset.ml));draw();});
+  SI.querySelector('#wMate').onclick=()=>{if(S.salud.mate){if(!tapOk('mate'))return;addMate(T);draw();return;}const c=SI.querySelector('#mateCfg');c.hidden=false;
+    c.innerHTML=`<div class="two"><label class="fl"><span>Termo</span><select id="mT">${[500,750,1000,1300].map(v=>`<option value="${v}" ${v===1000?'selected':''}>${v>=1000?String(v/1000).replace('.',',')+' L':v+' ml'}</option>`).join('')}</select></label><label class="fl"><span>Tu parte</span><select id="mP">${[25,50,75,100].map(v=>`<option value="${v}" ${v===50?'selected':''}>${v}%</option>`).join('')}</select></label></div><button class="btn primary" type="button" id="mOk" style="width:100%">Guardar y sumar</button>`;
+    c.querySelector('#mOk').onclick=()=>{const t=Number(c.querySelector('#mT').value),pc=Number(c.querySelector('#mP').value);S.salud.mate={termo:t,parte:pc,ml:Math.round(t*pc/100/10)*10};save();addMate(T);draw();};};
   SI.querySelector('#wUndo').onclick=()=>{const d=S.dias[T]||{};patchDay(T,{agua:Math.max(0,(d.agua||0)-250)});renderFab();renderBat(T);draw();};
   SI.querySelector('#ok').onclick=()=>sheet.close();};draw();if(!sheet.open)sheet.showModal();}
 (function(){const f=document.getElementById('wfab');if(!f)return;let t=null,long=false;
   f.addEventListener('pointerdown',()=>{long=false;t=setTimeout(()=>{long=true;vib(15);openWaterSheet();},450);});
   ['pointerup','pointerleave','pointercancel'].forEach(e=>f.addEventListener(e,()=>clearTimeout(t)));
   f.addEventListener('contextmenu',e=>e.preventDefault());
-  f.onclick=()=>{if(long){long=false;return;}addWater(250);};})();
+  f.onclick=()=>{if(long){long=false;return;}if(!tapOk('agua'))return;addWater(250);};})();
 
 function applyTheme(t){if(t)document.documentElement.setAttribute('data-theme',t);else document.documentElement.removeAttribute('data-theme');}
 /* ---------- tono de pantalla: suave a la mañana y a la noche ---------- */
