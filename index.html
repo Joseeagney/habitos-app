@@ -657,7 +657,7 @@ nav.tabs{padding-right:70px;padding-left:70px}
 .expfull{display:flex;flex-direction:column;gap:12px}
 #insights>.link{align-self:flex-start}
 .callout .tip{margin-top:8px}
-.hdl{align-self:center;font-size:13px;color:var(--muted)}
+.hdlink{align-self:center;font-size:13px;color:var(--muted)}
 
 /* ---- tono suave: oscuro cálido, poco contraste, sin azul fuerte ---- */
 :root[data-theme="suave"]{--bg:#17130f;--soft:#211b15;--fg:#e8dbc5;--muted:#a6957b;--faint:#74664f;--line:#2d251d;
@@ -691,7 +691,10 @@ html,body{transition:background-color .6s ease}
 .ghd svg{width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;flex:0 0 auto}
 .grp.open .ghd svg{transform:rotate(180deg)}
 .tv{display:grid;grid-template-columns:30px minmax(0,1fr) 30px;align-items:center;gap:4px;width:100%}
-.tv input{width:100%}.tv button{width:30px;height:30px}
+.tv input{width:100%}
+.tin{position:relative;display:grid;place-items:center;min-width:0;height:44px;border-radius:12px;cursor:pointer}
+.tin b{font-size:21px;font-weight:800;letter-spacing:-.03em;color:var(--fg);pointer-events:none}
+.tin input{position:absolute;inset:0;width:100%!important;height:100%;opacity:0;cursor:pointer}.tv button{width:30px;height:30px}
 .synclk{word-break:break-all;background:var(--soft);border-radius:8px;padding:10px 12px;user-select:all;-webkit-user-select:all}
 
 /* ================= v4: tarjetas estilo iOS (mismo contenido, más orden y profundidad) ================= */
@@ -1125,7 +1128,7 @@ function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)re
 
 /* ---------- HOY ---------- */
 function renderHeader(){const t=todayStr(),hr=Number(new Date().toLocaleString('en-US',{timeZone:TZ,hour:'numeric',hour12:false}));
-  document.getElementById('hello').textContent=(hr<13?'Buen día':hr<20?'Buenas tardes':'Buenas noches')+', José';
+  document.getElementById('hello').textContent=(hr>=5&&hr<13?'Buen día':hr>=13&&hr<20?'Buenas tardes':'Buenas noches')+', José';
   document.getElementById('dateline').textContent=fmt(t,{weekday:'long',day:'numeric',month:'long'});}
 const MOMS=[['manana','Mañana'],['tarde','Tarde'],['noche','Noche']];
 const momOfTime=t=>{const m=hm2m(t);return m<5*60?'noche':m<13*60?'manana':m<20*60?'tarde':'noche';};
@@ -1320,10 +1323,10 @@ function sleepStats(a,b){const xs=[];for(let s=a;s<=b;s=add(s,1)){const x=slp(s)
 function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSleep(s);
   let b=x?x.b:(L?L.b:'01:30'),w=x?x.w:(L?L.w:S.salud.wake),stv=(S.dias[add(s,-1)]||{}).pasos||(((S.dias[add(s,-1)]||{}).pasosHoy||{}).n)||'';
   const el=document.createElement('div');el.className='slpEd';
-  const tb=(lbl,k,v)=>`<div class="tbox"><span>${lbl}</span><div class="tv"><button type="button" data-k="${k}" data-d="-15" aria-label="${lbl}: 15 minutos antes">−</button><input type="time" step="900" data-k="${k}" value="${v}" aria-label="${lbl}"><button type="button" data-k="${k}" data-d="15" aria-label="${lbl}: 15 minutos después">+</button></div></div>`;
-  const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} de sueño</p><button class="btn primary" type="button" data-h="0">Guardar</button><button class="link hdl" type="button" data-h="1">Me desperté con dolor de cabeza</button>`;
+  const tb=(lbl,k,v)=>`<div class="tbox"><span>${lbl}</span><div class="tv"><button type="button" data-k="${k}" data-d="-15" aria-label="${lbl}: 15 minutos antes">−</button><label class="tin"><b class="num">${v}</b><input type="time" step="900" data-k="${k}" value="${v}" aria-label="${lbl}"></label><button type="button" data-k="${k}" data-d="15" aria-label="${lbl}: 15 minutos después">+</button></div></div>`;
+  const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} en cama</p><button class="btn primary" type="button" data-h="0">Guardar</button><button class="link hdlink" type="button" data-h="1">Me desperté con dolor de cabeza</button>`;
     el.querySelectorAll('button[data-d]').forEach(bt=>bt.onclick=()=>{const d=Number(bt.dataset.d);if(bt.dataset.k==='b')b=m2hm(hm2m(b)+d);else w=m2hm(hm2m(w)+d);paint();});
-    el.querySelectorAll('input[type=time]').forEach(i=>i.onchange=()=>{if(!i.value)return;if(i.dataset.k==='b')b=i.value;else w=i.value;el.querySelector('#slHrs').textContent=fmtH(slH({b,w}))+' de sueño';});
+    el.querySelectorAll('input[type=time]').forEach(i=>i.onchange=()=>{if(!i.value)return;if(i.dataset.k==='b')b=i.value;else w=i.value;i.previousElementSibling.textContent=i.value;el.querySelector('#slHrs').textContent=fmtH(slH({b,w}))+' en cama';});
     const pb=el.querySelector('#stPaste');if(pb)pb.onclick=async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();const n=parseInt(String(t).replace(/[^0-9]/g,''),10);if(n>0&&n<80000){el.querySelector('#stIn').value=n;stv=n;toast('Pasos pegados: '+fmtN(n));}else toast('No encontré un número de pasos copiado');}catch(err){toast('No se pudo pegar: escribilo a mano');}};
     el.querySelectorAll('button[data-h]').forEach(bt=>bt.onclick=()=>{const hd=Number(bt.dataset.h);const si=el.querySelector('#stIn'),sv=si&&si&&si.value?Math.max(0,Math.min(80000,parseInt(si.value,10)||0)):0;if(sv)patchDay(add(s,-1),{pasos:sv});patchDay(s,{sl:{b,w,hd}});if(!S.salud.start||s<S.salud.start){S.salud.start=s;save();}vib();
       toast('Sueño guardado · '+fmtH(slH({b,w})));onDone&&onDone();});};
@@ -1337,6 +1340,7 @@ function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&
   if(hr>=5&&hr<12)return ['',`Primero <b>luz del día</b>: unos minutos afuera al levantarte ayudan a despertarte y a dormirte más temprano a la noche.`];
   return null;}
 function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box.innerHTML='';box.className='slp';box.hidden=false;
+  if(!x&&!slEdit&&curHr()<5){box.hidden=true;return;}// de madrugada todavía no dormiste: no preguntar
   if(!x||slEdit){box.innerHTML=`<div class="spread"><h2>¿Cómo dormiste?</h2><span class="hintx">10 segundos</span></div>`;
     box.appendChild(sleepEditor(T,()=>{slEdit=false;renderAll();}));
     if(slEdit){const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar';c.onclick=()=>{slEdit=false;renderAll();};box.appendChild(c);}return;}
@@ -1362,7 +1366,7 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   const pct=v=>Math.round(v*100)+'%',feelL=v=>v>.33?'Mejor':v<-.33?'Peor':'Igual';
   const rA=rangeRatio(A[0],A[1]),rN=sep?rangeRatio(N[0],N[1]):null;
   let html=`<div class="cmp"><span class="h">Indicador</span><span class="h">Antes</span><span class="h">Ahora</span>`;
-  html+=row('Horas de sueño',sa&&sa.avg,sn&&sn.avg,fmtH,(n,a)=>n>a);
+  html+=row('Horas en cama',sa&&sa.avg,sn&&sn.avg,fmtH,(n,a)=>n>a);
   html+=row('Horario de levantarte',sa&&sa.sd,sn&&sn.sd,v=>'±'+Math.round(v)+' min',(n,a)=>n<a);
   html+=row('Días con dolor de cabeza',sa&&sa.hdp,sn&&sn.hdp,pct,(n,a)=>n<a);
   html+=row('Constancia de hábitos',rA,rN,pct,(n,a)=>n>a);
@@ -1479,7 +1483,7 @@ function renderExpProg(T){const box=document.getElementById('expP');box.innerHTM
   let html=`<div class="spread"><b class="et2"></b><span class="sub small num">${d>14?'Terminado':'Día '+Math.max(1,d)+' de 14'}</span></div><div class="track ol"><i style="width:${Math.min(100,Math.round(Math.max(0,d)/14*100))}%"></i></div>`;
   html+=`<p class="sub small">Cumplimiento: <b>${adh===null?'—':Math.round(adh*100)+'%'}</b> de los días anotados.${d<4?' Los resultados se vuelven útiles desde el día 4.':''}</p>`;
   html+=`<div class="cmp"><span class="h">Indicador</span><span class="h">14 días antes</span><span class="h">Durante</span>`;
-  html+=cmpRow('Horas de sueño',before.sl&&before.sl.avg,dur.sl&&dur.sl.avg,fmtH,(n,a)=>n>a);
+  html+=cmpRow('Horas en cama',before.sl&&before.sl.avg,dur.sl&&dur.sl.avg,fmtH,(n,a)=>n>a);
   html+=cmpRow('Días con dolor de cabeza',before.sl&&before.sl.hdp,dur.sl&&dur.sl.hdp,v=>Math.round(v*100)+'%',(n,a)=>n<a);
   html+=cmpRow('Horario de levantarte',before.sl&&before.sl.sd,dur.sl&&dur.sl.sd,v=>'±'+Math.round(v)+' min',(n,a)=>n<a);
   html+=cmpRow('Constancia de hábitos',before.hab,dur.hab,v=>Math.round(v*100)+'%',(n,a)=>n>a);
