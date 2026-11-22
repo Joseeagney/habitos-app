@@ -508,6 +508,9 @@ body::before{display:none}html{background:var(--bg)}
 #v-hoy .mom>header .tag{background:none;color:var(--olive);padding:0;font-size:11px;letter-spacing:.06em;font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
 #v-hoy .mom .rows{padding:0}
 #v-hoy .mom .peek{padding:10px 0 0;margin:0}
+#napBox{display:flex;flex-direction:column;gap:8px;background:var(--card,var(--bg));border-radius:20px;padding:16px}
+#napBox[hidden]{display:none}
+#napBox .inl{flex-wrap:wrap}
 #v-hoy .hrw{padding:14px 0;border-radius:0;grid-template-columns:36px 1fr}
 #v-hoy .hrw.hasplus{grid-template-columns:36px 1fr auto}
 #v-hoy .hrw.hasplus .plus{grid-row:1;grid-column:3;align-self:center;white-space:nowrap}
@@ -826,6 +829,7 @@ html.recov-on body>:not(#recov):not(script){display:none!important}
   <main id="v-hoy" class="view">
     <section id="slpBox" class="slp" aria-label="Sueño"></section>
     <section id="bat" class="bat" aria-label="Batería del día"></section>
+    <section id="napBox" class="nap" aria-label="Descanso" hidden></section>
     <section id="tasks" class="tks" aria-label="Tareas">
       <div class="dhd"><h2>Tareas</h2><span class="c num" id="tkC"></span></div>
       <div class="tkcard">
@@ -1096,7 +1100,7 @@ function dayDone(s){const r=HABS().filter(h=>counts(h,s));return r.length>0&&r.e
 function dayStreak(){const T=todayStr(),f=firstDate();let n=dayDone(T)?1:0,s=add(T,-1);for(let i=0;i<600&&s>=f;i++,s=add(s,-1)){if(!HABS().some(h=>counts(h,s)))continue;if(dayDone(s))n++;else break;}return n;}
 function monthRatio(ym){const T=todayStr();let tot=0,got=0;for(let s=ym+'-01';s.slice(0,7)===ym&&s<=T;s=add(s,1)){HABS().forEach(h=>{if(!counts(h,s))return;if(s===T&&st(s,h.id)===0)return;const v=st(s,h.id);tot++;got+=v===2?1:v===1?.5:0;});}return tot?got/tot:null;}
 function metricValue(m){if(m.type==='count'){let n=0;for(const s in S.dias)if(st(s,m.habit)>0)n++;return n;}if(m.type==='sum'){let n=0;const hh=HABS().find(q=>q.id===m.habit);for(const s in S.dias){const v=nv(s,m.habit);if(v)n+=v;else if(hh&&hh.num){const x=st(s,m.habit);if(x===2)n+=hh.num.def||0;else if(x===1)n+=hh.num.defMin||0;}}return n/(m.scale||1);}if(m.type==='log'){const l=m.log||[];return l.length?l[l.length-1].v:null;}if(m.type==='counter')return Number(m.cur)||0;if(m.type==='sleep'){const t=todayStr(),x=sleepStats(add(t,-6),t);return x?round1(x.avg):0;}return 0;}
-function goalPct(g){const p=[];(g.metrics||[]).forEach(m=>{const tg=Number(m.target);if(m.type!=='log'&&tg>0)p.push(Math.min(1,metricValue(m)/tg));});const H=g.hitos||[];if(H.length)p.push(H.filter(x=>x.done).length/H.length);return p.length?Math.round(p.reduce((a,b)=>a+b,0)/p.length*100):0;}
+function goalPct(g){const p=[];(g.metrics||[]).forEach(m=>{const tg=Number(m.target);if(m.type!=='log'&&tg>0)p.push(Math.min(1,metricValue(m)/tg));});const H=g.hitos||[];if(!p.length&&H.length)p.push(H.filter(x=>x.done).length/H.length);return p.length?Math.round(p.reduce((a,b)=>a+b,0)/p.length*100):0;}
 
 /* ---------- acciones ---------- */
 const TAPS={};function tapOk(k,ms){const n=Date.now();if(TAPS[k]&&n-TAPS[k]<(ms||400))return false;TAPS[k]=n;return true;}
@@ -1238,7 +1242,26 @@ function renderWeekRev(T){const box=document.getElementById('weekBox'),fb=docume
   fb.querySelectorAll('[data-so]').forEach(x=>x.onclick=()=>{W.social=Number(x.dataset.so);S.semanas[a]=W;save();renderAll();toast(W.social?'Bien ahí: los vínculos también son salud':'Anotado. Esta semana, ¿un mate con alguien?');});
   fb.insertAdjacentHTML('beforeend',`<p class="q2">¿Comiste algo con proteína en casi todas las comidas? <span class="sub small">(huevo, carne, pollo, queso, yogur, legumbres)</span></p><div class="feel">${[[2,'Sí'],[1,'A medias'],[0,'No']].map(([v,l])=>`<button class="btn" type="button" data-pr="${v}" aria-pressed="${W.prot===v}">${l}</button>`).join('')}</div>`);
   fb.querySelectorAll('[data-pr]').forEach(x=>x.onclick=()=>{W.prot=Number(x.dataset.pr);S.semanas[a]=W;save();renderAll();toast(W.prot===2?'Bien: así se gana músculo':'Tip: sumá huevo, queso o pollo a la comida que más se te escapa');});}
-function renderHoy(){const T=todayStr();renderBat(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
+/* ---------- descanso de la tarde: solo con noche corta, en la franja y si decís que tenés sueño ---------- */
+function napWindow(){const bm=hm2m(bedTarget()),bed=bm<720?bm+1440:bm;return {ini:13*60,fin:Math.min(16*60,bed-360)};}
+function renderNap(T){const box=document.getElementById('napBox');if(!box)return;const d=S.dias[T]||{},n=d.nap||{},x=slp(T),now=hm2m(nowHM()),w=napWindow();
+  const meta=S.salud.meta,corto=!!x&&slH(x)<meta-1;let html='';
+  if(n.terminaA&&!n.listo){const left=Math.round((n.terminaA-Date.now())/60000);
+    html=left>0?`<div class="spread"><span><b>Descanso</b><br><span class="sub small">Termina a las ${m2hm(hm2m(n.ini)+n.min)} · faltan ${left} min</span></span><button class="link" type="button" data-nap="cortar">Terminar</button></div><p class="sub small">Para despertarte, usá una alarma del Reloj: esta app no puede sonar con el celular bloqueado.</p>`
+      :`<b>Terminó el tiempo de descanso</b><p class="sub small">¿Te dormiste?</p><div class="inl"><button class="btn" type="button" data-nap="si">Sí</button><button class="btn" type="button" data-nap="no">No</button><button class="btn" type="button" data-nap="nose">No sé</button></div>`;}
+  else if(!n.listo&&!n.hoyNo&&corto&&now>=w.ini-120&&now<w.fin){
+    if(!n.sueno)html=`<b>Anoche estuviste ${fmtH(slH(x))} en cama.</b><p class="sub small">¿Cómo estás ahora?</p><div class="inl"><button class="btn" type="button" data-nap="s1">Bien</button><button class="btn" type="button" data-nap="s2">Algo cansado</button><button class="btn" type="button" data-nap="s3">Muy cansado</button></div>`;
+    else if(n.sueno>1){const desde=Math.max(now,w.ini);html=(n.sueno===3?'<p class="note warnx">Evitá manejar o usar herramientas hasta sentirte despierto.</p>':'')+
+      `<b>Si te viene bien, un descanso de 20 min ${desde>now?'entre las '+m2hm(w.ini)+' y las '+m2hm(w.fin):'antes de las '+m2hm(w.fin)}</b><p class="sub small">Puede ayudarte a estar más alerta. No reemplaza dormir a la noche: si podés, acostate a las ${bedTarget()}.</p><div class="inl"><button class="btn primary" type="button" data-nap="go" ${desde>now?'disabled':''}>Empezar 20 min</button><button class="btn" type="button" data-nap="hoyno">Hoy no</button></div><details class="help"><summary>¿Por qué?</summary><p class="sub small">NIOSH recomienda de día una siesta de menos de 20 min con alarma a los 15–30 min. Si dormís más, al despertar puede haber aturdimiento: esperá a sentirte despierto antes de manejar.</p></details>`;}}
+  box.innerHTML=html;box.hidden=!html;
+  box.querySelectorAll('[data-nap]').forEach(b=>b.onclick=()=>{const a=b.dataset.nap,cur=Object.assign({},(S.dias[T]||{}).nap||{});
+    if(a==='s1'){cur.sueno=1;cur.listo=true;}else if(a==='s2')cur.sueno=2;else if(a==='s3')cur.sueno=3;else if(a==='hoyno'){cur.hoyNo=true;}
+    else if(a==='go'){cur.ini=nowHM();cur.min=20;cur.terminaA=Date.now()+20*60000;}
+    else if(a==='cortar'){cur.terminaA=Date.now();}
+    else if(a==='si'||a==='no'||a==='nose'){cur.listo=true;cur.dormido=a==='si'?true:a==='no'?false:null;toast(a==='no'?'Anotado: descansaste sin dormir':'Anotado');}
+    patchDay(T,{nap:cur});renderNap(T);});}
+setInterval(()=>{const n=(S.dias[todayStr()]||{}).nap;if(n&&n.terminaA&&!n.listo&&!document.hidden)renderNap(todayStr());},20000);
+function renderHoy(){const T=todayStr();renderBat(T);renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
 function rangeRatio(a,b,only){const T=todayStr();let tot=0,got=0;for(let s=a;s<=b&&s<=T;s=add(s,1)){HABS().forEach(h=>{if(only&&h!==only)return;if(!counts(h,s))return;if(s===T&&st(s,h.id)===0)return;const v=st(s,h.id);tot++;got+=v===2?1:v===1?.5:0;});}return tot?got/tot:null;}
 function renderWeek(T){const box=document.getElementById('weekBox'),d=dow(T);box.innerHTML='';
   if(d!==0&&d!==1){box.hidden=true;return;}
@@ -1306,7 +1329,6 @@ function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSlee
 let slEdit=false;
 function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7'),wk=sleepStats(add(T,-6),T);
   if(wk&&wk.hd>=3&&turno&&!turno.done)return ['warm',`<b>${wk.hd} de ${wk.n} días con dolor de cabeza.</b> Si se repite varias semanas, conviene consultar con un médico.`,['Ver objetivo',()=>openGoalDetail(gm)]];
-  if(x&&slH(x)<S.salud.meta-1&&hr>=12&&hr<16)return ['',`Anoche estuviste <b>${fmtH(slH(x))}</b> en cama. Si podés, esta noche <b>acostate a las ${bedTarget()}</b>.`];
   const gy=HABS().find(h=>h.id==='gym');if(gy&&st(T,gy.id)>0&&hr<14)return ['',`Después del gimnasio: sumá al mate <b>algo con proteína</b> (huevo, queso, yogur o leche). Ayuda a recuperar y a ganar músculo.`];
   if(hr>=12&&hr<21&&waterOf(T)<waterGoal()*(hr<16?.35:.6))return ['',`Vas <b>${fmtL(waterOf(T))}</b> de agua. Tomá un vaso ahora: con calor, poca hidratación baja la energía y la concentración.`];
   if(hr>=13&&hr<16)return ['',`Después de almorzar: <b>10 min caminando</b>. Baja el pico de azúcar y ayuda con el bajón de la siesta.`];
