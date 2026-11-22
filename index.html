@@ -915,8 +915,8 @@ html.recov-on body>:not(#recov):not(script){display:none!important}
       <li><b style="color:var(--fg)">Día malo = versión mínima.</b> Cuenta igual.</li>
       <li><b style="color:var(--fg)">Imprevisto real = libre.</b> No suma ni resta.</li>
       <li><b style="color:var(--fg)">Domingo a la noche:</b> 15 min para mirar la semana y elegir 3 prioridades.</li><li><b style="color:var(--fg)">Al volver de las canchas:</b> gastos, baño, celular afuera, lectura y a dormir.</li><li><b style="color:var(--fg)">Horario parejo:</b> levantarte siempre a la misma hora (±30 min), también el fin de semana. Es lo que más ordena el sueño.</li></ol>
-      <p class="sub small" style="margin-top:10px"><b>Batería (Alta, Media o Baja):</b> resume lo que dormiste, tu deuda de sueño de la semana, qué tan parejo es tu horario, si tuviste dolor de cabeza y si entrenaste dos días seguidos. Es orientativa, no un dato médico.</p><p class="sub small"><b>Experimento de 14 días:</b> elegís un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Muestra relaciones, no prueba causas.</p>
-      <p class="sub small"><b>Fuerza de un hábito:</b> sube con cada día que lo cumplís (el mínimo cuenta) y baja de a poco si fallás. Arriba de 80 es casi automático.</p></details></section>
+      <p class="sub small" style="margin-top:10px"><b>Batería (Alta, Media o Baja):</b> resume tu tiempo en cama, cuántas noches de la semana quedaron por debajo de tu meta, qué tan parejo es tu horario, si tuviste dolor de cabeza y si entrenaste dos días seguidos. Es orientativa, no un dato médico.</p><p class="sub small"><b>Experimento de 14 días:</b> elegís un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Muestra relaciones, no prueba causas.</p>
+      <p class="sub small"><b>Constancia de un hábito:</b> sube con cada día que lo cumplís (el mínimo cuenta) y baja de a poco si fallás. Mide qué tan seguido lo hacés, no si ya es automático.</p></details></section>
   </main>
 </div>
 
@@ -955,7 +955,7 @@ html.recov-on body>:not(#recov):not(script){display:none!important}
 const TZ='America/Argentina/Buenos_Aires',KEY='micampo:v1';
 const SV=d=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+d+'</svg>',IC={moon:SV('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'),sprout:SV('<path d="M12 20v-8"/><path d="M12 12c0-4-3-6-7-6 0 4 3 6 7 6z"/><path d="M12 14c0-3.5 2.5-5.5 7-5.5 0 3.5-2.5 5.5-7 5.5z"/>'),redo:SV('<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/>'),save:SV('<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>')};
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['D','L','M','M','J','V','S'],ORDER=[1,2,3,4,5,6,0];
-const STAGES=['Iniciando','En construcción','Consolidado','Automático'],MOMENTS=[['manana','Mañana','09:00'],['tarde','Tarde','15:00'],['noche','Noche','23:30']];
+const STAGES=['Iniciando','En construcción','Consolidado','Sostenido'],MOMENTS=[['manana','Mañana','09:00'],['tarde','Tarde','15:00'],['noche','Noche','23:30']];
 const SEED={habitos:[
  {id:'gym',name:'Gimnasio',days:[1,2,3,4],perWeek:3,from:'2026-10-12',active:true,time:'08:30',moment:'manana',min:'Ir igual y hacer 20 min',goal:'g_fisico',num:null},
  {id:'estudio',name:'Estudio autodidacta',days:[1,2,3,4,6],from:'2026-10-12',active:true,time:'10:00',moment:'manana',min:'15 min de agro',goal:'g_facu',num:{label:'Tiempo de estudio',unit:'min',step:15,autoDone:true}},
@@ -1137,10 +1137,10 @@ function ringsData(T){const x=slp(T),rest=x?Math.min(1,slH(x)/S.salud.meta):0;
   const adv=HABS().filter(h=>(h.id==='estudio'||h.id==='innova')&&counts(h,T));let av;
   if(adv.length){av=adv.reduce((p,h)=>{const v=st(T,h.id);return p+(v===2?1:v===1?.5:0);},0)/adv.length;}else{const r=dayRatio(T);av=r===null?0:r;}
   return [['Descansar',rest,x?Math.round(rest*100)+'%':'—'],['Moverte',move,gd+'/'+pw],['Avanzar',av,Math.round(av*100)+'%']];}
-function planText(T,b){const bed=bedTarget(),mate=m2hm(hm2m(bed)-8*60),hr=curHr(),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
+function planText(T,b){const bed=bedTarget(),mate=m2hm(hm2m(bed)-9*60),hr=curHr(),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
   if(!b)return 'Anotá cómo dormiste y te armo el plan del día.';
   if(hr>=20||hr<5)return b.lvl==='Baja'?`Hoy la batería estuvo baja: priorizá dormir. <b>A la cama a las ${bed}</b>, con el celular afuera.`:`Cerrá bien el día: <b>a dormir a las ${bed}</b> para llegar a ${fmtH(S.salud.meta)}.`;
-  const L=b.lvl==='Baja'?[gT&&!gD?'gimnasio en versión mínima':null,hr<16?'siesta de 10–20 min antes de las 16':null,`<b>a dormir a las ${bed}</b>`]
+  const L=b.lvl==='Baja'?[gT&&!gD?'gimnasio en versión mínima':null,`<b>a dormir a las ${bed}</b>`]
    :b.lvl==='Media'?[gT&&!gD?'entrená sin forzar':null,hr<13?'lo más difícil de estudio a la mañana':null,hr<16?`<b>último mate a las ${mate}</b>`:`<b>a dormir a las ${bed}</b>`]
    :[gT&&!gD?'<b>entrená fuerte</b>':null,hr<13?'lo más difícil de estudio ahora, que es tu mejor momento':'aprovechá la tarde para <b>Innova</b>',hr<16?`último mate a las ${mate}`:null];
   const x=L.filter(Boolean),txt=x.length>1?x.slice(0,-1).join(', ')+' y '+x[x.length-1]:x[0];
@@ -1149,12 +1149,13 @@ function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(-
   R.forEach((r,i)=>{const rad=c-sw/2-i*(sw+gap),C=2*Math.PI*rad,off=C*(1-Math.max(0,Math.min(1,r[1])));
     o+=`<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-opacity=".12" stroke-width="${sw}"/><circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-width="${sw}" stroke-linecap="round" class="rfg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${off.toFixed(1)}"/>`;});
   return `<svg viewBox="0 0 ${sz} ${sz}" class="fit">${o}</svg>`;}
+function shortNights(T){const meta=S.salud.meta;let n=0,t=0;for(let s=add(T,-6);s<=T;s=add(s,1)){const y=slp(s);if(y){t++;if(slH(y)<meta)n++;}}return t?'Por debajo de tu meta: '+n+' de '+t+(t===1?' noche':' noches'):'Sin registros de sueño';}
 function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T);
-  box.innerHTML=(b?`<div class="herocard"><button type="button" class="bx bxb" id="ringsB" aria-label="Ver tus 3 anillos"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy</span><div class="score lvw l${b.lvl}">${b.lvl}</div><span class="lv3${b.lvl==='Baja'?' low':''}">${b.debt>=1?'Deuda de sueño: '+fmtH(b.debt):'Sin deuda de sueño'}</span></div></button>
+  box.innerHTML=(b?`<div class="herocard"><button type="button" class="bx bxb" id="ringsB" aria-label="Ver tus 3 anillos"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy · orientativa</span><div class="score lvw l${b.lvl}">${b.lvl}</div><span class="lv3${b.lvl==='Baja'?' low':''}">${shortNights(T)}</span></div></button>
    <p class="plan">${planText(T,b)}</p></div>`:'')+quickRow(T);
   const rb=box.querySelector('#ringsB');if(rb)rb.onclick=()=>openRings(T);
   wireQuick(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
-function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Lo que dormiste contra tu meta','Gimnasio, pádel y correr esta semana','Estudio e Innova de hoy'];
+function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Tiempo en cama contra tu meta','Gimnasio, pádel y correr esta semana','Estudio e Innova de hoy'];
   SI.innerHTML=`<div><h3>Tus 3 anillos</h3><p class="sub small">Se llenan solos con lo que marcás.</p></div><div class="rgl">${R.map((r,i)=>`<div class="spread rowx"><span class="rgn"><i class="dot ${cols[i]}"></i><span><b>${r[0]}</b><br><span class="sub small">${dsc[i]}</span></span></span><b class="num">${r[2]}</b></div>`).join('')}</div><button class="btn primary" type="button" id="ok">Listo</button>`;
   SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
@@ -1218,7 +1219,7 @@ function renderWeekRev(T){const box=document.getElementById('weekBox'),fb=docume
   if(r!==null){const prev=rangeRatio(add(a,-7),add(a,-1)),rows=HABS().map(h=>[h,rangeRatio(a,b,h)]).filter(x=>x[1]!==null).sort((x,y)=>y[1]-x[1]);
     const best=rows[0],worst=rows.length>1?rows[rows.length-1]:null,diff=prev===null?null:Math.round((r-prev)*100),sw=sleepStats(a,b);
     box.innerHTML=`<div class="spread"><div><h3>${d===0?'Esta semana':'La semana pasada'}</h3><p class="sub small">${fmt(a,{day:'numeric',month:'short'})} al ${fmt(b,{day:'numeric',month:'short'})}${!diff?'':' · '+(diff>0?'+':'')+diff+'% vs la anterior'}</p></div><span class="gp num">${Math.round(r*100)}%</span></div>
-     <div class="kp"><div><span>Mejor hábito</span><b></b></div><div><span>A mejorar</span><b></b></div><div><span>Sueño promedio</span><b class="num">${sw?fmtH(sw.avg):'—'}</b></div></div>`;
+     <div class="kp"><div><span>Mejor hábito</span><b></b></div><div><span>A mejorar</span><b></b></div><div><span>En cama, promedio</span><b class="num">${sw?fmtH(sw.avg):'—'}</b></div></div>`;
     const bs=box.querySelectorAll('.kp b');bs[0].textContent=best?best[0].name:'—';bs[1].textContent=worst&&worst[1]<1?worst[0].name:'Ninguno';box.hidden=false;}
   else box.hidden=true;
   fb.hidden=true;return;
@@ -1296,7 +1297,7 @@ function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSlee
 let slEdit=false;
 function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7'),wk=sleepStats(add(T,-6),T);
   if(wk&&wk.hd>=3&&turno&&!turno.done)return ['warm',`<b>${wk.hd} de ${wk.n} días con dolor de cabeza.</b> Junto con los ronquidos, conviene que lo vea un médico (clínico u otorrino) para descartar apnea del sueño.`,['Ver objetivo',()=>openGoalDetail(gm)]];
-  if(x&&slH(x)<S.salud.meta-1&&hr>=12&&hr<16)return ['',`Dormiste <b>${fmtH(slH(x))}</b>. Si podés, una siesta de <b>10 a 20 min</b> antes de las 16 te devuelve la atención sin dejarte pesado.`];
+  if(x&&slH(x)<S.salud.meta-1&&hr>=12&&hr<16)return ['',`Anoche estuviste <b>${fmtH(slH(x))}</b> en cama. Si podés, esta noche <b>acostate a las ${bedTarget()}</b>.`];
   const gy=HABS().find(h=>h.id==='gym');if(gy&&st(T,gy.id)>0&&hr<14)return ['',`Después del gimnasio: sumá al mate <b>algo con proteína</b> (huevo, queso, yogur o leche). Ayuda a recuperar y a ganar músculo.`];
   if(hr>=12&&hr<21&&waterOf(T)<waterGoal()*(hr<16?.35:.6))return ['',`Vas <b>${fmtL(waterOf(T))}</b> de agua. Tomá un vaso ahora: con calor, poca hidratación baja la energía y la concentración.`];
   if(hr>=13&&hr<16)return ['',`Después de almorzar: <b>10 min caminando</b>. Baja el pico de azúcar y ayuda con el bajón de la siesta.`];
@@ -1308,7 +1309,7 @@ function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box
     if(slEdit){const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar';c.onclick=()=>{slEdit=false;renderAll();};box.appendChild(c);}return;}
   box.hidden=true;return;
   const h=slH(x);box.className='slp compact';
-  box.innerHTML=`<div class="t"><span class="sub small">Anoche</span><br><b>${fmtH(h)}</b> <span class="sub small">· ${x.b} → ${x.w} · ${x.hd?'con dolor de cabeza':'sin dolor de cabeza'}${((S.dias[add(T,-1)]||{}).pasos||((S.dias[add(T,-1)]||{}).pasosHoy||{}).n)?' · '+fmtN((S.dias[add(T,-1)]||{}).pasos||(S.dias[add(T,-1)]||{}).pasosHoy.n)+' pasos ayer':''}</span></div><button class="link" type="button" id="slEditB">Editar</button>`;
+  box.innerHTML=`<div class="t"><span class="sub small">Anoche, en cama</span><br><b>${fmtH(h)}</b> <span class="sub small">· ${x.b} → ${x.w} · ${x.hd?'con dolor de cabeza':'sin dolor de cabeza'}${((S.dias[add(T,-1)]||{}).pasos||((S.dias[add(T,-1)]||{}).pasosHoy||{}).n)?' · '+fmtN((S.dias[add(T,-1)]||{}).pasos||(S.dias[add(T,-1)]||{}).pasosHoy.n)+' pasos ayer':''}</span></div><button class="link" type="button" id="slEditB">Editar</button>`;
   box.querySelector('#slEditB').onclick=()=>{slEdit=true;renderAll();};}
 function feelOf(a,b){const v=[];for(const m in S.semanas){if(m>=mondayOf(a)&&m<=b&&typeof S.semanas[m].feel==='number')v.push(S.semanas[m].feel);}return v.length?v.reduce((p,c)=>p+c,0)/v.length:null;}
 function gymWeek(a,b){const g=HABS().find(h=>h.id==='gym');if(!g)return null;let n=0,d=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){d++;if(st(s,g.id)>0)n++;}return d?n/d*7:null;}
@@ -1345,7 +1346,7 @@ function renderCfg(){const m=document.getElementById('cfgMeta'),w=document.getEl
 
 
 /* ---------- FUERZA DE HÁBITOS ---------- */
-const LVL=['Iniciando','En construcción','Consolidado','Automático'],LVL_TH=[.25,.5,.8];
+const LVL=['Iniciando','En construcción','Consolidado','Sostenido'],LVL_TH=[.25,.5,.8];
 function strengthAt(h,end){let s=h.from&&h.from>firstDate()?h.from:firstDate(),v=0;for(let i=0;i<800&&s<=end;i++,s=add(s,1)){if(!counts(h,s))continue;const x=st(s,h.id);if(s===todayStr()&&x===0)continue;v=v*.88+.12*(x===2?1:x===1?.6:0);}return v;}
 function daysToNext(h){const v=strength(h),n=stageN(h);if(n>=3||n<0)return null;const th=LVL_TH[n];return Math.max(1,Math.ceil(Math.log((1-th)/(1-v))/Math.log(.88)));}
 function bestStreak(h){const T=todayStr();let b=0,c=0;for(let s=firstDate();s<=T;s=add(s,1)){if(!counts(h,s))continue;if(st(s,h.id)>0){c++;b=Math.max(b,c);}else if(s!==T)c=0;}return b;}
@@ -1370,16 +1371,16 @@ function renderCampo(T){const box=document.getElementById('campo'),hs=HABS().fil
   const a=add(T,-13),r=rangeRatio(a,T),pr=rangeRatio(add(a,-14),add(a,-1)),tr=r!==null&&pr!==null?Math.round((r-pr)*100):null;
   let bars='';for(let s=a;s<=T;s=add(s,1)){const x=dayRatio(s);bars+=`<i style="height:${x===null?6:Math.max(6,Math.round(x*100))}%" class="${s===T?'t':''}"></i>`;}
   const cnt=[0,0,0,0];hs.forEach(h=>{const n=stageN(h);if(n>=0)cnt[n]++;});
-  const lv=[[3,'automático','automáticos'],[2,'consolidado','consolidados'],[1,'en construcción','en construcción'],[0,'iniciando','iniciando']].filter(x=>cnt[x[0]]).map(x=>cnt[x[0]]+' '+(cnt[x[0]]===1?x[1]:x[2])).join(' · ');
+  const lv=[[3,'sostenido','sostenidos'],[2,'consolidado','consolidados'],[1,'en construcción','en construcción'],[0,'iniciando','iniciando']].filter(x=>cnt[x[0]]).map(x=>cnt[x[0]]+' '+(cnt[x[0]]===1?x[1]:x[2])).join(' · ');
   let nd=0;for(let s=a;s<=T;s=add(s,1)){if(HABS().some(h=>st(s,h.id)>0))nd++;}
   if(nd<3){box.innerHTML=`<h2>Resumen</h2><div class="note"><b>Tu resumen aparece desde el día 3.</b> Marcá tus hábitos y anotá tu sueño: con pocos días ya vas a ver tu constancia y cómo evoluciona.</div>`;const L0=document.getElementById('habl');L0.innerHTML='';return;}
   box.innerHTML=`<div class="sum4"><div><span class="k">Constancia · últimos 14 días</span><div class="score num">${r===null?'—':Math.round(r*100)}<small>%</small></div>${tr===null||!tr?'<span class="dl">Igual que las 2 semanas anteriores</span>':`<span class="dl ${tr>0?'up':'dn'}">${tr>0?'▲':'▼'} ${Math.abs(tr)} ${Math.abs(tr)===1?'punto':'puntos'} vs las 2 semanas anteriores</span>`}</div><div class="b14">${bars}</div></div><p class="sub small">${lv?lv.charAt(0).toUpperCase()+lv.slice(1):''}</p>`;
-  const L=document.getElementById('habl');L.innerHTML='<div class="spread"><h2>Hábitos</h2><span class="sub small">Fuerza 0–100</span></div>';
+  const L=document.getElementById('habl');L.innerHTML='<div class="spread"><h2>Hábitos</h2><span class="sub small">Constancia reciente</span></div>';
   const list=document.createElement('div');list.className='hlst';
   hs.map(h=>[h,strength(h)]).sort((x,y)=>y[1]-x[1]).forEach(([h,v])=>{const n=stageN(h),pct=Math.round(v*100),d=pct-Math.round(strengthAt(h,add(T,-14))*100),sk=streak(h),dn=daysToNext(h);
     const el=document.createElement('button');el.type='button';el.className='hlr';
     el.innerHTML=`<div class="mr">${miniRing(v)}<b class="num">${pct}</b></div><div class="tx"><b></b><span>${STAGES[Math.max(0,n)]}${n<3&&dn?' · '+dn+(dn===1?' día':' días')+' para subir':''}${sk>1?' · racha '+sk:''}</span></div><span class="mono td ${d>0?'up':d<0?'dn':''}">${d>0?'+':d<0?'−':'±'}${Math.abs(d)}</span>`;
-    el.querySelector('.tx b').textContent=h.name;el.setAttribute('aria-label',h.name+': fuerza '+pct+', '+STAGES[Math.max(0,n)]);el.onclick=()=>openHabitSheet(h,T);list.appendChild(el);});
+    el.querySelector('.tx b').textContent=h.name;el.setAttribute('aria-label',h.name+': constancia '+pct+', '+STAGES[Math.max(0,n)]);el.onclick=()=>openHabitSheet(h,T);list.appendChild(el);});
   L.appendChild(list);animRings(L,ANIM.prog);ANIM.prog=false;}
 
 /* ---------- QUÉ TE FUNCIONA ---------- */
@@ -1407,7 +1408,7 @@ function insights(){const T=todayStr(),N=[];const ds=Object.keys(S.dias).filter(
   const gy=HABS().find(h=>h.id==='gym');if(gy){const L=nights.filter(n=>counts(gy,n.prev)),[y,no]=grp(L,n=>st(n.prev,gy.id)>0);
     if(y.length>=MIN&&no.length>=MIN){const hy=avg(y,n=>slH(n.x)),hn=avg(no,n=>slH(n.x));if(Math.abs(hy-hn)>=.4)push({score:Math.abs(hy-hn)/3,t:`Los días que entrenás dormís <b>${fmtH(hy)}</b> esa noche; los que no, <b>${fmtH(hn)}</b>.`,bars:[['Con gimnasio',hy/10,fmtH(hy)],['Sin gimnasio',hn/10,fmtH(hn)]],n:`${y.length} y ${no.length} noches`});}}
   return {list:N.sort((a,b)=>b.score-a.score).slice(0,3),have:nights.length};}
-function renderInsights(){const box=document.getElementById('insights'),{list,have}=insights(),need=14;box.innerHTML='<h2>Qué te funciona</h2>';
+function renderInsights(){const box=document.getElementById('insights'),{list,have}=insights(),need=14;box.innerHTML='<h2>Patrones en tus datos</h2><p class="sub small">Muestran relaciones, no prueban qué causa qué.</p>';
   if(have<need){const left=need-have;box.insertAdjacentHTML('beforeend',`<div class="lock"><b>Faltan ${left} ${left===1?'día':'días'} de registro</b><p class="sub small">Con 14 mañanas anotadas busco patrones reales en tus datos: qué horarios y hábitos te hacen dormir mejor, tener menos dolor de cabeza y cumplir más. Sin inventar nada.</p><div class="track ol"><i style="width:${Math.round(have/need*100)}%"></i></div></div>`);return;}
   if(!list.length){box.insertAdjacentHTML('beforeend','<p class="note">Por ahora no aparece ningún patrón claro. Sigo mirando a medida que sumás días.</p>');return;}
   const w=document.createElement('div');w.className='ins';
@@ -1453,12 +1454,12 @@ function renderExpProg(T){const box=document.getElementById('expP');box.innerHTM
   html+='</div>';box.insertAdjacentHTML('beforeend',html);box.querySelector('.et2').textContent=E.title;
   if(d>14){let good=0,bad=0;const chk=(a,n,better)=>{if(a==null||n==null||Math.abs(n-a)<1e-9)return;better(n,a)?good++:bad++;};
     chk(before.sl&&before.sl.avg,dur.sl&&dur.sl.avg,(n,a)=>n-a>=.25);chk(before.sl&&before.sl.hdp,dur.sl&&dur.sl.hdp,(n,a)=>a-n>=.1);chk(before.hab,dur.hab,(n,a)=>n-a>=.05);
-    const res=good>bad?'te sirvió':good<bad?'no te sirvió':'sin cambio claro';
-    box.insertAdjacentHTML('beforeend',`<div class="note"><b>Resultado: ${res}.</b> ${good>bad?'Te conviene mantenerlo como hábito.':'Podés probar otro cambio.'}</div>`);
+    const res=good>bad?'mejoraron':good<bad?'empeoraron':'sin cambio claro';
+    box.insertAdjacentHTML('beforeend',`<div class="note"><b>En estos 14 días tus datos: ${res}.</b> Muestra lo que pasó, no prueba que el cambio lo causó. Si te sentiste bien, podés seguir con él; si no, probá otro.</div>`);
     const b=document.createElement('button');b.type='button';b.className='btn';b.textContent='Guardar resultado y elegir otro';b.onclick=()=>{S.expHist=(S.expHist||[]).concat([{title:E.title,start:E.start,res}]);S.exp=null;save();renderAll();};box.appendChild(b);}
   else{const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar experimento';c.onclick=()=>{if(c.dataset.sure){S.exp=null;save();renderAll();}else{c.dataset.sure='1';c.textContent='¿Seguro? Tocá otra vez';}};box.appendChild(c);}}
 function renderMetas(T){const box=document.getElementById('campo');const a=add(T,-6),sl=sleepStats(a,T),stp=avgSteps(a,add(T,-1)),fv=avgFyv(a,T),M=mondayOf(T);
-  const wa=avgWater(a,T);const rows=[['Sueño',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'h por noche'],['Agua',wa,waterGoal(),fmtL,'por día'],['Pasos',stp,8000,fmtN,'por día'],['Frutas y verduras',fv,5,v=>round1(v)+'','porciones/día'],['Cardio',cardioWeek(T),150,v=>v+'','min esta semana']];
+  const wa=avgWater(a,T);const rows=[['En cama',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'por noche'],['Agua',wa,waterGoal(),fmtL,'por día'],['Pasos',stp,8000,fmtN,'por día'],['Frutas y verduras',fv,5,v=>round1(v)+'','porciones/día'],['Cardio (estimado)',cardioWeek(T),150,v=>v+'','min esta semana']];
   const el=document.createElement('div');el.className='metas';el.innerHTML=`<p class="gsub">Metas de salud · últimos 7 días</p>`+rows.map(([l,v,t,f,u])=>`<div class="mt2"><div class="spread"><span>${l}</span><span class="num"><b>${v==null?'—':f(v)}</b> / ${f(t)} <small>${u}</small></span></div><div class="track ol"><i style="width:${v==null?0:Math.min(100,Math.round(v/t*100))}%"></i></div></div>`).join('');
   box.appendChild(el);}
 const SB=[['Ronquidos','¿Roncás fuerte (se escucha con la puerta cerrada o alguien te lo dijo)?'],['Cansancio','¿Te sentís cansado o con sueño durante el día seguido?'],['Pausas','¿Alguien te vio dejar de respirar o ahogarte mientras dormías?'],['Presión','¿Tenés presión alta o la estás tratando?'],['Peso','¿Tu índice de masa corporal es mayor a 35? (peso ÷ altura²)'],['Edad','¿Tenés más de 50 años?'],['Cuello','¿Tu cuello mide más de 40 cm de contorno?'],['Sexo','¿Sos varón?']];
@@ -1605,7 +1606,7 @@ function quickRow(T){const x=slp(T),d=(S.dias[T]||{}).pasosHoy,w=waterOf(T),g=wa
   const tile=(id,k,val,sub,pct,cls,col)=>`<button type="button" class="qt ${cls||''}" id="${id}"><span class="k"><span class="qi" style="background:color-mix(in srgb,${col} 16%,var(--bg));color:${col}">${QICO[id]}</span>${k}</span><b class="num">${val}</b><small>${sub}</small><span class="qb"><i style="width:${Math.max(0,Math.min(100,pct))}%;background:${col}"></i></span></button>`;
   const stSub=busy?'Actualizando…':PEND?'Tocá para pegar':d?(d.ts?agoTxt(d.ts):'a las '+d.t):(S.salud.syncLast?'Sin datos de hoy':'Tocá para traer');
   return `<div class="qrow${slOn?'':' q2'}">${
-    slOn?tile('qSl','Sueño',fmtH(slH(x)),x.b+' → '+x.w,slH(x)/S.salud.meta*100,'','var(--olive)'):''}${
+    slOn?tile('qSl','En cama',fmtH(slH(x)),x.b+' → '+x.w,slH(x)/S.salud.meta*100,'','var(--olive)'):''}${
     tile('qSt','Pasos',d?fmtN(d.n):'—',stSub,d?d.n/8000*100:0,PEND?'pend':'','var(--sand)')}${
     tile('qWa','Agua',fmtL(w),'de '+fmtL(g),w/g*100,'','var(--water)')}</div>`;}
 function stepsRun(){SYNC_TAP=Math.floor(Date.now()/1000);try{sessionStorage.setItem('syncTap',String(SYNC_TAP));}catch(e){}if(!S.salud.syncLast){PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);}
@@ -1763,7 +1764,7 @@ function openFix(x){const isNew=!x;x=x?JSON.parse(JSON.stringify(x)):{id:uid('f'
     const i=S.fijos.findIndex(y=>y.id===x.id);if(i>=0)S.fijos[i]=x;else S.fijos.push(x);save();sheet.close();};
   wire(f,()=>{S.fijos=S.fijos.filter(y=>y.id!==x.id);});if(!sheet.open)sheet.showModal();}
 function metricBox(m,i){return `<div class="mbox" data-mi="${i}"><div class="two"><label class="fl"><span>Métrica</span><input data-k="label" value="${esc(m.label)}"></label>
-   <label class="fl"><span>Cómo se mide</span><select data-k="type"><option value="count" ${m.type==='count'?'selected':''}>Días hechos de un hábito</option><option value="sum" ${m.type==='sum'?'selected':''}>Suma del número de un hábito</option><option value="counter" ${m.type==='counter'?'selected':''}>Contador manual</option><option value="log" ${m.type==='log'?'selected':''}>Registro (ej: peso)</option><option value="sleep" ${m.type==='sleep'?'selected':''}>Horas de sueño (automático)</option></select></label></div>
+   <label class="fl"><span>Cómo se mide</span><select data-k="type"><option value="count" ${m.type==='count'?'selected':''}>Días hechos de un hábito</option><option value="sum" ${m.type==='sum'?'selected':''}>Suma del número de un hábito</option><option value="counter" ${m.type==='counter'?'selected':''}>Contador manual</option><option value="log" ${m.type==='log'?'selected':''}>Registro (ej: peso)</option><option value="sleep" ${m.type==='sleep'?'selected':''}>Horas en cama (se carga sola)</option></select></label></div>
    <div class="two"><label class="fl"><span>Hábito</span><select data-k="habit"><option value="">—</option>${HABS().map(h=>`<option value="${esc(h.id)}" ${h.id===m.habit?'selected':''}>${esc(h.name)}</option>`).join('')}</select></label><label class="fl"><span>Meta</span><input data-k="target" inputmode="decimal" value="${esc(m.target??'')}"></label></div>
    <div class="two"><label class="fl"><span>Unidad</span><input data-k="unit" value="${esc(m.unit||'')}"></label><label class="fl"><span>Dividir suma por</span><input data-k="scale" inputmode="decimal" value="${esc(m.scale||1)}"></label></div>
    <button class="btn danger" type="button" data-rm>Quitar métrica</button></div>`;}
