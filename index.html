@@ -1168,7 +1168,14 @@ function ringsData(T){const x=slp(T),rest=x?Math.min(1,slH(x)/S.salud.meta):0;
   const adv=HABS().filter(h=>(h.id==='estudio'||h.id==='innova')&&counts(h,T));let av;
   if(adv.length){av=adv.reduce((p,h)=>{const v=st(T,h.id);return p+(v===2?1:v===1?.5:0);},0)/adv.length;}else{const r=dayRatio(T);av=r===null?0:r;}
   return [['Descansar',rest,x?Math.round(rest*100)+'%':'—'],['Moverte',move,gd+'/'+pw],['Avanzar',av,Math.round(av*100)+'%']];}
-function planText(T,b){const bed=bedTarget(),mate=m2hm(hm2m(bed)-9*60),hr=curHr(),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
+// Hora recomendada para acostarse: parte de tu hora de levantarte menos tu meta, y se adapta a cómo venís durmiendo.
+// Se mueve de a 30 min por noche (un salto grande hace difícil dormirse) y nunca cambia la hora de levantarte.
+function recBed(T){T=T||todayStr();const meta=S.salud.meta,wake=S.salud.wake,ax=m=>m<720?m+1440:m,tgt=ax(hm2m(bedTarget()));
+  const bs=[];for(let k=0;k<3;k++){const x=slp(add(T,-k));if(x)bs.push(ax(hm2m(x.b)));}const avg=bs.length?bs.reduce((a,c)=>a+c,0)/bs.length:null,last=slp(T),r15=m=>Math.round(m/15)*15;
+  if(avg!=null&&avg>tgt+30){const r=Math.max(tgt,r15(avg-30));return {hm:m2hm(r),why:`Te venís acostando cerca de las ${m2hm(r15(avg))}. Adelantá de a 30 min por noche hasta llegar a las ${m2hm(tgt)}: un salto grande hace que te cueste dormirte. Levantate siempre a las ${wake}.`};}
+  if(last&&slH(last)<meta-1){const r=tgt-30;return {hm:m2hm(r),why:`Anoche estuviste ${fmtH(slH(last))} en cama. Acostate 30 min antes y levantate a la hora de siempre (${wake}): recuperás sin desordenar el horario. Una sola noche larga no compensa varias cortas.`};}
+  return {hm:m2hm(tgt),why:`Para estar ${fmtH(meta)} en cama y levantarte a las ${wake}. Mantener esa hora todos los días, también el finde, es lo que más ayuda a dormirte rápido.`};}
+function planText(T,b){const bed=recBed(T).hm,mate=m2hm(hm2m(bed)-9*60),hr=curHr(),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
   if(!b)return 'Anotá cómo dormiste y te armo el plan del día.';
   if(hr>=20||hr<5)return b.lvl==='Baja'?`Hoy la batería estuvo baja: priorizá dormir. <b>A la cama a las ${bed}</b>, con el celular afuera.`:`Cerrá bien el día: <b>a dormir a las ${bed}</b> para llegar a ${fmtH(S.salud.meta)}.`;
   const L=b.lvl==='Baja'?[gT&&!gD?'gimnasio en versión mínima':null,`<b>a dormir a las ${bed}</b>`]
@@ -1182,7 +1189,7 @@ function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(-
   return `<svg viewBox="0 0 ${sz} ${sz}" class="fit">${o}</svg>`;}
 function shortNights(T){const meta=S.salud.meta;let n=0,t=0;for(let s=add(T,-6);s<=T;s=add(s,1)){const y=slp(s);if(y){t++;if(slH(y)<meta)n++;}}return t?'Por debajo de tu meta: '+n+' de '+t+(t===1?' noche':' noches'):'Sin registros de sueño';}
 /* ---------- análisis: avisos con tus datos (reglas locales, nada sale del celular) ---------- */
-function analisis(T){const A=[],hr=curHr(),meta=S.salud.meta,bed=bedTarget(),a7=add(T,-6),y=add(T,-1),pl=(n,a,b)=>n+' '+(n===1?a:b);
+function analisis(T){const A=[],hr=curHr(),meta=S.salud.meta,RB=recBed(T),bed=RB.hm,a7=add(T,-6),y=add(T,-1),pl=(n,a,b)=>n+' '+(n===1?a:b);
   const add1=(p,t,why)=>A.push({p,t,why});
   // sueño
   let cortas=0,noches=0,tarde=0;const bm=hm2m(bed),bmx=bm<720?bm+1440:bm;
@@ -1203,6 +1210,7 @@ function analisis(T){const A=[],hr=curHr(),meta=S.salud.meta,bed=bedTarget(),a7=
   // agua y movimiento (solo cuando todavía hay tiempo)
   const w=waterOf(T),g=waterGoal();if(hr>=15&&hr<22&&w<g*.4)add1(45,`<b>Vas ${fmtL(w)} de ${fmtL(g)} de agua.</b> Sumá una botella ahora.`,'A esta hora ya deberías ir por la mitad de tu meta.');
   const d=S.dias[T]||{},pt=d.pasosHoy&&d.pasosHoy.n,as=avgSteps(a7,y);if(hr>=17&&hr<22&&pt!=null&&pt<4000&&as!=null&&as<6000)add1(40,`<b>${fmtN(pt)} pasos hoy.</b> Una caminata de 15 min te acerca a tu meta.`,`Tu promedio de la semana: ${fmtN(Math.round(as))} pasos por día.`);
+  add1(hr>=21||hr<5?57:hr>=19?42:25,`<b>Esta noche, a la cama a las ${bed}.</b>`,RB.why);
   // lo que va bien (para no mostrar solo lo flojo)
   if(noches>=5&&cortas===0)add1(20,`<b>Venís durmiendo bien:</b> ${noches} noches sin quedar cortas. Mantené el horario.`,'Todas las noches de la semana cerca de tu meta.');
   if(r7!=null&&r7>=.85)add1(15,`<b>Constancia de ${Math.round(r7*100)}% esta semana.</b> Buen ritmo: no sumes nada nuevo todavía.`,'Cuando un ritmo funciona, conviene sostenerlo antes de agregar más.');
@@ -1309,7 +1317,7 @@ function renderWeekRev(T){const box=document.getElementById('weekBox'),fb=docume
   fb.insertAdjacentHTML('beforeend',`<p class="q2">¿Comiste algo con proteína en casi todas las comidas? <span class="sub small">(huevo, carne, pollo, queso, yogur, legumbres)</span></p><div class="feel">${[[2,'Sí'],[1,'A medias'],[0,'No']].map(([v,l])=>`<button class="btn" type="button" data-pr="${v}" aria-pressed="${W.prot===v}">${l}</button>`).join('')}</div>`);
   fb.querySelectorAll('[data-pr]').forEach(x=>x.onclick=()=>{W.prot=Number(x.dataset.pr);S.semanas[a]=W;save();renderAll();toast(W.prot===2?'Bien: así se gana músculo':'Tip: sumá huevo, queso o pollo a la comida que más se te escapa');});}
 /* ---------- descanso de la tarde: solo con noche corta, en la franja y si decís que tenés sueño ---------- */
-function napWindow(){const bm=hm2m(bedTarget()),bed=bm<720?bm+1440:bm;return {ini:13*60,fin:Math.min(16*60,bed-360)};}
+function napWindow(){const bm=hm2m(recBed().hm),bed=bm<720?bm+1440:bm;return {ini:13*60,fin:Math.min(16*60,bed-360)};}
 function renderNap(T){const box=document.getElementById('napBox');if(!box)return;const d=S.dias[T]||{},n=d.nap||{},x=slp(T),now=hm2m(nowHM()),w=napWindow();
   const meta=S.salud.meta,corto=!!x&&slH(x)<meta-1;let html='';
   if(n.terminaA&&!n.listo){const left=Math.round((n.terminaA-Date.now())/60000);
@@ -1318,7 +1326,7 @@ function renderNap(T){const box=document.getElementById('napBox');if(!box)return
   else if(!n.listo&&!n.hoyNo&&corto&&now>=w.ini-120&&now<w.fin){
     if(!n.sueno)html=`<b>Anoche estuviste ${fmtH(slH(x))} en cama.</b><p class="sub small">¿Cómo estás ahora?</p><div class="inl"><button class="btn" type="button" data-nap="s1">Bien</button><button class="btn" type="button" data-nap="s2">Algo cansado</button><button class="btn" type="button" data-nap="s3">Muy cansado</button></div>`;
     else if(n.sueno>1){const desde=Math.max(now,w.ini);html=(n.sueno===3?'<p class="note warnx">Evitá manejar o usar herramientas hasta sentirte despierto.</p>':'')+
-      `<b>Si te viene bien, un descanso de 20 min ${desde>now?'entre las '+m2hm(w.ini)+' y las '+m2hm(w.fin):'antes de las '+m2hm(w.fin)}</b><p class="sub small">Puede ayudarte a estar más alerta. No reemplaza dormir a la noche: si podés, acostate a las ${bedTarget()}.</p><div class="inl"><button class="btn primary" type="button" data-nap="go" ${desde>now?'disabled':''}>Empezar 20 min</button><button class="btn" type="button" data-nap="hoyno">Hoy no</button></div><details class="help"><summary>¿Por qué?</summary><p class="sub small">NIOSH recomienda de día una siesta de menos de 20 min con alarma a los 15–30 min. Si dormís más, al despertar puede haber aturdimiento: esperá a sentirte despierto antes de manejar.</p></details>`;}}
+      `<b>Si te viene bien, una siesta corta ${desde>now?'entre las '+m2hm(w.ini)+' y las '+m2hm(w.fin):'antes de las '+m2hm(w.fin)}</b><p class="sub small">Lo ideal son 10 a 20 min dormido. Poné la alarma del Reloj a los 20 min: contando lo que tardás en dormirte, te quedan unos 10 a 15 de sueño. No pases de 30 min: te levantás aturdido y a la noche te cuesta dormir. Esta noche acostate a las ${recBed(T).hm}.</p><div class="inl"><button class="btn primary" type="button" data-nap="go" ${desde>now?'disabled':''}>Empezar 20 min</button><button class="btn" type="button" data-nap="hoyno">Hoy no</button></div><details class="help"><summary>¿En qué se basa?</summary><p class="sub small">NIOSH (CDC) recomienda de día una siesta de menos de 20 min con alarma a los 15–30 min. En un estudio con jóvenes que durmieron 5 h, 10 min de sueño fue lo que más rindió; con 30 min hubo aturdimiento al despertar. Después de las 16 o a menos de 6 h de acostarte, la siesta complica la noche.</p></details>`;}}
   box.innerHTML=html;box.hidden=!html;
   box.querySelectorAll('[data-nap]').forEach(b=>b.onclick=()=>{const a=b.dataset.nap,cur=Object.assign({},(S.dias[T]||{}).nap||{});
     if(a==='s1'){cur.sueno=1;cur.listo=true;}else if(a==='s2')cur.sueno=2;else if(a==='s3')cur.sueno=3;else if(a==='hoyno'){cur.hoyNo=true;}
@@ -1439,7 +1447,7 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   const note=!sep?'La columna "Ahora" aparece desde el día 14, cuando ya no se pisa con tu primera semana.':'Verde = mejor que al principio · rojo = peor. El cambio real se ve a los 30, 60 y 90 días.';
   box.insertAdjacentHTML('beforeend',`<p class="sub small">${note}</p>`);}
 function renderCfg(){const m=document.getElementById('cfgMeta'),w=document.getElementById('cfgWake');m.value=String(S.salud.meta);w.value=S.salud.wake;
-  document.getElementById('cfgBed').textContent='Hora ideal para acostarte: '+bedTarget()+'.';
+  {const rb=recBed();document.getElementById('cfgBed').textContent='Hora ideal para acostarte: '+bedTarget()+'.'+(rb.hm!==bedTarget()?' Esta noche: '+rb.hm+'. '+rb.why:'');}
   m.onchange=()=>{S.salud.meta=Number(m.value);save();renderAll();};const ag=document.getElementById('cfgAgua');ag.value=S.salud.agua==='auto'?'auto':String(waterGoal());const pe=document.getElementById('cfgPeso'),pl=document.getElementById('pesoL'),ai=document.getElementById('aguaInfo');pe.value=S.salud.peso||'';pl.hidden=S.salud.agua!=='auto';
   const ex=waterExtra();ai.textContent=S.salud.agua==='auto'?'Hoy: '+fmtL(waterGoal())+' = '+fmtL(waterBase())+' base'+(S.salud.peso?'':' (sin peso, valor general)')+ex.map(x=>' + '+fmtL(x[0])+' por '+x[1]).join('')+'. Orientativa: si tenés sed o la orina oscura, tomá más.':'';
   pe.onchange=()=>{const v=parseFloat(String(pe.value).replace(',','.'));S.salud.peso=v>=35&&v<=200?v:null;save();renderAll();};const bc=document.getElementById('cfgBici');bc.value=String(S.salud.bici==null?30:S.salud.bici);bc.onchange=()=>{S.salud.bici=Number(bc.value);save();renderAll();};ag.onchange=()=>{S.salud.agua=ag.value==='auto'?'auto':Number(ag.value);save();renderAll();};w.onchange=()=>{if(w.value){S.salud.wake=w.value;save();renderAll();}};}
