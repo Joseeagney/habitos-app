@@ -723,6 +723,12 @@ header.top .ghost:active{transform:scale(.92)}
 .herocard .fitw{width:118px;height:118px}
 #v-hoy .herocard .bs2 .score{font-size:62px}
 #v-hoy .herocard .plan{margin:0;padding-top:14px;border-top:1px solid var(--line)}
+.aviso{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;width:100%;margin-top:12px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--warn) 9%,transparent);font-size:14.5px;line-height:1.4;cursor:pointer}
+.aviso.ok{background:color-mix(in srgb,var(--olive) 10%,transparent)}
+.aviso b{font-weight:700}
+.avl{display:flex;flex-direction:column;gap:10px}
+.av{padding:12px 14px;border-radius:14px;background:var(--soft)}
+.av p{margin:0}.av p+p{margin-top:4px}
 #v-hoy .bat{gap:12px}
 /* Sueño · Pasos · Agua */
 #v-hoy .qrow{gap:10px}
@@ -1167,10 +1173,50 @@ function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(-
     o+=`<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-opacity=".12" stroke-width="${sw}"/><circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-width="${sw}" stroke-linecap="round" class="rfg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${off.toFixed(1)}"/>`;});
   return `<svg viewBox="0 0 ${sz} ${sz}" class="fit">${o}</svg>`;}
 function shortNights(T){const meta=S.salud.meta;let n=0,t=0;for(let s=add(T,-6);s<=T;s=add(s,1)){const y=slp(s);if(y){t++;if(slH(y)<meta)n++;}}return t?'Por debajo de tu meta: '+n+' de '+t+(t===1?' noche':' noches'):'Sin registros de sueño';}
+/* ---------- análisis: avisos con tus datos (reglas locales, nada sale del celular) ---------- */
+function analisis(T){const A=[],hr=curHr(),meta=S.salud.meta,bed=bedTarget(),a7=add(T,-6),y=add(T,-1),pl=(n,a,b)=>n+' '+(n===1?a:b);
+  const add1=(p,t,why)=>A.push({p,t,why});
+  // sueño
+  let cortas=0,noches=0,tarde=0;const bm=hm2m(bed),bmx=bm<720?bm+1440:bm;
+  for(let s=a7;s<=T;s=add(s,1)){const x=slp(s);if(!x)continue;noches++;if(slH(x)<meta-1)cortas++;const b=hm2m(x.b),bx=b<720?b+1440:b;if(bx-bmx>=45)tarde++;}
+  const sw=sleepStats(a7,T);
+  if(sw&&sw.hd>=3)add1(95,`<b>${sw.hd} de ${sw.n} días con dolor de cabeza.</b> Si sigue así varias semanas, consultá con un médico.`,'Dolor de cabeza al despertar 3 o más días en la semana.');
+  if(cortas>=3)add1(90,`<b>${pl(cortas,'noche corta','noches cortas')} esta semana.</b> Hoy lo que más suma es acostarte a las ${bed}.`,`En ${cortas} de ${noches} noches estuviste más de 1 h por debajo de tu meta de ${fmtH(meta)} en cama. Una noche larga no compensa varias cortas: hacen falta varias noches buenas seguidas.`);
+  else if(tarde>=3)add1(70,`<b>Te acostaste tarde ${pl(tarde,'noche','noches')} esta semana.</b> Esta noche, celular afuera 30 min antes de las ${bed}.`,`Te acostaste 45 min o más después de tu hora objetivo (${bed}).`);
+  if(sw&&sw.n>=4&&sw.sd>=60)add1(65,`<b>Te levantás a horas muy distintas</b> (±${Math.round(sw.sd)} min). Probá la misma hora todos los días, también el finde.`,'Un horario parejo de despertarse ayuda a dormirte más fácil a la noche.');
+  // hábitos
+  const r7=rangeRatio(a7,y),r14=rangeRatio(add(T,-13),add(T,-7));
+  if(r7!=null&&r14!=null&&r14-r7>=.15)add1(60,`<b>Tu constancia bajó ${Math.round((r14-r7)*100)} puntos esta semana.</b> Elegí un solo hábito y cumplilo aunque sea en su versión mínima.`,`Últimos 7 días: ${Math.round(r7*100)}%. Los 7 anteriores: ${Math.round(r14*100)}%.`);
+  let worst=null;HABS().forEach(h=>{if(h.opt||h.active===false)return;let miss=0;for(let s=y;s>=add(T,-14);s=add(s,-1)){if(!counts(h,s))continue;if(st(s,h.id)>0)break;miss++;}if(miss>=3&&(!worst||miss>worst.m))worst={h,m:miss};});
+  if(!worst){let weak=null;HABS().forEach(h=>{if(h.opt||h.active===false)return;let n=0,c=0;for(let s=a7;s<=y;s=add(s,1)){if(!counts(h,s))continue;n++;if(st(s,h.id)>0)c++;}if(n>=4&&c/n<.4&&(!weak||c/n<weak.c/weak.n))weak={h,n,c};});
+    if(weak)add1(52,`<b>${esc(weak.h.name)}: ${weak.c} de ${weak.n} esta semana.</b> Hacelo más fácil: ${weak.h.min?'la versión mínima ('+esc(weak.h.min)+') ya cuenta':'achicalo hasta que cueste poco'}.`,'Cuando un hábito casi no sale, conviene achicarlo antes que exigirse más.');}
+  if(worst)add1(55,`<b>${esc(worst.h.name)}: ${worst.m} veces seguidas sin hacerlo.</b> Hoy alcanza con la versión mínima${worst.h.min?': '+esc(worst.h.min):''}.`,'Volver rápido después de fallar importa más que no fallar nunca.');
+  const ci=HABS().find(h=>h.id==='sueno');if(ci&&ci.active!==false){let n=0,c=0;for(let s=a7;s<=y;s=add(s,1)){if(!counts(ci,s))continue;n++;if(st(s,ci.id)>0)c++;}if(n>=4&&c/n<.5&&hr>=18)add1(58,`<b>La noche es tu punto débil:</b> cumpliste el cierre del día ${c} de ${n} veces. Hoy dejá el celular cargando lejos de la cama.`,'El celular en la cama atrasa la hora de dormir.');}
+  // agua y movimiento (solo cuando todavía hay tiempo)
+  const w=waterOf(T),g=waterGoal();if(hr>=15&&hr<22&&w<g*.4)add1(45,`<b>Vas ${fmtL(w)} de ${fmtL(g)} de agua.</b> Sumá una botella ahora.`,'A esta hora ya deberías ir por la mitad de tu meta.');
+  const d=S.dias[T]||{},pt=d.pasosHoy&&d.pasosHoy.n,as=avgSteps(a7,y);if(hr>=17&&hr<22&&pt!=null&&pt<4000&&as!=null&&as<6000)add1(40,`<b>${fmtN(pt)} pasos hoy.</b> Una caminata de 15 min te acerca a tu meta.`,`Tu promedio de la semana: ${fmtN(Math.round(as))} pasos por día.`);
+  // lo que va bien (para no mostrar solo lo flojo)
+  if(noches>=5&&cortas===0)add1(20,`<b>Venís durmiendo bien:</b> ${noches} noches sin quedar cortas. Mantené el horario.`,'Todas las noches de la semana cerca de tu meta.');
+  if(r7!=null&&r7>=.85)add1(15,`<b>Constancia de ${Math.round(r7*100)}% esta semana.</b> Buen ritmo: no sumes nada nuevo todavía.`,'Cuando un ritmo funciona, conviene sostenerlo antes de agregar más.');
+  return A.sort((x,z)=>z.p-x.p);}
+function resumenClaude(T){const a7=add(T,-6),y=add(T,-1),sw=sleepStats(a7,T),r7=rangeRatio(a7,y),r14=rangeRatio(add(T,-13),add(T,-7)),aw=avgWater(a7,T),as=avgSteps(a7,y);
+  const L=['Mis datos de Hábitos App (últimos 7 días, '+T+'):',
+    sw?`- En cama: promedio ${fmtH(sw.avg)} (meta ${fmtH(S.salud.meta)}), hora de levantarme ±${Math.round(sw.sd)} min, ${sw.hd} días con dolor de cabeza, ${sw.n} noches anotadas.`:'- Sin datos de sueño.',
+    r7!=null?`- Constancia de hábitos: ${Math.round(r7*100)}%${r14!=null?' (semana anterior '+Math.round(r14*100)+'%)':''}.`:'',
+    ...HABS().filter(h=>!h.opt&&h.active!==false).map(h=>{let n=0,c=0;for(let s=a7;s<=y;s=add(s,1)){if(!counts(h,s))continue;n++;if(st(s,h.id)>0)c++;}return n?`  · ${h.name}: ${c} de ${n}`:'';}),
+    aw!=null?`- Agua: ${fmtL(aw)} por día (meta ${fmtL(waterGoal())}).`:'',
+    as!=null?`- Pasos: ${fmtN(Math.round(as))} por día.`:'',
+    '- Avisos de la app: '+(analisis(T).map(x=>x.t.replace(/<[^>]+>/g,'')).join(' | ')||'ninguno'),
+    'Dame un diagnóstico corto y la recomendación más importante para esta semana.'];
+  return L.filter(Boolean).join('\n');}
+function openAnalisis(T){const A=analisis(T);
+  SI.innerHTML=`<div><h3>Análisis de tus datos</h3><p class="sub small">Últimos 7 días. Se calcula en tu celular; nada se envía.</p></div><div class="avl">${A.length?A.map(x=>`<div class="av"><p>${x.t}</p><p class="sub small">${esc(x.why)}</p></div>`).join(''):'<p class="note">Todavía no hay suficientes datos para un análisis. Anotá tu sueño y tus hábitos unos días.</p>'}</div><button class="btn" type="button" id="avCopy">Copiar resumen para Claude</button><button class="btn primary" type="button" id="ok">Listo</button>`;
+  SI.querySelector('#avCopy').onclick=async()=>{try{await navigator.clipboard.writeText(resumenClaude(T));toast('Copiado: pegalo en tu chat con Claude');}catch(e){toast('No se pudo copiar');}};
+  SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
 function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T);
   box.innerHTML=(b?`<div class="herocard"><button type="button" class="bx bxb" id="ringsB" aria-label="Ver tus 3 anillos"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy · orientativa</span><div class="score lvw l${b.lvl}">${b.lvl}</div><span class="lv3${b.lvl==='Baja'?' low':''}">${shortNights(T)}</span></div></button>
-   <p class="plan">${planText(T,b)}</p></div>`:'')+quickRow(T);
-  const rb=box.querySelector('#ringsB');if(rb)rb.onclick=()=>openRings(T);
+   <p class="plan">${planText(T,b)}</p>${(()=>{const A=analisis(T);return A.length&&A[0].p>=40?`<button type="button" class="aviso" id="avB"><span>${A[0].t}</span><span class="sub small">${A.length>1?'Ver análisis ('+A.length+')':'Ver por qué'} ›</span></button>`:A.length?`<button type="button" class="aviso ok" id="avB"><span>${A[0].t}</span><span class="sub small">Ver análisis ›</span></button>`:'';})()}</div>`:'')+quickRow(T);
+  const rb=box.querySelector('#ringsB');if(rb)rb.onclick=()=>openRings(T);const av=box.querySelector('#avB');if(av)av.onclick=()=>openAnalisis(T);
   wireQuick(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
 function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Tiempo en cama contra tu meta','Gimnasio, pádel y correr esta semana','Estudio y proyecto de hoy'];
   SI.innerHTML=`<div><h3>Tus 3 anillos</h3><p class="sub small">Se llenan solos con lo que marcás.</p></div><div class="rgl">${R.map((r,i)=>`<div class="spread rowx"><span class="rgn"><i class="dot ${cols[i]}"></i><span><b>${r[0]}</b><br><span class="sub small">${dsc[i]}</span></span></span><b class="num">${r[2]}</b></div>`).join('')}</div><button class="btn primary" type="button" id="ok">Listo</button>`;
