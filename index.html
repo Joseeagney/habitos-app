@@ -849,6 +849,16 @@ html.recov-on body>:not(#recov):not(script){display:none!important}
 #day .grp+.grp{border-top:1px solid var(--line)!important}
 #day .rows.flat+.grp{margin-top:6px!important}
 #napBox{box-shadow:var(--cshadow)}
+/* ===== v6: números del día como en B (fondo suave, sin sombra, cifras grandes) y pulido general ===== */
+header.top h1{font-size:28px!important}
+.qt{background:var(--soft)!important;box-shadow:none!important;border:0!important}
+.qt b{font-size:26px!important;letter-spacing:-.03em}
+.qt .qb{margin-top:6px}
+.hrw .info b,.tkr .tt{font-size:16px}
+.dhd h2,#tasks h2{font-size:20px!important}
+#v-prog section{box-shadow:var(--cshadow)}
+.segtab{padding:4px!important}
+.segtab button{border-radius:9px!important}
 </style>
 </head>
 <body>
@@ -1504,12 +1514,12 @@ function renderCampo(T){const box=document.getElementById('campo'),hs=HABS().fil
   const lv=[[3,'sostenido','sostenidos'],[2,'consolidado','consolidados'],[1,'en construcción','en construcción'],[0,'iniciando','iniciando']].filter(x=>cnt[x[0]]).map(x=>cnt[x[0]]+' '+(cnt[x[0]]===1?x[1]:x[2])).join(' · ');
   let nd=0;for(let s=a;s<=T;s=add(s,1)){if(HABS().some(h=>st(s,h.id)>0))nd++;}
   if(nd<3){box.innerHTML=`<h2>Resumen</h2><div class="note"><b>Tu resumen aparece desde el día 3.</b> Marcá tus hábitos y anotá tu sueño: con pocos días ya vas a ver tu constancia y cómo evoluciona.</div>`;const L0=document.getElementById('habl');L0.innerHTML='';return;}
-  box.innerHTML=`<div class="sum4"><div><span class="k">Constancia · últimos 14 días</span><div class="score num">${r===null?'—':Math.round(r*100)}<small>%</small></div>${tr===null||!tr?'<span class="dl">Igual que las 2 semanas anteriores</span>':`<span class="dl ${tr>0?'up':'dn'}">${tr>0?'▲':'▼'} ${Math.abs(tr)} ${Math.abs(tr)===1?'punto':'puntos'} vs las 2 semanas anteriores</span>`}</div><div class="b14">${bars}</div></div><p class="sub small">${lv?lv.charAt(0).toUpperCase()+lv.slice(1):''}</p>`;
+  box.innerHTML=`<div class="sum4"><div><span class="k">Constancia · últimos 14 días</span><div class="score num">${r===null?'—':Math.round(r*100)}<small>%</small></div>${tr===null||!tr?'<span class="dl">Igual que antes</span>':`<span class="dl ${tr>0?'up':'dn'}">${tr>0?'▲':'▼'} ${Math.abs(tr)} ${Math.abs(tr)===1?'punto':'puntos'} vs. 2 semanas antes</span>`}</div><div class="b14">${bars}</div></div><p class="sub small">${lv?lv.charAt(0).toUpperCase()+lv.slice(1):''}</p>`;
   const L=document.getElementById('habl');L.innerHTML='<div class="spread"><h2>Hábitos</h2><span class="sub small">Constancia reciente</span></div>';
   const list=document.createElement('div');list.className='hlst';
   hs.map(h=>[h,strength(h)]).sort((x,y)=>y[1]-x[1]).forEach(([h,v])=>{const n=stageN(h),pct=Math.round(v*100),d=pct-Math.round(strengthAt(h,add(T,-14))*100),sk=streak(h),dn=daysToNext(h);
     const el=document.createElement('button');el.type='button';el.className='hlr';
-    el.innerHTML=`<div class="mr">${miniRing(v)}<b class="num">${pct}</b></div><div class="tx"><b></b><span>${STAGES[Math.max(0,n)]}${n<3&&dn?' · '+dn+(dn===1?' día':' días')+' para subir':''}${sk>1?' · racha '+sk:''}</span></div><span class="mono td ${d>0?'up':d<0?'dn':''}">${d>0?'+':d<0?'−':'±'}${Math.abs(d)}</span>`;
+    el.innerHTML=`<div class="mr">${miniRing(v)}<b class="num">${pct}</b></div><div class="tx"><b></b><span>${STAGES[Math.max(0,n)]}${sk>1?' · racha '+sk:''}</span></div><span class="mono td ${d>0?'up':d<0?'dn':''}">${d>0?'+':d<0?'−':'±'}${Math.abs(d)}</span>`;
     el.querySelector('.tx b').textContent=h.name;el.setAttribute('aria-label',h.name+': constancia '+pct+', '+STAGES[Math.max(0,n)]);el.onclick=()=>openHabitSheet(h,T);list.appendChild(el);});
   L.appendChild(list);animRings(L,ANIM.prog);ANIM.prog=false;}
 
