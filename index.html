@@ -997,7 +997,8 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
       <p class="sub small">Tus datos se guardan en este celular. Hacé una copia de vez en cuando por si cambiás de teléfono o borrás Safari.</p>
       <p class="sub small num" id="dataLine"></p>
       <div class="inl"><button class="btn" type="button" id="expBtn">Guardar copia</button><button class="btn" type="button" id="impBtn">Restaurar copia</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>
-      <p class="sub small" id="lastBk"></p></section>
+      <p class="sub small" id="lastBk"></p>
+      <button class="btn danger" type="button" id="resetBtn" style="margin-top:6px">Empezar de cero (borra los registros)</button><p class="sub small">Borra días, sueño, agua, pasos, tareas, repasos y experimentos. Conserva tus hábitos, objetivos, ajustes y el atajo de pasos. Antes guarda una copia en este celular por si te arrepentís.</p></section>
     <section><h2>Recordatorios</h2>
       <p class="sub small">El iPhone no deja que esta app mande avisos sola. La forma gratis y confiable es con la app <b>Atajos</b> (5 minutos, una sola vez):</p>
       <details class="help"><summary>Ver los pasos</summary><ol>
@@ -2095,6 +2096,15 @@ if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceW
 (function(){const mb=document.getElementById('miniBar'),mt=document.getElementById('miniT');if(!mb)return;let on=false;
   const tick=()=>{const v=[...document.querySelectorAll('.view')].find(x=>!x.hidden),t=v?(v.id==='v-hoy'?'Hoy':v.id==='v-prog'?'Progreso':(v.querySelector('h1')||{}).textContent||''):'';if(mt.textContent!==t)mt.textContent=t;const o=window.scrollY>72;if(o!==on){on=o;mb.classList.toggle('on',o);}};
   window.addEventListener('scroll',tick,{passive:true});document.addEventListener('click',()=>setTimeout(tick,50));tick();})();
+
+/* empezar de cero: borra registros y conserva la configuración */
+(function(){const b=document.getElementById('resetBtn');if(!b)return;let armed=0;
+  b.onclick=()=>{if(Date.now()-armed>5000){armed=Date.now();b.textContent='¿Seguro? Tocá otra vez para borrar';return;}
+    try{localStorage.setItem(KEY+':antes-de-cero:'+Date.now(),JSON.stringify(S));}catch(e){}
+    const T=todayStr();S.dias={};S.semanas={};S.tareas=[];S.exp=null;S.expHist=[];S.backup='';S.salud.start=null;S.salud.tests=[];
+    S.habitos.forEach(h=>{h.from=T;delete h.hist;});
+    (S.objetivos||[]).forEach(g=>(g.metrics||[]).forEach(m=>{if(m.type==='counter')m.cur=0;if(m.type==='log')m.log=[];}));
+    writeNow();armed=0;b.textContent='Empezar de cero (borra los registros)';renderAll();show('hoy');toast('Listo: arrancás de cero hoy');};})();
 </script>
 </body>
 </html>
