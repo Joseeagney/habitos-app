@@ -872,7 +872,6 @@ header.top h1{font-size:32px!important;letter-spacing:-.025em!important;font-wei
 nav.tabs div{background:color-mix(in srgb,var(--bg) 70%,transparent)!important;-webkit-backdrop-filter:blur(24px) saturate(1.8)!important;backdrop-filter:blur(24px) saturate(1.8)!important;border:1px solid color-mix(in srgb,var(--fg) 9%,transparent);box-shadow:0 10px 30px rgba(0,0,0,.18)!important}
 nav.tabs button{color:var(--fg)!important;opacity:.55}
 nav.tabs button[aria-current="page"]{background:color-mix(in srgb,var(--fg) 10%,transparent)!important;color:var(--olive)!important;opacity:1}
-:root:not([data-theme]){--page:#f2f2f7}
 [data-theme="dark"],[data-theme="oscuro"]{--page:#000}
 /* ===== v8: vidrio líquido en los controles que flotan (las tarjetas quedan sólidas) ===== */
 :root{--gl-bg:rgba(255,255,255,.4);--gl-hi:rgba(255,255,255,.95);--gl-edge:rgba(255,255,255,.7);--gl-sh:0 10px 30px -8px rgba(30,32,20,.28),0 2px 6px rgba(30,32,20,.08);--gl-sheen:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.12) 45%,rgba(255,255,255,0) 60%,rgba(255,255,255,.18) 100%)}
@@ -2074,7 +2073,7 @@ function toneSave(c){try{localStorage.setItem(TONE_K,JSON.stringify(c));}catch(e
 const softHr=h=>h<10||h>=21;
 function tonePeriod(){const h=curHr(),T=todayStr();return softHr(h)?(h>=21?add(T,1):T)+'s':T+'d';}
 function effTone(){const c=toneCfg();if(c.m!=='auto')return c.m;if(c.o&&c.p===tonePeriod())return c.o;return softHr(curHr())?'suave':'dia';}
-function applyTone(){const t=effTone();applyTheme(t==='suave'?'suave':t==='claro'?'light':t==='oscuro'?'dark':null);
+function applyTone(){const t=effTone();applyTheme(t==='suave'?'suave':t==='claro'||t==='dia'?'light':t==='oscuro'?'dark':null);
   const cs=getComputedStyle(document.documentElement),bg=(cs.getPropertyValue('--page')||cs.getPropertyValue('--bg')).trim()||'#ffffff';document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.setAttribute('content',bg));
   const b=document.getElementById('themeBtn');if(b){const soft=t==='suave'||t==='oscuro';b.innerHTML=soft?ICO_SUN:ICO_MOON;b.setAttribute('aria-label',soft?'Pasar a tono claro':'Pasar a tono suave');}
   const sel=document.getElementById('cfgTone');if(sel)sel.value=toneCfg().m;}
