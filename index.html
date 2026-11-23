@@ -1682,7 +1682,16 @@ function openStopBang(){const ans=(S.salud.sb&&S.salud.sb.ans)?S.salud.sb.ans.sl
   draw();if(!sheet.open)sheet.showModal();}
 /* sonido generado en el celular (sin archivos): tonos suaves y lluvia */
 const SND={ctx:null,noise:null,gain:null};
-function sndCtx(){if(!SND.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;SND.ctx=new C();}if(SND.ctx.state==='suspended')SND.ctx.resume();return SND.ctx;}
+// En iPhone el sonido web se apaga con la llave de silencio. Se pide sesión de "reproducción" (Safari 16.4+) y,
+// para versiones anteriores, se reproduce un audio mudo en bucle mientras dura la sesión.
+function silentWav(){const sr=8000,n=sr,b=new ArrayBuffer(44+n*2),v=new DataView(b),w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  return URL.createObjectURL(new Blob([b],{type:'audio/wav'}));}
+function sndUnlock(){try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+  try{if(!SND.keep){SND.keep=new Audio(silentWav());SND.keep.loop=true;SND.keep.setAttribute('playsinline','');}SND.keep.play().catch(()=>{});}catch(e){}
+  const c=sndCtx();if(c){try{const b=c.createBuffer(1,1,22050),s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start(0);}catch(e){}}return c;}
+function sndRelease(){try{if(SND.keep)SND.keep.pause();}catch(e){}}
+function sndCtx(){if(!SND.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;SND.ctx=new C();}if(SND.ctx.state!=='running')SND.ctx.resume().catch(()=>{});return SND.ctx;}
 function tone(f,dur,vol){const c=sndCtx();if(!c)return;const o=c.createOscillator(),g=c.createGain(),t=c.currentTime;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol||.07,t+.08);g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.9));o.connect(g).connect(c.destination);o.start(t);o.stop(t+(dur||.9)+.05);}
 function bell(){tone(528,3.2,.09);setTimeout(()=>tone(792,2.4,.04),40);}
 function rainOn(){const c=sndCtx();if(!c||SND.noise)return;const len=c.sampleRate*3,buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);let last=0;for(let k=0;k<len;k++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[k]=last*3.2;}
@@ -1697,7 +1706,7 @@ function openBreath(T,h){let run=false,last=0,raf=0,el=0,mode='suspiro',snd='gui
    <div class="brinfo"><p><b id="brPara"></b></p><p class="sub small" id="brComo"></p><p class="sub tiny" id="brEv"></p></div>
    <div class="br"><div class="bc"><i class="bcf"></i><span id="brT">Listo</span></div></div><p class="num" id="brC" style="text-align:center;font-size:22px;font-weight:700;margin:0">5:00</p>
    <div class="brrow"><div class="segtab sm" id="brS">${[['nada','Sin sonido'],['guia','Tonos'],['lluvia','Lluvia']].map(([k,l])=>`<button type="button" data-s="${k}" aria-selected="${k===snd}">${l}</button>`).join('')}</div><div class="segtab sm" id="brD" hidden>${[5,10].map(m=>`<button type="button" data-d="${m}" aria-selected="${m===5}">${m} min</button>`).join('')}</div></div>
-   <p class="sub tiny" style="text-align:center;margin:0">Cuenta solo con la app abierta. Con el iPhone en silencio no suena.</p>
+   <p class="sub tiny" style="text-align:center;margin:0">Cuenta solo con la app abierta. Subí el volumen; al elegir un sonido escuchás una prueba.</p>
    <button class="btn primary" type="button" id="brGo">Empezar</button><button class="btn" type="button" id="brX">Salir</button>`;
   const $=q=>SI.querySelector(q),C=$('.bcf'),TT=$('#brT'),CC=$('#brC'),go=$('#brGo');
   const fmtT=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
@@ -1705,18 +1714,18 @@ function openBreath(T,h){let run=false,last=0,raf=0,el=0,mode='suspiro',snd='gui
     SI.querySelectorAll('#brM button').forEach(x=>x.setAttribute('aria-selected',x.dataset.m===mode));SI.querySelectorAll('#brS button').forEach(x=>x.setAttribute('aria-selected',x.dataset.s===snd));SI.querySelectorAll('#brD button').forEach(x=>x.setAttribute('aria-selected',Number(x.dataset.d)*60===TOT));};
   SI.querySelectorAll('#brM button').forEach(b=>b.onclick=()=>{if(el>0)return;mode=b.dataset.m;paint();});
   SI.querySelectorAll('#brD button').forEach(b=>b.onclick=()=>{if(el>0)return;TOT=Number(b.dataset.d)*60;paint();});
-  SI.querySelectorAll('#brS button').forEach(b=>b.onclick=()=>{snd=b.dataset.s;if(run){if(snd==='lluvia')rainOn();else rainOff();}paint();});
+  SI.querySelectorAll('#brS button').forEach(b=>b.onclick=()=>{snd=b.dataset.s;if(snd!=='nada'){sndUnlock();tone(snd==='lluvia'?330:440,.5,.06);}if(run){if(snd==='lluvia')rainOn();else rainOff();}paint();});
   const phase=x=>{if(mode==='medita'){const k=Math.floor(x/45)%TIPS.length;return [TIPS[k],.8+.04*Math.sin(x/6*2*Math.PI)];}
     if(mode==='lenta'){const c=x%10;return c<4?['Inhalá',.55+.45*(c/4)]:['Soltá',1-.45*((c-4)/6)];}const c=x%9;if(c<2)return ['Inhalá',.55+.3*(c/2)];if(c<3)return ['Un poco más',.85+.15*(c-2)];return ['Soltá lento',1-.45*((c-3)/6)];};
   const credit=()=>{if(el>=180&&h&&st(T,h.id)===0)setState(T,h.id,2,true);};
-  const stopSnd=()=>rainOff();
+  const stopSnd=()=>{rainOff();sndRelease();};
   const pause=()=>{if(!run)return;run=false;cancelAnimationFrame(raf);stopSnd();go.textContent='Seguir';TT.textContent='En pausa';credit();};
   const tick=now=>{if(!run)return;const dt=(now-last)/1000;last=now;if(dt>0&&dt<1)el+=dt;
-    const left=Math.max(0,TOT-el),[w,sc]=phase(el);if(w!==ph){ph=w;if(snd!=='nada'&&mode!=='medita')tone(w==='Inhalá'?440:w==='Un poco más'?523:330,.7,.06);}
+    const left=Math.max(0,TOT-el),[w,sc]=phase(el);if(w!==ph){const first=ph==='';ph=w;if(snd!=='nada'){if(mode!=='medita')tone(w==='Inhalá'?440:w==='Un poco más'?523:330,.7,.08);else if(!first)tone(528,2.2,.05);}}
     TT.textContent=w;if(!RM)C.style.transform=`scale(${sc})`;CC.textContent=fmtT(left);
     if(left<=0){run=false;stopSnd();if(snd!=='nada')bell();TT.textContent='Listo';go.textContent='Terminado';go.disabled=true;if(h&&st(T,h.id)===0)setState(T,h.id,2,true);vib(20);return;}raf=requestAnimationFrame(tick);};
   const onVis=()=>{if(document.hidden)pause();};document.addEventListener('visibilitychange',onVis);
-  go.onclick=()=>{if(run){pause();return;}if(snd!=='nada'){sndCtx();if(el===0&&mode==='medita')bell();if(snd==='lluvia')rainOn();}run=true;ph='';last=performance.now();go.textContent='Pausar';raf=requestAnimationFrame(tick);};
+  go.onclick=()=>{if(run){pause();return;}if(snd!=='nada'){const c=sndUnlock();const go2=()=>{if(el<1&&mode==='medita')bell();if(snd==='lluvia')rainOn();};if(c&&c.state!=='running')c.resume().then(go2,go2);else go2();}run=true;ph='';last=performance.now();go.textContent='Pausar';raf=requestAnimationFrame(tick);};
   $('#brX').onclick=()=>{pause();sheet.close();};
   sheet.addEventListener('close',()=>{pause();stopSnd();document.removeEventListener('visibilitychange',onVis);},{once:true});paint();if(!sheet.open)sheet.showModal();}
 function renderSaludExtras(T){return;const box=document.getElementById('salud');if(!box)return;
