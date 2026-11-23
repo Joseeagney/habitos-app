@@ -904,6 +904,14 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
 @media (prefers-reduced-motion:reduce){.view:not([hidden]){animation:none}.ck2 svg path{transition:none}}
 /* tarjetas: sombra más suave tipo iOS en claro */
 :root:not([data-theme="dark"]):not([data-theme="suave"]){--cshadow:0 1px 1px rgba(0,0,0,.03),0 6px 20px -10px rgba(0,0,0,.12)}
+/* deslizar para borrar */
+.swr{position:relative;touch-action:pan-y;overflow:hidden}
+.swr>:not(.swdel){transform:translateX(var(--dx,0));transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.swr.swing>:not(.swdel){transition:none}
+.swdel{position:absolute;right:0;top:6px;bottom:6px;width:76px;border:0;border-radius:14px;background:#e5484d;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:12px;cursor:pointer;opacity:0;transform:scale(.85);transition:opacity .2s,transform .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.swdel svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.swr.swo .swdel,.swr.swing .swdel{opacity:1;transform:none}
+.swr.swo .swdel{pointer-events:auto}
 </style>
 </head>
 <body>
@@ -1320,6 +1328,19 @@ function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArr
 function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i]=!cur[i];if(cur[i])POP={id:h.id+'#'+i,t:Date.now()};const k=cur.filter(Boolean).length,prev=Object.assign({},S.dias[T]||{}),was=dayDone(T);
   patchDay(T,{['s_'+h.id]:cur,[h.id]:k===n?2:k>0?1:0});renderAll();vib(8);
   if(!was&&dayDone(T)){confetti();toast('Día completo · racha de '+dayStreak(),()=>restore(T,prev));}else if(k===n)toast(h.name+': completo',()=>restore(T,prev));}
+/* deslizar a la izquierda para borrar (tareas y hábitos), como en iOS */
+let SW_OPEN=null;const TRASH='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+function swClose(r){if(!r)return;r.classList.remove('swo');r.style.removeProperty('--dx');if(SW_OPEN===r)SW_OPEN=null;}
+document.addEventListener('pointerdown',e=>{if(SW_OPEN&&!SW_OPEN.contains(e.target))swClose(SW_OPEN);},true);
+function wireSwipe(r,label,onDel){const b=document.createElement('button');b.type='button';b.className='swdel';b.innerHTML=TRASH+'<span>Borrar</span>';b.setAttribute('aria-label','Borrar '+label);
+  b.onclick=e=>{e.stopPropagation();swClose(r);onDel();};r.appendChild(b);r.classList.add('swr');
+  let x0=0,y0=0,dx=0,mode=0,base=0;
+  r.addEventListener('pointerdown',e=>{if(e.target.closest('.hdl,.swdel'))return;x0=e.clientX;y0=e.clientY;dx=0;mode=0;base=r.classList.contains('swo')?-84:0;});
+  r.addEventListener('pointermove',e=>{if(!x0)return;const mx=e.clientX-x0,my=e.clientY-y0;if(!mode){if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3){mode=1;if(SW_OPEN&&SW_OPEN!==r)swClose(SW_OPEN);r.classList.add('swing');}else if(Math.abs(my)>10){mode=2;}}
+    if(mode===1){dx=Math.max(-120,Math.min(0,base+mx));r.style.setProperty('--dx',dx+'px');}});
+  const end=()=>{if(mode===1){r.classList.remove('swing');if(dx<-50){r.classList.add('swo');r.style.setProperty('--dx','-84px');SW_OPEN=r;}else swClose(r);r.dataset.swiped=Date.now();}x0=0;mode=0;};
+  r.addEventListener('pointerup',end);r.addEventListener('pointercancel',end);
+  r.addEventListener('click',e=>{if(Date.now()-(Number(r.dataset.swiped)||0)<350){e.stopPropagation();e.preventDefault();}},true);}
 function habRow(T,h){const v=st(T,h.id),n=nv(T,h.id),sk=streak(h),r=document.createElement('div');
   r.className='hrw'+(v===2?' done':v===1?' half':v===-1?' free':'')+(POP.id===h.id&&Date.now()-POP.t<700?' pop':'');
   const meta=[];if(v===2)meta.push('Hecho');else if(v===1)meta.push('Mínimo');else if(v===-1)meta.push('Libre');
@@ -1331,6 +1352,8 @@ function habRow(T,h){const v=st(T,h.id),n=nv(T,h.id),sk=streak(h),r=document.cre
   ck.onclick=()=>{if(!tapOk('ck'+h.id))return;if(h.steps&&h.steps.length){const all=v===2?[]:h.steps.map(()=>true);patchDay(T,{['s_'+h.id]:all});}setState(T,h.id,v===2?0:2,true);};
   r.querySelector('.info').onclick=()=>h.breath?openBreath(T,h):openHabitSheet(h,T);
   if(h.num&&h.num.label&&T===todayStr()){r.classList.add('hasplus');r.appendChild(plusBtn(T,h));}
+  wireSwipe(r,h.name,()=>{const i=S.habitos.findIndex(x=>x.id===h.id);if(i<0)return;const old=S.habitos[i];S.habitos.splice(i,1);save();renderAll();vib(12);
+    toast('Hábito borrado: '+old.name,()=>{S.habitos.splice(Math.min(i,S.habitos.length),0,old);save();renderAll();});});
   return r;}
 function expRow(T){const E=S.exp,d=expDay(T),v=(E.log||{})[T]===1,r=document.createElement('div');r.className='hrw'+(v?' done':'');
   r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b></b><span class="${v?'ok':''}">Experimento · día ${d} de 14</span></button>`;
@@ -1794,7 +1817,9 @@ function taskRow(T,x,drag){const r=document.createElement('div'),v=!!x.done;r.cl
   const mt=taskMeta(T,x);if(mt.length){const sp=document.createElement('span');sp.className='tmeta';mt.forEach(([cls,txt],i)=>{if(i){sp.appendChild(document.createTextNode(' · '));}const e=document.createElement('em');if(cls)e.className=cls;e.textContent=txt;sp.appendChild(e);});r.querySelector('.info').appendChild(sp);}
   const ck=r.querySelector('.ck2');ck.setAttribute('aria-label',x.t+(v?': hecha, tocá para desmarcar':': tocá para marcar hecha'));
   ck.onclick=()=>{const prev=x.done;x.done=v?null:T;save();vib(8);renderTasks(T);if(!v)toast('Hecha: '+x.t,()=>{x.done=prev;save();renderTasks(T);});};
-  r.querySelector('.info').onclick=()=>openTask(T,x);return r;}
+  r.querySelector('.info').onclick=()=>openTask(T,x);
+  wireSwipe(r,x.t,()=>{const i=S.tareas.indexOf(x);if(i<0)return;S.tareas.splice(i,1);save();renderTasks(T);vib(12);toast('Tarea borrada',()=>{S.tareas.splice(Math.min(i,S.tareas.length),0,x);save();renderTasks(T);});});
+  return r;}
 /* arrastrar para ordenar (como en Recordatorios) */
 function wireTaskDrag(L,T){L.querySelectorAll('.tkr .hdl').forEach(h=>{h.onpointerdown=e=>{const row=h.closest('.tkr');if(!row)return;e.preventDefault();
   const rows=[...L.querySelectorAll('.tkr')].filter(x=>x.querySelector('.hdl')),idx=rows.indexOf(row);if(idx<0)return;
@@ -2052,7 +2077,7 @@ function addMate(T){const m=S.salud.mate;if(!m)return;const prev=Object.assign({
 function openWaterSheet(){const T=todayStr(),draw=()=>{const w=waterOf(T),g=waterGoal();
   SI.innerHTML=`<div><h3>Agua de hoy</h3><p class="sub small">${fmtL(w)} de ${fmtL(g)}${S.salud.agua==='auto'&&waterExtra(T).length?' (incluye '+waterExtra(T).map(x=>'+'+fmtL(x[0])+' por '+esc(x[1])).join(', ')+')':''} · el mate también cuenta</p></div><div class="track" style="height:8px"><i style="width:${Math.min(100,Math.round(w/g*100))}%;background:var(--water)"></i></div>
    <div class="wopts">${[[150,'Taza','150 ml'],[250,'Vaso','250 ml'],[500,'Botella','500 ml'],[750,'Botella grande','750 ml']].map(([ml,l,sub])=>`<button class="btn" type="button" data-ml="${ml}"><b>${l}</b><small>${sub}</small></button>`).join('')}</div>
-   <button class="btn" type="button" id="wMate" style="width:100%"><b>Mate</b><small style="display:block;font-size:11.5px;color:var(--muted);font-weight:600">${S.salud.mate?'tu parte: '+S.salud.mate.ml+' ml (estimado)':'configuralo una vez'}</small></button><div id="mateCfg" hidden></div>
+   <p class="sub small" style="margin:0">Último mate o café hoy: <b>${mateCut().hm}</b> para no perder sueño.</p><button class="btn" type="button" id="wMate" style="width:100%"><b>Mate</b><small style="display:block;font-size:11.5px;color:var(--muted);font-weight:600">${S.salud.mate?'tu parte: '+S.salud.mate.ml+' ml (estimado)':'configuralo una vez'}</small></button><div id="mateCfg" hidden></div>
    <div class="inl"><button class="btn" type="button" id="wUndo" ${((S.dias[T]||{}).agua||0)>0?'':'disabled'}>Quitar 250 ml</button><button class="btn primary" type="button" id="ok" style="flex:1">Listo</button></div>`;
   SI.querySelectorAll('[data-ml]').forEach(b=>b.onclick=()=>{addWater(Number(b.dataset.ml));draw();});
   SI.querySelector('#wMate').onclick=()=>{if(S.salud.mate){if(!tapOk('mate'))return;addMate(T);draw();return;}const c=SI.querySelector('#mateCfg');c.hidden=false;
