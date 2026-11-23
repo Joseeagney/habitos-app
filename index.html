@@ -874,6 +874,19 @@ nav.tabs button{color:var(--fg)!important;opacity:.55}
 nav.tabs button[aria-current="page"]{background:color-mix(in srgb,var(--fg) 10%,transparent)!important;color:var(--olive)!important;opacity:1}
 :root:not([data-theme]){--page:#f2f2f7}
 [data-theme="dark"],[data-theme="oscuro"]{--page:#000}
+/* ===== v8: vidrio líquido en los controles que flotan (las tarjetas quedan sólidas) ===== */
+:root{--gl-bg:rgba(255,255,255,.4);--gl-hi:rgba(255,255,255,.95);--gl-edge:rgba(255,255,255,.7);--gl-sh:0 10px 30px -8px rgba(30,32,20,.28),0 2px 6px rgba(30,32,20,.08);--gl-sheen:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.12) 45%,rgba(255,255,255,0) 60%,rgba(255,255,255,.18) 100%)}
+[data-theme="dark"],[data-theme="suave"]{--gl-bg:rgba(44,44,46,.48);--gl-hi:rgba(255,255,255,.28);--gl-edge:rgba(255,255,255,.14);--gl-sh:0 12px 34px -8px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.3);--gl-sheen:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 45%,rgba(255,255,255,0) 60%,rgba(255,255,255,.06) 100%)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-theme="claro"]){--gl-bg:rgba(44,44,46,.48);--gl-hi:rgba(255,255,255,.28);--gl-edge:rgba(255,255,255,.14);--gl-sh:0 12px 34px -8px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.3);--gl-sheen:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 45%,rgba(255,255,255,0) 60%,rgba(255,255,255,.06) 100%)}}
+nav.tabs div,header.top .ghost,#wfab,.dhd .c,#tkC,#v-prog .segtab{background:var(--gl-sheen),var(--gl-bg)!important;-webkit-backdrop-filter:blur(22px) saturate(1.9)!important;backdrop-filter:blur(22px) saturate(1.9)!important;border:.5px solid var(--gl-edge)!important;box-shadow:inset 0 1px 0 var(--gl-hi),inset 0 -1px 1px rgba(0,0,0,.05),var(--gl-sh)!important}
+.dhd .c,#tkC{box-shadow:inset 0 1px 0 var(--gl-hi),0 1px 3px rgba(0,0,0,.06)!important}
+#v-prog .segtab{box-shadow:inset 0 1px 0 var(--gl-hi),0 4px 14px -6px rgba(0,0,0,.18)!important}
+nav.tabs div{padding:5px!important}
+nav.tabs button[aria-current="page"],#v-prog .segtab button[aria-selected="true"]{background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.12)),color-mix(in srgb,var(--olive) 14%,transparent)!important;box-shadow:inset 0 1px 0 var(--gl-hi),inset 0 0 0 .5px var(--gl-edge),0 2px 8px -2px rgba(0,0,0,.18)!important;color:var(--olive)!important}
+[data-theme="dark"] nav.tabs button[aria-current="page"],[data-theme="dark"] #v-prog .segtab button[aria-selected="true"],[data-theme="suave"] nav.tabs button[aria-current="page"],[data-theme="suave"] #v-prog .segtab button[aria-selected="true"]{background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.03)),color-mix(in srgb,var(--olive) 18%,transparent)!important}
+header.top .ghost{width:44px;height:44px;border-radius:50%!important;display:grid;place-items:center}
+.tkadd button{background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 60%),var(--olive)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 12px -4px color-mix(in srgb,var(--olive) 60%,transparent)!important}
+.btn.primary{background-image:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 55%)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 6px 16px -8px rgba(0,0,0,.35)!important}
 </style>
 </head>
 <body>
