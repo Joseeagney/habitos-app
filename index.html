@@ -1172,10 +1172,14 @@ function ringsData(T){const x=slp(T),rest=x?Math.min(1,slH(x)/S.salud.meta):0;
 // Se mueve de a 30 min por noche (un salto grande hace difícil dormirse) y nunca cambia la hora de levantarte.
 function recBed(T){T=T||todayStr();const meta=S.salud.meta,wake=S.salud.wake,ax=m=>m<720?m+1440:m,tgt=ax(hm2m(bedTarget()));
   const bs=[];for(let k=0;k<3;k++){const x=slp(add(T,-k));if(x)bs.push(ax(hm2m(x.b)));}const avg=bs.length?bs.reduce((a,c)=>a+c,0)/bs.length:null,last=slp(T),r15=m=>Math.round(m/15)*15;
-  if(avg!=null&&avg>tgt+30){const r=Math.max(tgt,r15(avg-30));return {hm:m2hm(r),why:`Te venís acostando cerca de las ${m2hm(r15(avg))}. Adelantá de a 30 min por noche hasta llegar a las ${m2hm(tgt)}: un salto grande hace que te cueste dormirte. Levantate siempre a las ${wake}.`};}
+  if(avg!=null&&avg>tgt+30){const r=Math.max(tgt,r15(avg-30));return {hm:m2hm(r),why:`Te venís acostando cerca de las ${m2hm(r15(avg))}. Adelantá de a 30 min por noche hasta llegar a las ${m2hm(tgt)}, levantate siempre a las ${wake} y salí a la luz apenas te levantes: la luz de la mañana es lo que más ayuda al reloj del cuerpo a adelantarse.`};}
   if(last&&slH(last)<meta-1){const r=tgt-30;return {hm:m2hm(r),why:`Anoche estuviste ${fmtH(slH(last))} en cama. Acostate 30 min antes y levantate a la hora de siempre (${wake}): recuperás sin desordenar el horario. Una sola noche larga no compensa varias cortas.`};}
   return {hm:m2hm(tgt),why:`Para estar ${fmtH(meta)} en cama y levantarte a las ${wake}. Mantener esa hora todos los días, también el finde, es lo que más ayuda a dormirte rápido.`};}
-function planText(T,b){const bed=recBed(T).hm,mate=m2hm(hm2m(bed)-9*60),hr=curHr(),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
+// Corte de cafeína: metaanálisis 2023 (café 107 mg -> 8,8 h antes de dormir; 217,5 mg -> 13,2 h).
+// Un termo entero de mate (30 g de yerba, 15 cebadas) tiene unos 250 mg (Fragale 2026); se escala por tu parte.
+function mateCut(bed){const parte=(S.salud.mate&&S.salud.mate.parte)||50,mg=Math.round(260*parte/100),h=Math.min(13.2,Math.max(8.8,8.8+(mg-107)*(4.4/110.5))),hh=Math.ceil(h*2)/2;
+  return {hm:m2hm(hm2m(bed||recBed().hm)-hh*60),h:hh,mg};}
+function planText(T,b){const bed=recBed(T).hm,mate=mateCut(bed).hm,hr=curHr(),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
   if(!b)return 'Anotá cómo dormiste y te armo el plan del día.';
   if(hr>=20||hr<5)return b.lvl==='Baja'?`Hoy la batería estuvo baja: priorizá dormir. <b>A la cama a las ${bed}</b>, con el celular afuera.`:`Cerrá bien el día: <b>a dormir a las ${bed}</b> para llegar a ${fmtH(S.salud.meta)}.`;
   const L=b.lvl==='Baja'?[gT&&!gD?'gimnasio en versión mínima':null,`<b>a dormir a las ${bed}</b>`]
@@ -1211,6 +1215,7 @@ function analisis(T){const A=[],hr=curHr(),meta=S.salud.meta,RB=recBed(T),bed=RB
   const w=waterOf(T),g=waterGoal();if(hr>=15&&hr<22&&w<g*.4)add1(45,`<b>Vas ${fmtL(w)} de ${fmtL(g)} de agua.</b> Sumá una botella ahora.`,'A esta hora ya deberías ir por la mitad de tu meta.');
   const d=S.dias[T]||{},pt=d.pasosHoy&&d.pasosHoy.n,as=avgSteps(a7,y);if(hr>=17&&hr<22&&pt!=null&&pt<4000&&as!=null&&as<6000)add1(40,`<b>${fmtN(pt)} pasos hoy.</b> Una caminata de 15 min te acerca a tu meta.`,`Tu promedio de la semana: ${fmtN(Math.round(as))} pasos por día.`);
   add1(hr>=21||hr<5?57:hr>=19?42:25,`<b>Esta noche, a la cama a las ${bed}.</b>`,RB.why);
+  {const mc=mateCut(bed);if(hr<16)add1(hr>=12?47:22,`<b>Último mate o café a las ${mc.hm}.</b>`,`Con tu parte del termo tomás unos ${mc.mg} mg de cafeína. Un metaanálisis de 2023 encontró que para no perder sueño, 107 mg (un café) van al menos 8,8 h antes de dormir y 217 mg, 13,2 h antes. Por eso te dejo ${String(mc.h).replace('.',',')} h antes de las ${bed}.`);}
   // lo que va bien (para no mostrar solo lo flojo)
   if(noches>=5&&cortas===0)add1(20,`<b>Venís durmiendo bien:</b> ${noches} noches sin quedar cortas. Mantené el horario.`,'Todas las noches de la semana cerca de tu meta.');
   if(r7!=null&&r7>=.85)add1(15,`<b>Constancia de ${Math.round(r7*100)}% esta semana.</b> Buen ritmo: no sumes nada nuevo todavía.`,'Cuando un ritmo funciona, conviene sostenerlo antes de agregar más.');
