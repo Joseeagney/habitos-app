@@ -703,9 +703,9 @@ html,body{transition:background-color .6s ease}
 .synclk{word-break:break-all;background:var(--soft);border-radius:8px;padding:10px 12px;user-select:all;-webkit-user-select:all}
 
 /* ================= v4: tarjetas estilo iOS (mismo contenido, más orden y profundidad) ================= */
-:root{--page:#f3f3f0;--cshadow:0 1px 2px rgba(28,30,18,.05),0 10px 28px -16px rgba(28,30,18,.2);--r:22px}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--page:#0b0b0b;--cshadow:0 0 0 1px rgba(255,255,255,.06)}}
-:root[data-theme="dark"]{--page:#0b0b0b;--cshadow:0 0 0 1px rgba(255,255,255,.06)}
+:root{--page:#f2f2f7;--cshadow:0 1px 2px rgba(28,30,18,.05),0 10px 28px -16px rgba(28,30,18,.2);--r:22px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--page:#000;--bg:#1c1c1e;--soft:#2c2c2e;--line:#38383a;--cshadow:0 0 0 1px rgba(255,255,255,.06)}}
+:root[data-theme="dark"]{--page:#000;--bg:#1c1c1e;--soft:#2c2c2e;--line:#38383a;--cshadow:0 0 0 1px rgba(255,255,255,.06)}
 :root[data-theme="suave"]{--page:#0f0b08;--bg:#1a1511;--soft:#241d17;--line:#2e261e;--cshadow:0 0 0 1px rgba(255,226,184,.06)}
 html{background:var(--page)!important}
 .view{gap:18px!important}
@@ -887,11 +887,30 @@ nav.tabs button[aria-current="page"],#v-prog .segtab button[aria-selected="true"
 header.top .ghost{width:44px;height:44px;border-radius:50%!important;display:grid;place-items:center}
 .tkadd button{background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 60%),var(--olive)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 12px -4px color-mix(in srgb,var(--olive) 60%,transparent)!important}
 .btn.primary{background-image:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 55%)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 6px 16px -8px rgba(0,0,0,.35)!important}
+/* ===== v9: calidad tipo iOS (colores del sistema, barra compacta, movimiento) ===== */
+.minibar{position:fixed;left:0;right:0;top:0;z-index:6;height:calc(44px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);display:grid;place-items:center;font-weight:600;font-size:17px;letter-spacing:-.01em;color:var(--fg);
+  background:color-mix(in srgb,var(--page) 86%,transparent);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);border-bottom:.5px solid color-mix(in srgb,var(--fg) 12%,transparent);opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+.minibar.on{opacity:1;transform:none}
+/* tocar: se hunde un poco y vuelve con resorte */
+.qt,.hrw .info,.tkr .info,.aviso,.ghd,.revrow,.btn,nav.tabs button,header.top .ghost,#wfab,.plus,.segtab button{transition:transform .35s cubic-bezier(.34,1.56,.64,1),background-color .2s,box-shadow .2s}
+.qt:active,.aviso:active,.revrow:active,.btn:active,header.top .ghost:active,.plus:active{transform:scale(.96)!important;transition-duration:.08s}
+nav.tabs button:active,.segtab button:active{transform:scale(.94)}
+/* tilde: relleno con resorte y check que se dibuja */
+.ck2{transition:background-color .25s ease,border-color .25s ease,transform .35s cubic-bezier(.34,1.56,.64,1)!important}
+.ck2 svg path{stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .3s ease .05s}
+.hrw.done .ck2 svg path,.tkr.done .ck2 svg path{stroke-dashoffset:0}
+/* cambio de pantalla suave */
+.view:not([hidden]){animation:viewIn .28s cubic-bezier(.2,.7,.2,1)}
+@keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view:not([hidden]){animation:none}.ck2 svg path{transition:none}}
+/* tarjetas: sombra más suave tipo iOS en claro */
+:root:not([data-theme="dark"]):not([data-theme="suave"]){--cshadow:0 1px 1px rgba(0,0,0,.03),0 6px 20px -10px rgba(0,0,0,.12)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
+  <div class="minibar" id="miniBar" aria-hidden="true"><span id="miniT">Hoy</span></div>
+<header class="top">
     <div style="min-width:0"><p class="eyebrow" id="dateline"></p><h1 id="hello">Hola, José</h1></div>
     <div style="display:flex;gap:2px">
       <button class="ghost" type="button" id="themeBtn" aria-label="Cambiar modo claro u oscuro"><svg class="i" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
@@ -2072,6 +2091,11 @@ let lastDay=todayStr(),SYNC_TICK=0;setInterval(()=>{const t=todayStr();if(t!==la
 syncAndRender();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){renderAll();applyTone();syncAndRender();if(SYNC_TAP){setTimeout(syncAndRender,2500);setTimeout(syncAndRender,6000);}}});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});// busca una versión nueva del service worker en cada apertura
+
+/* barra compacta al deslizar, como los títulos grandes de iOS */
+(function(){const mb=document.getElementById('miniBar'),mt=document.getElementById('miniT');if(!mb)return;let on=false;
+  const tick=()=>{const v=[...document.querySelectorAll('.view')].find(x=>!x.hidden),t=v?(v.id==='v-hoy'?'Hoy':v.id==='v-prog'?'Progreso':(v.querySelector('h1')||{}).textContent||''):'';if(mt.textContent!==t)mt.textContent=t;const o=window.scrollY>72;if(o!==on){on=o;mb.classList.toggle('on',o);}};
+  window.addEventListener('scroll',tick,{passive:true});document.addEventListener('click',()=>setTimeout(tick,50));tick();})();
 </script>
 </body>
 </html>
