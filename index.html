@@ -603,7 +603,12 @@ details.help p{margin-top:8px}
 .rowx small.up{color:var(--olive)}.rowx small.dn{color:var(--warn)}
 .sbq{display:flex;flex-direction:column}.sbr{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.sbr p{font-size:14px}
 .split button.on{background:var(--olive);color:var(--onc)}
-.br{display:grid;place-items:center;height:236px;margin:0 0 -10px}
+.br{display:grid;place-items:center;height:200px;margin:0}
+.brinfo{display:flex;flex-direction:column;gap:4px}
+.brinfo p{margin:0}
+.brrow{display:flex;flex-direction:column;gap:8px}
+.segtab.sm button{font-size:13px;padding:7px 4px}
+#brT{text-align:center;max-width:170px;line-height:1.25}
 .bc{position:relative;width:210px;height:210px;display:grid;place-items:center}
 .bcf{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--olive) 35%,var(--bg)),var(--olive-s));transform:scale(.55);transition:transform .25s linear;box-shadow:0 0 0 10px color-mix(in srgb,var(--olive) 8%,transparent)}
 .bc span{position:relative}
@@ -724,7 +729,7 @@ header.top .ghost:active{transform:scale(.92)}
 #v-hoy .herocard .bs2 .score{font-size:62px}
 #v-hoy .herocard .plan{margin:0;padding-top:14px;border-top:1px solid var(--line)}
 .aviso{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;width:100%;margin-top:12px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--warn) 9%,transparent);font-size:14.5px;line-height:1.4;cursor:pointer}
-.aviso.ok{background:color-mix(in srgb,var(--olive) 10%,transparent)}
+.avl2{margin-top:10px;font-size:13.5px;color:var(--muted)}
 .aviso b{font-weight:700}
 .avl{display:flex;flex-direction:column;gap:10px}
 .av{padding:12px 14px;border-radius:14px;background:var(--soft)}
@@ -1215,7 +1220,7 @@ function openAnalisis(T){const A=analisis(T);
   SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
 function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T);
   box.innerHTML=(b?`<div class="herocard"><button type="button" class="bx bxb" id="ringsB" aria-label="Ver tus 3 anillos"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy · orientativa</span><div class="score lvw l${b.lvl}">${b.lvl}</div><span class="lv3${b.lvl==='Baja'?' low':''}">${shortNights(T)}</span></div></button>
-   <p class="plan">${planText(T,b)}</p>${(()=>{const A=analisis(T);return A.length&&A[0].p>=40?`<button type="button" class="aviso" id="avB"><span>${A[0].t}</span><span class="sub small">${A.length>1?'Ver análisis ('+A.length+')':'Ver por qué'} ›</span></button>`:A.length?`<button type="button" class="aviso ok" id="avB"><span>${A[0].t}</span><span class="sub small">Ver análisis ›</span></button>`:'';})()}</div>`:'')+quickRow(T);
+   ${(()=>{const A=analisis(T);if(A.length&&A[0].p>=40)return `<button type="button" class="aviso" id="avB"><span>${A[0].t}</span><span class="sub small">Ver análisis ›</span></button>`;return `<p class="plan">${planText(T,b)}</p>`+(A.length?`<button type="button" class="link avl2" id="avB">Ver análisis ›</button>`:'');})()}</div>`:'')+quickRow(T);
   const rb=box.querySelector('#ringsB');if(rb)rb.onclick=()=>openRings(T);const av=box.querySelector('#avB');if(av)av.onclick=()=>openAnalisis(T);
   wireQuick(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
 function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Tiempo en cama contra tu meta','Gimnasio, pádel y correr esta semana','Estudio y proyecto de hoy'];
@@ -1252,12 +1257,19 @@ function renderDay(T){const box=document.getElementById('day'),now=momNow();box.
   items.sort((a,b)=>a.key-b.key);
   const isDone=it=>it.k==='h'?st(T,it.h.id)!==0:((S.exp.log||{})[T]===1),isOpt=it=>it.k==='h'&&(it.h.opt||it.h.breath||quotaFree(it.h,T));
   const reqs=items.filter(it=>!isOpt(it)&&!(it.k==='h'&&st(T,it.h.id)===-1)),dn=reqs.filter(isDone).length;
-  const main=items.filter(it=>!isOpt(it)||isDone(it)),opt=items.filter(it=>isOpt(it)&&!isDone(it));
+  const main=items.filter(it=>!isOpt(it)&&!isDone(it)),done=items.filter(it=>isDone(it)),opt=items.filter(it=>isOpt(it)&&!isDone(it));
   const rowOf=it=>it.k==='h'?habRow(T,it.h):expRow(T);
   const hd=document.createElement('div');hd.className='dhd';hd.innerHTML=`<h2>Hábitos de hoy</h2><span class="c num${reqs.length&&dn===reqs.length?' ok':''}">${reqs.length?(dn===reqs.length?'Listo ✓':dn+' de '+reqs.length):''}</span>`;box.appendChild(hd);
   const list=document.createElement('div');list.className='rows flat';let last='';
   main.forEach(it=>{if(it.m!==last){last=it.m;const l=document.createElement('p');l.className='mlab'+(it.m===now?' now':'');l.innerHTML=MICO[it.m]+'<span></span>';l.querySelector('span').textContent=MOMS[mi(it.m)][1]+(it.m===now?' · ahora':'');list.appendChild(l);}list.appendChild(rowOf(it));});
+  if(!main.length){const p=document.createElement('p');p.className='empty';p.textContent=reqs.length?'Hiciste todo lo de hoy.':'Hoy no toca ningún hábito obligatorio.';list.appendChild(p);}
   box.appendChild(list);
+  if(done.length){const g=document.createElement('section'),op=!!openGrp.dn;g.className='grp'+(op?' open':'');
+    g.innerHTML=`<button type="button" class="ghd" aria-expanded="${op}"><span><b>Hechos · ${done.length}</b><small></small></span>${SVGI.chev}</button>`;
+    g.querySelector('small').textContent=done.map(it=>it.k==='h'?it.h.name:'Experimento').join(' · ');
+    g.querySelector('.ghd').onclick=()=>{openGrp.dn=!op;renderDay(T);};
+    if(op){const rows=document.createElement('div');rows.className='rows flat';done.forEach(it=>rows.appendChild(rowOf(it)));g.appendChild(rows);}
+    box.appendChild(g);}
   if(opt.length){const g=document.createElement('section'),op=!!openGrp.opt;g.className='grp'+(op?' open':'');
     g.innerHTML=`<button type="button" class="ghd" aria-expanded="${op}"><span><b>Opcionales</b><small></small></span>${SVGI.chev}</button>`;
     g.querySelector('small').textContent=opt.map(it=>it.k==='h'?it.h.name:'Experimento').join(' · ');
@@ -1553,21 +1565,45 @@ function openStopBang(){const ans=(S.salud.sb&&S.salud.sb.ans)?S.salud.sb.ans.sl
     ok.onclick=()=>{const sc=ans.reduce((p,c)=>p+(c||0),0);S.salud.sb={score:sc,date:todayStr(),ans};save();renderAll();
       const lv=sc>=5?'alto':sc>=3?'intermedio':'bajo';SI.innerHTML=`<div><h3>Riesgo ${lv} (${sc} de 8)</h3><p class="sub" style="margin-top:8px">${sc>=3?'Según este cuestionario conviene consultar con un médico (clínico u otorrino) y comentarle tus ronquidos y el dolor de cabeza al despertar. Puede pedirte un estudio del sueño.':'Según este cuestionario el riesgo es bajo. Igual, si los dolores de cabeza al despertar siguen, conviene consultar.'}</p><p class="sub small" style="margin-top:8px">No es un diagnóstico: solo un médico puede confirmarlo.</p></div><button class="btn primary" type="button" id="ok2">Listo</button>`;SI.querySelector('#ok2').onclick=()=>sheet.close();};};
   draw();if(!sheet.open)sheet.showModal();}
-function openBreath(T,h){let run=false,last=0,raf=0,el=0,mode='suspiro';const TOT=300,RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const TX={suspiro:'Suspiro cíclico: inhalá por la nariz, sumá una segunda inhalación corta y soltá todo el aire lento por la boca.',lenta:'Respiración lenta: inhalá 4 segundos y soltá 6. Unas 6 respiraciones por minuto.'};
-  SI.innerHTML=`<div><h3>Respiración · 5 minutos</h3><div class="segtab" id="brM" role="tablist" style="margin:10px 0 8px"><button type="button" data-m="suspiro" aria-selected="true">Suspiro cíclico</button><button type="button" data-m="lenta" aria-selected="false">Lenta 4:6</button></div><p class="sub small" id="brD"></p></div><div class="br"><div class="bc"><i class="bcf"></i><span id="brT">Listo</span></div></div><p class="num" id="brC" style="text-align:center;font-size:22px;font-weight:700">5:00</p><p class="sub small" style="text-align:center;margin-top:-6px">Cuenta solo mientras la app está abierta.</p><button class="btn primary" type="button" id="brGo">Empezar</button><button class="btn" type="button" id="brX">Salir</button>`;
-  const C=SI.querySelector('.bcf'),TT=SI.querySelector('#brT'),CC=SI.querySelector('#brC'),go=SI.querySelector('#brGo'),D=SI.querySelector('#brD');D.textContent=TX[mode];
-  SI.querySelectorAll('#brM button').forEach(b=>b.onclick=()=>{if(el>0)return;mode=b.dataset.m;D.textContent=TX[mode];SI.querySelectorAll('#brM button').forEach(x=>x.setAttribute('aria-selected',x===b));});
-  const phase=x=>{if(mode==='lenta'){const c=x%10;return c<4?['Inhalá',.55+.45*(c/4)]:['Soltá',1-.45*((c-4)/6)];}const c=x%9;if(c<2)return ['Inhalá',.55+.3*(c/2)];if(c<3)return ['Un poco más',.85+.15*(c-2)];return ['Soltá lento',1-.45*((c-3)/6)];};
+/* sonido generado en el celular (sin archivos): tonos suaves y lluvia */
+const SND={ctx:null,noise:null,gain:null};
+function sndCtx(){if(!SND.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;SND.ctx=new C();}if(SND.ctx.state==='suspended')SND.ctx.resume();return SND.ctx;}
+function tone(f,dur,vol){const c=sndCtx();if(!c)return;const o=c.createOscillator(),g=c.createGain(),t=c.currentTime;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol||.07,t+.08);g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.9));o.connect(g).connect(c.destination);o.start(t);o.stop(t+(dur||.9)+.05);}
+function bell(){tone(528,3.2,.09);setTimeout(()=>tone(792,2.4,.04),40);}
+function rainOn(){const c=sndCtx();if(!c||SND.noise)return;const len=c.sampleRate*3,buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);let last=0;for(let k=0;k<len;k++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[k]=last*3.2;}
+  const src=c.createBufferSource(),lp=c.createBiquadFilter(),g=c.createGain();src.buffer=buf;src.loop=true;lp.type='lowpass';lp.frequency.value=1000;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.16,c.currentTime+2);src.connect(lp).connect(g).connect(c.destination);src.start();SND.noise=src;SND.gain=g;}
+function rainOff(){if(!SND.noise)return;const c=SND.ctx,g=SND.gain,n=SND.noise;try{g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(g.gain.value,c.currentTime);g.gain.linearRampToValueAtTime(0,c.currentTime+.6);n.stop(c.currentTime+.7);}catch(e){}SND.noise=null;}
+function openBreath(T,h){let run=false,last=0,raf=0,el=0,mode='suspiro',snd='guia',TOT=300,ph='',tipI=-1;const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MODES={suspiro:{n:'Suspiro',t:'Suspiro cíclico',para:'Para bajar el estrés en el momento y mejorar el ánimo.',como:'Inhalá por la nariz, sumá una segunda inhalación corta y soltá todo el aire lento por la boca.',ev:'En un ensayo de 2023, 5 minutos por día durante un mes mejoraron el ánimo más que la meditación.'},
+    lenta:{n:'Lenta 4:6',t:'Respiración lenta',para:'Para calmarte antes de dormir o antes de algo que te pone nervioso.',como:'Inhalá 4 segundos y soltá 6. Son 6 respiraciones por minuto.',ev:'Respirar lento baja la activación del cuerpo: el pulso se calma.'},
+    medita:{n:'Meditación',t:'Meditación de atención',para:'Para entrenar la atención y manejar la ansiedad con el tiempo.',como:'Sentate cómodo, cerrá los ojos y seguí el aire. Cuando te distraigas, volvé sin enojarte: eso es el ejercicio.',ev:'En una revisión de 47 ensayos, mejoró algo la ansiedad y el ánimo. Rinde con práctica regular.'}};
+  const TIPS=['Notá el aire al entrar y al salir','Aflojá hombros y mandíbula','Si te distraés, volvé al aire','Notá el peso del cuerpo','Seguí el aire, sin cambiarlo'];
+  SI.innerHTML=`<div><h3 id="brH">Respiración</h3><div class="segtab" id="brM" role="tablist" style="margin:10px 0 0">${Object.entries(MODES).map(([k,m])=>`<button type="button" data-m="${k}" aria-selected="${k===mode}">${m.n}</button>`).join('')}</div></div>
+   <div class="brinfo"><p><b id="brPara"></b></p><p class="sub small" id="brComo"></p><p class="sub tiny" id="brEv"></p></div>
+   <div class="br"><div class="bc"><i class="bcf"></i><span id="brT">Listo</span></div></div><p class="num" id="brC" style="text-align:center;font-size:22px;font-weight:700;margin:0">5:00</p>
+   <div class="brrow"><div class="segtab sm" id="brS">${[['nada','Sin sonido'],['guia','Tonos'],['lluvia','Lluvia']].map(([k,l])=>`<button type="button" data-s="${k}" aria-selected="${k===snd}">${l}</button>`).join('')}</div><div class="segtab sm" id="brD" hidden>${[5,10].map(m=>`<button type="button" data-d="${m}" aria-selected="${m===5}">${m} min</button>`).join('')}</div></div>
+   <p class="sub tiny" style="text-align:center;margin:0">Cuenta solo con la app abierta. Con el iPhone en silencio no suena.</p>
+   <button class="btn primary" type="button" id="brGo">Empezar</button><button class="btn" type="button" id="brX">Salir</button>`;
+  const $=q=>SI.querySelector(q),C=$('.bcf'),TT=$('#brT'),CC=$('#brC'),go=$('#brGo');
+  const fmtT=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
+  const paint=()=>{const m=MODES[mode];$('#brPara').textContent=m.para;$('#brComo').textContent=m.como;$('#brEv').textContent=m.ev;$('#brD').hidden=mode!=='medita';if(mode!=='medita')TOT=300;CC.textContent=fmtT(TOT-el);
+    SI.querySelectorAll('#brM button').forEach(x=>x.setAttribute('aria-selected',x.dataset.m===mode));SI.querySelectorAll('#brS button').forEach(x=>x.setAttribute('aria-selected',x.dataset.s===snd));SI.querySelectorAll('#brD button').forEach(x=>x.setAttribute('aria-selected',Number(x.dataset.d)*60===TOT));};
+  SI.querySelectorAll('#brM button').forEach(b=>b.onclick=()=>{if(el>0)return;mode=b.dataset.m;paint();});
+  SI.querySelectorAll('#brD button').forEach(b=>b.onclick=()=>{if(el>0)return;TOT=Number(b.dataset.d)*60;paint();});
+  SI.querySelectorAll('#brS button').forEach(b=>b.onclick=()=>{snd=b.dataset.s;if(run){if(snd==='lluvia')rainOn();else rainOff();}paint();});
+  const phase=x=>{if(mode==='medita'){const k=Math.floor(x/45)%TIPS.length;return [TIPS[k],.8+.04*Math.sin(x/6*2*Math.PI)];}
+    if(mode==='lenta'){const c=x%10;return c<4?['Inhalá',.55+.45*(c/4)]:['Soltá',1-.45*((c-4)/6)];}const c=x%9;if(c<2)return ['Inhalá',.55+.3*(c/2)];if(c<3)return ['Un poco más',.85+.15*(c-2)];return ['Soltá lento',1-.45*((c-3)/6)];};
   const credit=()=>{if(el>=180&&h&&st(T,h.id)===0)setState(T,h.id,2,true);};
-  const pause=()=>{if(!run)return;run=false;cancelAnimationFrame(raf);go.textContent='Seguir';TT.textContent='En pausa';credit();};
-  const tick=now=>{if(!run)return;const dt=(now-last)/1000;last=now;if(dt>0&&dt<1)el+=dt;// un salto grande (pantalla bloqueada) no cuenta
-    const left=Math.max(0,TOT-el),[w,sc]=phase(el);TT.textContent=w;if(!RM)C.style.transform=`scale(${sc})`;CC.textContent=Math.floor(left/60)+':'+String(Math.floor(left%60)).padStart(2,'0');
-    if(left<=0){run=false;TT.textContent='Listo';go.textContent='Terminado';go.disabled=true;if(h&&st(T,h.id)===0)setState(T,h.id,2,true);vib(20);return;}raf=requestAnimationFrame(tick);};
+  const stopSnd=()=>rainOff();
+  const pause=()=>{if(!run)return;run=false;cancelAnimationFrame(raf);stopSnd();go.textContent='Seguir';TT.textContent='En pausa';credit();};
+  const tick=now=>{if(!run)return;const dt=(now-last)/1000;last=now;if(dt>0&&dt<1)el+=dt;
+    const left=Math.max(0,TOT-el),[w,sc]=phase(el);if(w!==ph){ph=w;if(snd!=='nada'&&mode!=='medita')tone(w==='Inhalá'?440:w==='Un poco más'?523:330,.7,.06);}
+    TT.textContent=w;if(!RM)C.style.transform=`scale(${sc})`;CC.textContent=fmtT(left);
+    if(left<=0){run=false;stopSnd();if(snd!=='nada')bell();TT.textContent='Listo';go.textContent='Terminado';go.disabled=true;if(h&&st(T,h.id)===0)setState(T,h.id,2,true);vib(20);return;}raf=requestAnimationFrame(tick);};
   const onVis=()=>{if(document.hidden)pause();};document.addEventListener('visibilitychange',onVis);
-  go.onclick=()=>{if(run){pause();return;}run=true;last=performance.now();go.textContent='Pausar';raf=requestAnimationFrame(tick);};
-  SI.querySelector('#brX').onclick=()=>{pause();sheet.close();};
-  sheet.addEventListener('close',()=>{pause();document.removeEventListener('visibilitychange',onVis);},{once:true});if(!sheet.open)sheet.showModal();}
+  go.onclick=()=>{if(run){pause();return;}if(snd!=='nada'){sndCtx();if(el===0&&mode==='medita')bell();if(snd==='lluvia')rainOn();}run=true;ph='';last=performance.now();go.textContent='Pausar';raf=requestAnimationFrame(tick);};
+  $('#brX').onclick=()=>{pause();sheet.close();};
+  sheet.addEventListener('close',()=>{pause();stopSnd();document.removeEventListener('visibilitychange',onVis);},{once:true});paint();if(!sheet.open)sheet.showModal();}
 function renderSaludExtras(T){return;const box=document.getElementById('salud');if(!box)return;
   const sb=S.salud.sb,ex=document.createElement('div');ex.className='sx';
   if(!sb)ex.innerHTML=`<div class="note"><b>Chequeo de apnea del sueño.</b> Con ronquidos y dolor de cabeza al despertar, vale la pena hacerlo (1 minuto).<br><button class="link" type="button" id="sbGo">Hacer el chequeo</button></div>`;
@@ -1624,7 +1660,7 @@ function renderSyncCfg(){const el=document.getElementById('syncSt');if(!el)retur
 /* ---------- TAREAS: escribís lo que tenés que hacer, tocás + y listo ---------- */
 function tasksOf(){if(!Array.isArray(S.tareas))S.tareas=[];return S.tareas;}
 const TK_FLAG='<svg class="tkf" viewBox="0 0 24 24" aria-label="Importante"><path d="M6 21V4h10.5l-1.6 4 1.6 4H6"/></svg>',TK_HDL='<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>';
-let TK_DRAG=false,TK_FUT=false;
+let TK_DRAG=false,TK_FUT=false,TK_ALL=false,TK_DN=false;
 const tkVisible=(x,T)=>!x.done&&(!x.due||x.due<=T);
 function taskMeta(T,x){if(x.done)return [['ok','Hecha']];const m=[];if(x.hm)m.push(['tm',x.hm]);
   if(x.due&&x.due>T)m.push(['',x.due===add(T,1)?'Mañana':fmt(x.due,{weekday:'short',day:'numeric',month:'short'})]);
@@ -1634,7 +1670,9 @@ function taskMeta(T,x){if(x.done)return [['ok','Hecha']];const m=[];if(x.hm)m.pu
 function renderTasks(T){const L=document.getElementById('tkList'),c=document.getElementById('tkC');if(!L||TK_DRAG)return;
   const all=tasksOf(),pend=all.filter(x=>tkVisible(x,T)),fut=all.filter(x=>!x.done&&x.due&&x.due>T).sort((p,q)=>p.due<q.due?-1:p.due>q.due?1:0),dnT=all.filter(x=>x.done===T);L.innerHTML='';
   c.textContent=pend.length?pend.length+(pend.length===1?' pendiente':' pendientes'):(dnT.length?'Al día ✓':'');c.classList.toggle('ok',!pend.length&&dnT.length>0);
-  pend.forEach(x=>L.appendChild(taskRow(T,x,true)));dnT.forEach(x=>L.appendChild(taskRow(T,x,false)));
+  const MAXT=4,vis=TK_ALL?pend:pend.slice(0,MAXT);vis.forEach(x=>L.appendChild(taskRow(T,x,true)));
+  if(pend.length>MAXT){const m=document.createElement('button');m.type='button';m.className='tkmore';m.innerHTML=`<span>${TK_ALL?'Ver menos':'Ver '+(pend.length-MAXT)+' más'}</span>${SVGI.chev}`;m.classList.toggle('open',TK_ALL);m.onclick=()=>{TK_ALL=!TK_ALL;renderTasks(T);};L.appendChild(m);}
+  if(dnT.length){const m=document.createElement('button');m.type='button';m.className='tkmore';m.innerHTML=`<span>Hechas hoy · ${dnT.length}</span>${SVGI.chev}`;m.classList.toggle('open',TK_DN);m.onclick=()=>{TK_DN=!TK_DN;renderTasks(T);};L.appendChild(m);if(TK_DN)dnT.forEach(x=>L.appendChild(taskRow(T,x,false)));}
   if(!pend.length&&!dnT.length&&!fut.length)L.innerHTML='<p class="tkh">Escribí lo que tenés que hacer y tocá <b>+</b>. Cuando lo hacés, lo tildás.</p>';
   if(fut.length){const g=document.createElement('button');g.type='button';g.className='tkmore';g.innerHTML=`<span>Próximas · ${fut.length}</span>${SVGI.chev}`;g.classList.toggle('open',TK_FUT);
     g.onclick=()=>{TK_FUT=!TK_FUT;renderTasks(T);};L.appendChild(g);if(TK_FUT)fut.forEach(x=>L.appendChild(taskRow(T,x,false)));}
