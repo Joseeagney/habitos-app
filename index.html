@@ -926,6 +926,31 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
 .slpmini{padding:0!important}
 .slpq{all:unset;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;cursor:pointer}
 .slpgo{font-weight:700;font-size:14px;color:var(--olive);background:var(--olive-s);border-radius:99px;padding:8px 14px}
+.imp{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px 14px 18px;border-radius:var(--r);background:var(--bg);box-shadow:var(--cshadow);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.imp .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;font-size:14.5px;line-height:1.42}
+.imp .k{font-size:12px;font-weight:700;color:var(--muted)}
+.imp .tx b{font-weight:700}
+.imp>svg{width:16px;height:16px;flex:none;fill:none;stroke:var(--faint);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.imp:active{transform:scale(.98)}
+.slpq2{display:flex;align-items:center;gap:8px;padding:14px 14px 14px 18px}
+.slpq2 .tx{flex:1;min-width:0}
+.slpbtn{all:unset;box-sizing:border-box;cursor:pointer;font-weight:700;font-size:14px;border-radius:99px;padding:8px 14px;flex:none;-webkit-tap-highlight-color:transparent}
+.slpbtn.yes{color:#fff;background:var(--olive);min-width:52px;text-align:center}
+.slpbtn.no{color:var(--olive);background:var(--olive-s)}
+.slpbtn:active{transform:scale(.94)}
+.qt.warn small{color:var(--warn)!important}
+.foco{background:var(--bg);border-radius:var(--r);box-shadow:var(--cshadow);padding:16px 18px;display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.foco p{margin:0;font-size:14.5px;line-height:1.42}
+.foco .acts{display:flex;gap:16px;align-items:center}
+.foco .acts .btn{width:auto;padding-inline:18px}
+.fcl{display:flex;flex-direction:column}
+.fcr{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.fcr:last-child{border-bottom:0}
+.fcr input{width:22px;height:22px;flex:none;accent-color:var(--olive);margin:0}
+.fcr.off{opacity:.45}
+.imp .it{display:block!important}
+#v-hoy #slpBox.slpmini{padding:0!important}
+.stepl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -1331,11 +1356,11 @@ function openAnalisis(T){const A=analisis(T);
   SI.innerHTML=`<div><h3>Análisis de tus datos</h3><p class="sub small">Últimos 7 días. Se calcula en tu celular; nada se envía.</p></div><div class="avl">${A.length?A.map(x=>`<div class="av"><p>${x.t}</p><p class="sub small">${esc(x.why)}</p></div>`).join(''):'<p class="note">Todavía no hay suficientes datos para un análisis. Anotá tu sueño y tus hábitos unos días.</p>'}</div><button class="btn" type="button" id="avCopy">Copiar resumen para Claude</button><button class="btn primary" type="button" id="ok">Listo</button>`;
   SI.querySelector('#avCopy').onclick=async()=>{try{await navigator.clipboard.writeText(resumenClaude(T));toast('Copiado: pegalo en tu chat con Claude');}catch(e){toast('No se pudo copiar');}};
   SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
-function renderBat(T){const box=document.getElementById('bat'),b=battery(T),R=ringsData(T);
-  box.innerHTML=(b?`<div class="herocard"><button type="button" class="bx bxb" id="ringsB" aria-label="Ver tus 3 anillos"><div class="fitw">${fitRings(R)}</div><div class="bs2"><span class="k">Batería de hoy · orientativa</span><div class="score lvw l${b.lvl}">${b.lvl}</div><span class="lv3${b.lvl==='Baja'?' low':''}">${shortNights(T)}</span></div></button>
-   ${(()=>{const A=analisis(T);if(A.length&&A[0].p>=40)return `<button type="button" class="aviso" id="avB"><span>${A[0].t}</span><span class="sub small">Ver análisis ›</span></button>`;return `<p class="plan">${planText(T,b)}</p>`+(A.length?`<button type="button" class="link avl2" id="avB">Ver análisis ›</button>`:'');})()}</div>`:'')+quickRow(T);
-  const rb=box.querySelector('#ringsB');if(rb)rb.onclick=()=>openRings(T);const av=box.querySelector('#avB');if(av)av.onclick=()=>openAnalisis(T);
-  wireQuick(T);animRings(box,ANIM.hoy);ANIM.hoy=false;}
+function renderBat(T){const box=document.getElementById('bat'),b=battery(T),A=analisis(T);
+  let t=null;if(A.length&&(A[0].p>=40||!b))t=A[0].t;else if(b)t=planText(T,b);
+  box.innerHTML=(t?`<${A.length?'button type="button"':'div'} class="imp" id="avB"><span class="tx"><span class="k">Lo importante de hoy</span><span class="it"></span></span>${A.length?SVGI.arr:''}</${A.length?'button':'div'}>`:'')+quickRow(T);
+  if(t){box.querySelector('#avB .it').innerHTML=t;if(A.length)box.querySelector('#avB').onclick=()=>openAnalisis(T);}
+  wireQuick(T);}
 function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Tiempo en cama contra tu meta','Gimnasio, pádel y correr esta semana','Estudio y proyecto de hoy'];
   SI.innerHTML=`<div><h3>Tus 3 anillos</h3><p class="sub small">Se llenan solos con lo que marcás.</p></div><div class="rgl">${R.map((r,i)=>`<div class="spread rowx"><span class="rgn"><i class="dot ${cols[i]}"></i><span><b>${r[0]}</b><br><span class="sub small">${dsc[i]}</span></span></span><b class="num">${r[2]}</b></div>`).join('')}</div><button class="btn primary" type="button" id="ok">Listo</button>`;
   SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
@@ -1381,9 +1406,12 @@ function renderDay(T){const box=document.getElementById('day'),now=momNow();box.
   const mi=m=>MOMS.findIndex(x=>x[0]===m),items=[];
   HABS().filter(h=>sched(h,T)).forEach(h=>{const m=h.time?momOfTime(h.time):(h.moment||'manana');items.push({k:'h',h,m,key:mi(m)*10000+sortKey(htime(h))});});
   if(S.exp){const d=expDay(T);if(d>=1&&d<=14){const m=['mate','caminar'].includes(S.exp.k)?'tarde':'noche';items.push({k:'x',m,key:mi(m)*10000-1});}}
-  if(!items.length){box.innerHTML='<p class="empty">Hoy no toca ningún hábito.</p>';return;}
+  const core=HABS().filter(h=>h.active!==false&&!h.opt&&!h.breath);
+  if(core.length>4&&!S.foco&&(!S.focoSkip||T>=add(S.focoSkip,7))){const f=document.createElement('div');f.className='foco';f.innerHTML=`<p><b>Tenés ${core.length} hábitos fijos.</b> Para que se vuelvan automáticos conviene arrancar con 3 o 4. Los demás quedan en pausa (no se borran) y los sumás cuando estos salgan solos.</p><div class="acts"><button class="btn primary" type="button">Elegir mis hábitos</button><button class="link" type="button">Ahora no</button></div>`;
+    const bb=f.querySelectorAll('button');bb[0].onclick=openFoco;bb[1].onclick=()=>{S.focoSkip=T;save();renderDay(T);};box.appendChild(f);}
+  if(!items.length){box.insertAdjacentHTML('beforeend','<p class="empty">Hoy no toca ningún hábito.</p>');return;}
   items.sort((a,b)=>a.key-b.key);
-  const isDone=it=>it.k==='h'?st(T,it.h.id)!==0:((S.exp.log||{})[T]===1),isOpt=it=>it.k==='h'&&(it.h.opt||it.h.breath||quotaFree(it.h,T));
+  const isDone=it=>it.k==='h'?st(T,it.h.id)!==0:((S.exp.log||{})[T]===1),isOpt=it=>it.k==='x'||it.k==='h'&&(it.h.opt||it.h.breath||quotaFree(it.h,T));
   const reqs=items.filter(it=>!isOpt(it)&&!(it.k==='h'&&st(T,it.h.id)===-1)),dn=reqs.filter(isDone).length;
   const fresh=it=>it.k==='h'&&Date.now()-(JUST[it.h.id]||0)<1100,main=items.filter(it=>!isOpt(it)&&(!isDone(it)||fresh(it))),done=items.filter(it=>isDone(it)&&!fresh(it)),opt=items.filter(it=>isOpt(it)&&!isDone(it));
   const rowOf=it=>it.k==='h'?habRow(T,it.h):expRow(T);
@@ -1404,11 +1432,23 @@ function renderDay(T){const box=document.getElementById('day'),now=momNow();box.
     g.querySelector('.ghd').onclick=()=>{openGrp.opt=!op;renderDay(T);};
     if(op){const rows=document.createElement('div');rows.className='rows flat';opt.forEach(it=>rows.appendChild(rowOf(it)));g.appendChild(rows);}
     box.appendChild(g);}}
+const FOCO_DEF=['sueno','gym','estudio','innova'];
+function openFoco(){const T=todayStr(),FP=(S.foco&&S.foco.paused)||[],L=HABS().filter(h=>!h.opt&&!h.breath&&(h.active!==false||FP.includes(h.id)));
+  const sel=new Set(S.foco?L.filter(h=>h.active!==false).map(h=>h.id):L.filter(h=>FOCO_DEF.includes(h.id)).map(h=>h.id));if(!sel.size)L.slice(0,4).forEach(h=>sel.add(h.id));
+  const draw=()=>{SI.innerHTML=`<div><h3>Tus hábitos clave</h3><p class="sub small">Elegí hasta 4: los que más te importan ahora. Los demás quedan en pausa, con su historial guardado. Los volvés a activar cuando quieras.</p></div><div class="fcl"></div><p class="sub small num" id="fcn"></p><button class="btn primary" type="button" id="ok">Guardar</button><button class="link" type="button" id="cx">Cancelar</button>`;
+    const box=SI.querySelector('.fcl');L.forEach(h=>{const on=sel.has(h.id),off=!on&&sel.size>=4,r=document.createElement('label');r.className='fcr'+(off?' off':'');r.innerHTML=`<input type="checkbox" ${on?'checked':''} ${off?'disabled':''}><span><b></b><br><span class="sub small"></span></span>`;
+      r.querySelector('b').textContent=h.name;r.querySelector('.sub').textContent=h.min?'Mínimo: '+h.min:'';r.querySelector('input').onchange=e=>{if(e.target.checked)sel.add(h.id);else sel.delete(h.id);draw();};box.appendChild(r);});
+    SI.querySelector('#fcn').textContent=sel.size+' de 4 elegidos';SI.querySelector('#cx').onclick=()=>sheet.close();
+    const ok=SI.querySelector('#ok');ok.disabled=!sel.size;ok.onclick=()=>{const before=S.habitos.map(h=>[h.id,h.active]),prevF=S.foco,paused=[];
+      L.forEach(h=>{const on=sel.has(h.id);if(!on&&h.active!==false)paused.push(h.id);h.active=on;});
+      S.foco={at:T,paused:[...new Set(FP.filter(id=>!sel.has(id)).concat(paused))]};save();sheet.close();renderAll();vib();
+      toast(paused.length?sel.size+' hábitos clave · '+paused.length+' en pausa':'Hábitos clave guardados',()=>{before.forEach(([id,a])=>{const h=S.habitos.find(x=>x.id===id);if(h)h.active=a;});S.foco=prevF;save();renderAll();});};
+    if(!sheet.open)sheet.showModal();};draw();}
 function renderRevRow(T){const el=document.getElementById('revRow'),d=dow(T),PM=planMonday(),PP=(S.semanas[PM]&&S.semanas[PM].prio)||[],hot=d===0||d===1&&!(S.semanas[add(mondayOf(T),-7)]||{}).feel&&d===1;
   const done=PP.filter(p=>p.done).length;
   el.className='revrow'+(d===0?' hot':'');
   el.innerHTML=`<div><b>${d===0?'Hoy toca el repaso de la semana':'Repaso y prioridades'}</b><br><span>${PP.length?done+' de '+PP.length+' prioridades cumplidas':'Todavía no elegiste prioridades'}</span></div>${SVGI.arr}`;
-  el.hidden=!(d===0||(d===1&&!PP.length));
+  el.hidden=d!==0;
   el.onclick=()=>show('rev');}
 function renderRev(T){document.getElementById('revDate').textContent=fmt(T,{weekday:'long',day:'numeric',month:'long'});
   renderWeekRev(T);
@@ -1518,6 +1558,11 @@ function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSlee
       toast('Sueño guardado · '+fmtH(slH({b,w})));onDone&&onDone();});};
   paint();return el;}
 let slEdit=false;
+/* horario habitual: mediana de las últimas noches (hasta 14, en 3 semanas); con menos de 3, la última */
+function usualSleep(T){const L=[];for(let s=add(T,-1),i=0;i<21&&L.length<14;i++,s=add(s,-1)){const x=slp(s);if(x&&x.b&&x.w)L.push(x);}if(!L.length)return null;
+  if(L.length<3)return {b:L[0].b,w:L[0].w,n:L.length};
+  const med=a=>{a=a.slice().sort((p,q)=>p-q);return a[Math.floor((a.length-1)/2)];},q=m=>Math.round(m/15)*15;
+  return {b:m2hm(q(med(L.map(x=>{let m=hm2m(x.b);if(m<720)m+=1440;return m;})))),w:m2hm(q(med(L.map(x=>hm2m(x.w))))),n:L.length};}
 function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7'),wk=sleepStats(add(T,-6),T);
   if(wk&&wk.hd>=3&&turno&&!turno.done)return ['warm',`<b>${wk.hd} de ${wk.n} días con dolor de cabeza.</b> Si se repite varias semanas, conviene consultar con un médico.`,['Ver objetivo',()=>openGoalDetail(gm)]];
   const gy=HABS().find(h=>h.id==='gym');if(gy&&st(T,gy.id)>0&&hr<14)return ['',`Después del gimnasio: sumá al mate <b>algo con proteína</b> (huevo, queso, yogur o leche). Ayuda a recuperar y a ganar músculo.`];
@@ -1527,7 +1572,11 @@ function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&
   return null;}
 function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box.innerHTML='';box.className='slp';box.hidden=false;
   if(!x&&!slEdit&&curHr()<5){box.hidden=true;return;}// de madrugada todavía no dormiste: no preguntar
-  if(!x&&!slEdit){box.className='slp slpmini';box.innerHTML=`<button type="button" class="slpq"><span><b>¿Cómo dormiste?</b><br><span class="sub small">Anotalo en 10 segundos</span></span><span class="slpgo">Anotar</span></button>`;box.querySelector('.slpq').onclick=()=>{slEdit=true;renderAll();};return;}
+  if(!x&&!slEdit){box.className='slp slpmini';const U=usualSleep(T);
+    if(U){box.innerHTML=`<div class="slpq2"><span class="tx"><b>${U.n>=3?'¿Dormiste como siempre?':'¿Dormiste igual que la última vez?'}</b><br><span class="sub small num">${U.b} → ${U.w} · ${fmtH(slH(U))}</span></span><button type="button" class="slpbtn no" id="slOt">Cambiar</button><button type="button" class="slpbtn yes" id="slUs">Sí</button></div>`;
+      box.querySelector('#slUs').onclick=()=>{if(!tapOk('slUs'))return;const prev=Object.assign({},S.dias[T]||{});patchDay(T,{sl:{b:U.b,w:U.w,hd:0}});if(!S.salud.start||T<S.salud.start){S.salud.start=T;save();}vib();renderAll();toast('Sueño guardado · '+fmtH(slH(U)),()=>restore(T,prev));};
+      box.querySelector('#slOt').onclick=()=>{slEdit=true;renderAll();};return;}
+    box.innerHTML=`<button type="button" class="slpq"><span><b>¿Cómo dormiste?</b><br><span class="sub small">Anotalo en 10 segundos</span></span><span class="slpgo">Anotar</span></button>`;box.querySelector('.slpq').onclick=()=>{slEdit=true;renderAll();};return;}
   if(!x||slEdit){box.innerHTML=`<div class="spread"><h2>¿Cómo dormiste?</h2><span class="hintx">10 segundos</span></div>`;
     box.appendChild(sleepEditor(T,()=>{slEdit=false;renderAll();}));
     if(slEdit){const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar';c.onclick=()=>{slEdit=false;renderAll();};box.appendChild(c);}return;}
@@ -1651,7 +1700,7 @@ const SC_NAME='Pasos Hábitos';let PEND=false;try{PEND=sessionStorage.getItem('p
 function stepsRow(T){const d=(S.dias[T]||{}).pasosHoy,pct=d?Math.min(100,Math.round(d.n/8000*100)):0;
   return `<div class="stl"><div class="stl-t"><span class="k">Pasos de hoy</span><b class="num">${d?fmtN(d.n):'—'}</b><span class="sub small">${d?'de 8.000 · actualizado '+d.t:'Tocá Actualizar para traerlos de Salud'}</span></div>${PEND?'<button class="btn primary" type="button" id="stPasteNow">Pegar pasos</button>':'<button class="btn" type="button" id="stUpd">Actualizar</button>'}<div class="track ol" style="grid-column:1/-1;height:5px"><i style="width:${pct}%"></i></div></div>`;}
 function wireSteps(T){const u=document.getElementById('stUpd');if(u)u.onclick=()=>{PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);};
-  const pz=document.getElementById('stPasteNow');if(pz)pz.onclick=async()=>{try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();};}
+  const pz=document.getElementById('stPasteNow');if(pz)pz.onclick=async()=>{try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else if(String(t).trim())toast('Lo copiado no es un número de pasos. Revisá el atajo.');else openStepsHelp();}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();};}
 function avgFyv(a,b){const h=HABS().find(x=>x.id==='fyv');if(!h)return null;let n=0,c=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){if(!sched(h,s))continue;if(s===todayStr()&&!nv(s,h.id))continue;n+=nv(s,h.id);c++;}return c?n/c:null;}
 const EXPS=[{k:'mate',t:'Último mate a las 16:30',d:'Nada de mate ni café después de las 16:30.'},{k:'cama',t:'A dormir antes de la 1',d:'Acostarte antes de la 1:00 todas las noches.'},{k:'pantalla',t:'Celular afuera 30 min antes',d:'El celular fuera de la pieza 30 minutos antes de dormir.'},{k:'caminar',t:'Caminar 10 min después de almorzar',d:'Una caminata corta después del almuerzo.'},{k:'fyv',t:'5 porciones de frutas y verduras',d:'Llegar a 5 porciones todos los días.'},{k:'respira',t:'Respirar 5 min antes de dormir',d:'Suspiro cíclico guiado cada noche.'}];
 function expStats(a,b){const T=todayStr(),e=b>T?T:b,sl=sleepStats(a,e);return {sl,hab:rangeRatio(a,e),steps:avgSteps(a,e),fyv:avgFyv(a,e)};}
@@ -1890,20 +1939,26 @@ function openTask(T,x){let due=x.due||null,imp=!!x.imp;
 /* ---------- fila rápida: Sueño · Pasos · Agua ---------- */
 const QICO={qSl:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',qSt:'<svg viewBox="0 0 24 24"><path d="M8 3.5c1.7 0 2.6 2 2.6 4.4S9.4 12.3 8 12.3 5.4 10.2 5.4 7.9 6.3 3.5 8 3.5zM6.4 15.2h3.2M16 8.7c1.7 0 2.6 2 2.6 4.4s-1.2 4.4-2.6 4.4-2.6-2.1-2.6-4.4.9-4.4 2.6-4.4zM14.4 20.4h3.2"/></svg>',qWa:'<svg viewBox="0 0 24 24"><path d="M12 3.2c-.3 0-6.2 6.6-6.2 11a6.2 6.2 0 0 0 12.4 0c0-4.4-5.9-11-6.2-11z"/></svg>'};
 const MICO={manana:'<svg viewBox="0 0 24 24"><path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0M12 5v3M5 10.2l1.6 1.2M19 10.2l-1.6 1.2"/></svg>',tarde:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>',noche:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>'};
+function stepsStale(T){const d=(S.dias[T]||{}).pasosHoy;return !d&&!!S.salud.sync&&!!S.salud.syncLast&&Date.now()/1000-S.salud.syncLast>26*3600;}
 function quickRow(T){const x=slp(T),d=(S.dias[T]||{}).pasosHoy,w=waterOf(T),g=waterGoal(),slOn=!!x&&!slEdit,busy=SYNC_TAP&&Date.now()/1000-SYNC_TAP<90;
   const bars=(f,col)=>{const v=[];for(let k=6;k>=0;k--)v.push(Math.max(0,Math.min(1.15,f(add(T,-k))||0)));const W=7*9,H=26;return `<svg class="qbars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="${W}" y1="${H-H/1.15}" y2="${H-H/1.15}" stroke="${col}" stroke-opacity=".35" stroke-dasharray="2 2" stroke-width=".6"/>${v.map((x,i)=>`<rect x="${i*9+1.5}" y="${H-Math.max(1.5,x/1.15*H)}" width="6" height="${Math.max(1.5,x/1.15*H)}" rx="2" fill="${col}" fill-opacity="${i===6?1:.38}"/>`).join('')}</svg>`;};
   const SER={qSl:s=>{const y=slp(s);return y?slH(y)/S.salud.meta:0;},qSt:s=>{const dd=S.dias[s]||{},n=dd.pasos||(dd.pasosHoy&&dd.pasosHoy.n);return n?n/8000:0;},qWa:s=>waterOf(s)/waterGoal(s)};
   const tile=(id,k,val,sub,pct,cls,col)=>`<button type="button" class="qt ${cls||''}" id="${id}"><span class="k"><span class="qi" style="background:color-mix(in srgb,${col} 16%,var(--bg));color:${col}">${QICO[id]}</span>${k}</span><b class="num" style="color:${col}">${val}</b><small>${sub}</small>${bars(SER[id],col)}</button>`;
-  const stSub=busy?'Actualizando…':PEND?'Tocá para pegar':d?(d.ts?agoTxt(d.ts):'a las '+d.t):(S.salud.syncLast?'Sin datos de hoy':'Tocá para traer');
+  const stale=stepsStale(T),stSub=busy?'Actualizando…':PEND?'Tocá para pegar':d?(d.ts?agoTxt(d.ts):'a las '+d.t):stale?'No llegan':(S.salud.syncLast?'Sin datos de hoy':'Tocá para traer');
   return `<div class="qrow${slOn?'':' q2'}">${
     slOn?tile('qSl','En cama',fmtH(slH(x)),x.b+' → '+x.w,slH(x)/S.salud.meta*100,'','var(--olive)'):''}${
-    tile('qSt','Pasos',d?fmtN(d.n):'—',stSub,d?d.n/8000*100:0,PEND?'pend':'','var(--sand)')}${
+    tile('qSt','Pasos',d?fmtN(d.n):'—',stSub,d?d.n/8000*100:0,PEND?'pend':stale?'warn':'','var(--sand)')}${
     tile('qWa','Agua',fmtL(w),'de '+fmtL(g),w/g*100,'','var(--water)')}</div>`;}
 function stepsRun(){SYNC_TAP=Math.floor(Date.now()/1000);try{sessionStorage.setItem('syncTap',String(SYNC_TAP));}catch(e){}if(!S.salud.syncLast){PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);}
-async function stepsPaste(T){try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else toast(String(t).trim()?'Lo copiado no es un número de pasos. Revisá el atajo.':'Todavía no hay pasos hoy en Salud (o falta el permiso para Atajos).');}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();}
+async function stepsPaste(T){try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else if(String(t).trim())toast('Lo copiado no es un número de pasos. Revisá el atajo.');else openStepsHelp();}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();}
+function openStepsHelp(){SI.innerHTML=`<div><h3>Los pasos no llegan</h3><p class="sub small">Casi siempre es porque Atajos no tiene permiso para leer tus pasos. Se arregla una sola vez:</p></div>
+<ol class="stepl"><li>Abrí la app <b>Salud</b> y tocá tu foto, arriba a la derecha.</li><li>En <b>Privacidad</b>, tocá <b>Apps</b> y elegí <b>Atajos</b>.</li><li>Activá <b>Pasos</b>.</li><li>Volvé acá y tocá <b>Probar ahora</b>.</li></ol>
+<p class="sub small">Si Atajos no aparece en esa lista o el permiso ya estaba: abrí <b>Atajos</b>, tocá <b>${SC_NAME}</b> una vez y aceptá lo que te pregunte. Si sigue igual, mandame una captura del atajo abierto en modo Editar.</p>
+<button class="btn primary" type="button" id="ok">Probar ahora</button><button class="link" type="button" id="cx">Cerrar</button>`;
+  SI.querySelector('#ok').onclick=()=>{sheet.close();stepsRun();};SI.querySelector('#cx').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
 function wireQuick(T){const q=id=>document.getElementById(id);
   const sl=q('qSl');if(sl)sl.onclick=()=>{slEdit=true;renderAll();window.scrollTo({top:0,behavior:'smooth'});};
-  q('qSt').onclick=()=>PEND?stepsPaste(T):stepsRun();
+  q('qSt').onclick=()=>PEND?stepsPaste(T):stepsStale(T)?openStepsHelp():stepsRun();
   q('qWa').onclick=()=>openWaterSheet();}
 
 
@@ -1980,7 +2035,7 @@ function openGoalDetail(g){const draw=()=>{if(!GOALS().includes(g)){sheet.close(
   draw();if(!sheet.open)sheet.showModal();}
 
 /* ---------- AJUSTES ---------- */
-function renderAj(){const b=document.getElementById('habs');b.innerHTML='';const act=HABS().filter(h=>h.active!==false),pau=HABS().filter(h=>h.active===false);let pb=null;if(pau.length){const d=document.createElement('details');d.className='help';d.innerHTML=`<summary>En pausa (${pau.length})</summary>`;pb=d;}
+function renderAj(){const b=document.getElementById('habs');b.innerHTML='';{const fb=document.createElement('button');fb.type='button';fb.className='r';fb.innerHTML='<span><b>Elegir mis hábitos clave</b><br><span class="sub small">Hasta 4 activos; el resto en pausa</span></span>'+SVGI.arr;fb.onclick=openFoco;b.appendChild(fb);}const act=HABS().filter(h=>h.active!==false),pau=HABS().filter(h=>h.active===false);let pb=null;if(pau.length){const d=document.createElement('details');d.className='help';d.innerHTML=`<summary>En pausa (${pau.length})</summary>`;pb=d;}
   act.concat(pau).forEach(h=>{const tgt=h.active===false&&pb?pb:b;const r=document.createElement('button');r.type='button';r.className='r';const badge=h.active===false?' · En pausa':h.from&&h.from>todayStr()?' · Desde el '+fmt(h.from,{day:'numeric',month:'short'}):'';
     r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(h.time||(MOMENTS.find(m=>m[0]===(h.moment||'manana'))||MOMENTS[0])[1])}${h.opt?' · opcional':''} · ${ORDER.filter(d=>(h.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${badge}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=h.name;r.onclick=()=>openHab(h);tgt.appendChild(r);});if(pb)b.appendChild(pb);
   const f=document.getElementById('fixes');f.innerHTML='';S.fijos.forEach(x=>{const r=document.createElement('button');r.type='button';r.className='r';r.innerHTML=`<span style="min-width:0"><b style="display:block"></b><span class="sub small">${esc(x.time)} · ${ORDER.filter(d=>(x.days||[]).includes(d)).map(d=>DL[d]).join(' ')}${x.until?' · hasta el '+fmt(x.until,{day:'numeric',month:'short'}):''}</span></span><span class="sub small">Editar</span>`;r.querySelector('b').textContent=x.name;r.onclick=()=>openFix(x);f.appendChild(r);});
