@@ -912,6 +912,20 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
 .swdel svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .swr.swo .swdel,.swr.swing .swdel{opacity:1;transform:none}
 .swr.swo .swdel{pointer-events:auto}
+/* ===== v10: hábitos primero, anillo del día, sueño en una línea ===== */
+.dhd2{display:flex!important;align-items:center!important;gap:12px;justify-content:flex-start!important}
+.dring{position:relative;width:42px;height:42px;flex:0 0 auto}
+.dring svg{width:42px;height:42px;transform:rotate(-90deg)}
+.dring .dr0{fill:none;stroke:color-mix(in srgb,var(--olive) 16%,transparent);stroke-width:5}
+.dring .dr1{fill:none;stroke:var(--olive);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)}
+.dring .drk{position:absolute;inset:9px;width:24px;height:24px;transform:none;fill:none;stroke:var(--olive);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;animation:drk .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes drk{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.dtx{display:flex;flex-direction:column;gap:0}
+.dtx h2{margin:0}
+.dhd2.full .dtx h2{color:var(--olive)!important}
+.slpmini{padding:0!important}
+.slpq{all:unset;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;cursor:pointer}
+.slpgo{font-weight:700;font-size:14px;color:var(--olive);background:var(--olive-s);border-radius:99px;padding:8px 14px}
 </style>
 </head>
 <body>
@@ -926,6 +940,7 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
   </header>
 
   <main id="v-hoy" class="view">
+    <section id="day" class="day" aria-label="Tu día"></section>
     <section id="slpBox" class="slp" aria-label="Sueño"></section>
     <section id="bat" class="bat" aria-label="Batería del día"></section>
     <section id="napBox" class="nap" aria-label="Descanso" hidden></section>
@@ -937,7 +952,6 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
       </div>
     </section>
     <section id="expBox" aria-label="Experimento"></section>
-    <section id="day" class="day" aria-label="Tu día"></section>
     <button type="button" class="revrow" id="revRow"></button>
   </main>
 
@@ -1210,14 +1224,15 @@ function restore(s,prev){S.dias[s]=prev;save();renderAll();}
 function toast(m,undo){const t=document.getElementById('toast');t.innerHTML='';const sp=document.createElement('span');sp.textContent=m;t.appendChild(sp);
   if(undo){const b=document.createElement('button');b.type='button';b.className='undo';b.textContent='Deshacer';b.onclick=()=>{t.hidden=true;undo();};t.appendChild(b);}
   t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,undo?4000:2200);}
-function vib(n){try{navigator.vibrate&&navigator.vibrate(n||10);}catch(e){}}
+let HAP=null;function hapt(){try{if(!HAP){HAP=document.createElement('label');HAP.setAttribute('aria-hidden','true');HAP.style.cssText='position:fixed;left:-200px;top:0;opacity:0;pointer-events:none';const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');i.tabIndex=-1;HAP.appendChild(i);document.body.appendChild(HAP);}HAP.click();}catch(e){}}
+function vib(n){try{if(navigator.vibrate)navigator.vibrate(n||10);else hapt();}catch(e){}}
 let POP={id:'',t:0};
-function setState(s,id,v,undoable){if(v>0)POP={id,t:Date.now()};const prev=Object.assign({},S.dias[s]||{}),was=dayDone(s);patchDay(s,{[id]:v});renderAll();vib();
+let JUST={};function setState(s,id,v,undoable){if(v>0){POP={id,t:Date.now()};JUST[id]=Date.now();setTimeout(()=>{if(Date.now()-(JUST[id]||0)>=1100)renderDay(todayStr());},1150);}const prev=Object.assign({},S.dias[s]||{}),was=dayDone(s);patchDay(s,{[id]:v});renderAll();vib();
   const u=undoable?()=>restore(s,prev):null;
-  if(!was&&dayDone(s)){confetti();toast('Día completo · racha de '+dayStreak(),u);}else if(undoable)toast(v===2?'Hecho':v===1?'Mínimo':v===-1?'Libre':'Desmarcado',u);}
+  if(!was&&dayDone(s)){confetti();toast(dayStreak()>1?'Día completo · '+dayStreak()+' días seguidos':'Día completo',u);}else if(undoable)toast(v===2?'Hecho':v===1?'Mínimo':v===-1?'Libre':'Desmarcado',u);}
 function addNum(s,h){const prev=Object.assign({},S.dias[s]||{}),step=h.num.step||1,val=round1(nv(s,h.id)+step),p={['n_'+h.id]:val};if(h.num.target){p[h.id]=val>=h.num.target?2:1;if(val>=h.num.target)POP={id:h.id,t:Date.now()};}else if(st(s,h.id)===0&&h.num.autoDone!==false)p[h.id]=2;const was=dayDone(s);patchDay(s,p);renderAll();vib(8);
-  if(!was&&dayDone(s)){confetti();toast('Día completo · racha de '+dayStreak(),()=>restore(s,prev));}else toast(h.num.label+': '+val+(h.num.unit?' '+h.num.unit:''),()=>restore(s,prev));}
-function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const c=document.getElementById('confetti'),x=c.getContext('2d'),dp=devicePixelRatio||1,W=c.width=innerWidth*dp,H=c.height=innerHeight*dp;
+  if(!was&&dayDone(s)){confetti();toast(dayStreak()>1?'Día completo · '+dayStreak()+' días seguidos':'Día completo',()=>restore(s,prev));}else toast(h.num.label+': '+val+(h.num.unit?' '+h.num.unit:''),()=>restore(s,prev));}
+function confetti(){return;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const c=document.getElementById('confetti'),x=c.getContext('2d'),dp=devicePixelRatio||1,W=c.width=innerWidth*dp,H=c.height=innerHeight*dp;
   const cs=getComputedStyle(document.documentElement),cols=[cs.getPropertyValue('--olive').trim(),cs.getPropertyValue('--fg').trim(),'#bcc59a','#a9a9a4'];
   const P=[...Array(90)].map(()=>({x:W/2,y:H*.3,vx:(Math.random()-.5)*20*dp,vy:(-Math.random()*18-5)*dp,r:(3+Math.random()*4)*dp,c:cols[Math.random()*cols.length|0],a:Math.random()*6,va:(Math.random()-.5)*.3}));
   let f=0;(function tick(){x.clearRect(0,0,W,H);P.forEach(p=>{p.vy+=.6*dp;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/3,p.r,p.r*.6);x.restore();});if(++f<100)requestAnimationFrame(tick);else x.clearRect(0,0,W,H);})();}
@@ -1327,7 +1342,7 @@ function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['T
 function stepsOf(T,h){const v=S.dias[T]&&S.dias[T]['s_'+h.id];return Array.isArray(v)?v:[];}
 function toggleStep(T,h,i){const cur=stepsOf(T,h).slice(),n=h.steps.length;cur[i]=!cur[i];if(cur[i])POP={id:h.id+'#'+i,t:Date.now()};const k=cur.filter(Boolean).length,prev=Object.assign({},S.dias[T]||{}),was=dayDone(T);
   patchDay(T,{['s_'+h.id]:cur,[h.id]:k===n?2:k>0?1:0});renderAll();vib(8);
-  if(!was&&dayDone(T)){confetti();toast('Día completo · racha de '+dayStreak(),()=>restore(T,prev));}else if(k===n)toast(h.name+': completo',()=>restore(T,prev));}
+  if(!was&&dayDone(T)){confetti();toast(dayStreak()>1?'Día completo · '+dayStreak()+' días seguidos':'Día completo',()=>restore(T,prev));}else if(k===n)toast(h.name+': completo',()=>restore(T,prev));}
 /* deslizar a la izquierda para borrar (tareas y hábitos), como en iOS */
 let SW_OPEN=null;const TRASH='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
 function swClose(r){if(!r)return;r.classList.remove('swo');r.style.removeProperty('--dx');if(SW_OPEN===r)SW_OPEN=null;}
@@ -1370,13 +1385,13 @@ function renderDay(T){const box=document.getElementById('day'),now=momNow();box.
   items.sort((a,b)=>a.key-b.key);
   const isDone=it=>it.k==='h'?st(T,it.h.id)!==0:((S.exp.log||{})[T]===1),isOpt=it=>it.k==='h'&&(it.h.opt||it.h.breath||quotaFree(it.h,T));
   const reqs=items.filter(it=>!isOpt(it)&&!(it.k==='h'&&st(T,it.h.id)===-1)),dn=reqs.filter(isDone).length;
-  const main=items.filter(it=>!isOpt(it)&&!isDone(it)),done=items.filter(it=>isDone(it)),opt=items.filter(it=>isOpt(it)&&!isDone(it));
+  const fresh=it=>it.k==='h'&&Date.now()-(JUST[it.h.id]||0)<1100,main=items.filter(it=>!isOpt(it)&&(!isDone(it)||fresh(it))),done=items.filter(it=>isDone(it)&&!fresh(it)),opt=items.filter(it=>isOpt(it)&&!isDone(it));
   const rowOf=it=>it.k==='h'?habRow(T,it.h):expRow(T);
-  const hd=document.createElement('div');hd.className='dhd';hd.innerHTML=`<h2>Hábitos de hoy</h2><span class="c num${reqs.length&&dn===reqs.length?' ok':''}">${reqs.length?(dn===reqs.length?'Listo ✓':dn+' de '+reqs.length):''}</span>`;box.appendChild(hd);
+  const full=reqs.length&&dn===reqs.length,fr=reqs.length?dn/reqs.length:0,R2=17,C2=2*Math.PI*R2,sk=full?dayStreak():0;
+  const hd=document.createElement('div');hd.className='dhd dhd2'+(full?' full':'');hd.innerHTML=`<div class="dring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="${R2}" class="dr0"/><circle cx="21" cy="21" r="${R2}" class="dr1" style="stroke-dasharray:${C2.toFixed(1)};stroke-dashoffset:${(C2*(1-fr)).toFixed(1)}"/></svg>${full?'<svg viewBox="0 0 24 24" class="drk"><path d="m6 12.5 4 4 8-9"/></svg>':''}</div><div class="dtx"><h2>${full?'Día completo':'Hábitos de hoy'}</h2><span class="sub small num">${reqs.length?(full?(sk>1?sk+' días seguidos':'Todo hecho por hoy'):dn+' de '+reqs.length+' hechos'):'Nada obligatorio hoy'}</span></div>`;box.appendChild(hd);
   const list=document.createElement('div');list.className='rows flat';let last='';
   main.forEach(it=>{if(it.m!==last){last=it.m;const l=document.createElement('p');l.className='mlab'+(it.m===now?' now':'');l.innerHTML=MICO[it.m]+'<span></span>';l.querySelector('span').textContent=MOMS[mi(it.m)][1]+(it.m===now?' · ahora':'');list.appendChild(l);}list.appendChild(rowOf(it));});
-  if(!main.length){const p=document.createElement('p');p.className='empty';p.textContent=reqs.length?'Hiciste todo lo de hoy.':'Hoy no toca ningún hábito obligatorio.';list.appendChild(p);}
-  box.appendChild(list);
+  if(main.length)box.appendChild(list);
   if(done.length){const g=document.createElement('section'),op=!!openGrp.dn;g.className='grp'+(op?' open':'');
     g.innerHTML=`<button type="button" class="ghd" aria-expanded="${op}"><span><b>Hechos · ${done.length}</b><small></small></span>${SVGI.chev}</button>`;
     g.querySelector('small').textContent=done.map(it=>it.k==='h'?it.h.name:'Experimento').join(' · ');
@@ -1512,6 +1527,7 @@ function healthTip(T){const hr=curHr(),x=slp(T),gm=goalById('g_mente'),turno=gm&
   return null;}
 function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box.innerHTML='';box.className='slp';box.hidden=false;
   if(!x&&!slEdit&&curHr()<5){box.hidden=true;return;}// de madrugada todavía no dormiste: no preguntar
+  if(!x&&!slEdit){box.className='slp slpmini';box.innerHTML=`<button type="button" class="slpq"><span><b>¿Cómo dormiste?</b><br><span class="sub small">Anotalo en 10 segundos</span></span><span class="slpgo">Anotar</span></button>`;box.querySelector('.slpq').onclick=()=>{slEdit=true;renderAll();};return;}
   if(!x||slEdit){box.innerHTML=`<div class="spread"><h2>¿Cómo dormiste?</h2><span class="hintx">10 segundos</span></div>`;
     box.appendChild(sleepEditor(T,()=>{slEdit=false;renderAll();}));
     if(slEdit){const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar';c.onclick=()=>{slEdit=false;renderAll();};box.appendChild(c);}return;}
@@ -2081,7 +2097,7 @@ function renderFab(){const T=todayStr(),w=waterOf(T),g=waterGoal(),c=document.ge
   c.style.strokeDasharray=C.toFixed(1);c.style.strokeDashoffset=(C*(1-Math.min(1,w/g))).toFixed(1);t.textContent=fmtL(w);document.getElementById('wfab').classList.toggle('done',w>=g);}
 function addWater(ml){const T=todayStr(),prev=Object.assign({},S.dias[T]||{}),was=waterOf(T)>=waterGoal();patchDay(T,{agua:((S.dias[T]||{}).agua||0)+ml});vib(10);
   const f=document.getElementById('wfab');f.classList.remove('splash');void f.offsetWidth;f.classList.add('splash');renderFab();renderBat(T);
-  const now=waterOf(T);if(!was&&now>=waterGoal()){confetti();toast('¡Meta de agua cumplida! '+fmtL(now),()=>{restore(T,prev);renderFab();});}else toast('+'+ml+' ml · '+fmtL(now)+' de '+fmtL(waterGoal()),()=>{restore(T,prev);renderFab();});}
+  const now=waterOf(T);if(!was&&now>=waterGoal()){confetti();toast('Meta de agua cumplida · '+fmtL(now),()=>{restore(T,prev);renderFab();});}else toast('+'+ml+' ml · '+fmtL(now)+' de '+fmtL(waterGoal()),()=>{restore(T,prev);renderFab();});}
 function addMate(T){const m=S.salud.mate;if(!m)return;const prev=Object.assign({},S.dias[T]||{}),d=S.dias[T]||{};patchDay(T,{agua:(d.agua||0)+m.ml,mateMl:(d.mateMl||0)+m.ml});vib(10);renderFab();renderBat(T);toast('Mate: +'+m.ml+' ml (estimado) · '+fmtL(waterOf(T)),()=>{restore(T,prev);renderFab();});}
 function openWaterSheet(){const T=todayStr(),draw=()=>{const w=waterOf(T),g=waterGoal();
   SI.innerHTML=`<div><h3>Agua de hoy</h3><p class="sub small">${fmtL(w)} de ${fmtL(g)}${S.salud.agua==='auto'&&waterExtra(T).length?' (incluye '+waterExtra(T).map(x=>'+'+fmtL(x[0])+' por '+esc(x[1])).join(', ')+')':''} · el mate también cuenta</p></div><div class="track" style="height:8px"><i style="width:${Math.min(100,Math.round(w/g*100))}%;background:var(--water)"></i></div>
