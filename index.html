@@ -926,12 +926,12 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
 .slpmini{padding:0!important}
 .slpq{all:unset;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;cursor:pointer}
 .slpgo{font-weight:700;font-size:14px;color:var(--olive);background:var(--olive-s);border-radius:99px;padding:8px 14px}
-.imp{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px 14px 18px;border-radius:var(--r);background:var(--bg);box-shadow:var(--cshadow);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.imp .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;font-size:14.5px;line-height:1.42}
-.imp .k{font-size:12px;font-weight:700;color:var(--muted)}
-.imp .tx b{font-weight:700}
-.imp>svg{width:16px;height:16px;flex:none;fill:none;stroke:var(--faint);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.imp:active{transform:scale(.98)}
+.hoyimp{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px 14px 18px;border-radius:var(--r);background:var(--bg);box-shadow:var(--cshadow);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hoyimp .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;font-size:14.5px;line-height:1.42}
+.hoyimp .k{font-size:12px;font-weight:700;color:var(--muted)}
+.hoyimp .tx b{font-weight:700}
+.hoyimp>svg{width:16px;height:16px;flex:none;fill:none;stroke:var(--faint);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.hoyimp:active{transform:scale(.98)}
 .slpq2{display:flex;align-items:center;gap:8px;padding:14px 14px 14px 18px}
 .slpq2 .tx{flex:1;min-width:0}
 .slpbtn{all:unset;box-sizing:border-box;cursor:pointer;font-weight:700;font-size:14px;border-radius:99px;padding:8px 14px;flex:none;-webkit-tap-highlight-color:transparent}
@@ -948,8 +948,22 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
 .fcr:last-child{border-bottom:0}
 .fcr input{width:22px;height:22px;flex:none;accent-color:var(--olive);margin:0}
 .fcr.off{opacity:.45}
-.imp .it{display:block!important}
+.hoyimp .it{display:block!important}
 #v-hoy #slpBox.slpmini{padding:0!important}
+.qt{background:var(--bg)!important;box-shadow:var(--cshadow)!important;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;position:relative}
+.qt .qplus{position:absolute;top:9px;right:9px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--water) 14%,var(--bg));color:var(--water)}
+.qt .qplus svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round}
+.qt.full .qplus{background:color-mix(in srgb,var(--olive) 14%,var(--bg));color:var(--olive)}
+.dring .dr0{stroke:color-mix(in srgb,var(--olive) 20%,var(--line))!important}
+#v-hoy .rows.flat .tkr{grid-template-columns:40px 1fr!important}
+.tkr{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.tkr.lift{transform:scale(1.02);box-shadow:var(--cshadow);background:var(--bg);border-radius:14px;z-index:3;position:relative}
+nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:none;user-select:none}
+#imp:empty{display:none}
+.wrem{display:flex;flex-direction:column}
+.wrem .wr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.wrem .wr:last-child{border-bottom:0}
+.wrem .wr b{font-variant-numeric:tabular-nums;font-size:17px}
 .stepl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;line-height:1.4}
 </style>
 </head>
@@ -967,7 +981,8 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
   <main id="v-hoy" class="view">
     <section id="day" class="day" aria-label="Tu día"></section>
     <section id="slpBox" class="slp" aria-label="Sueño"></section>
-    <section id="bat" class="bat" aria-label="Batería del día"></section>
+    <section id="imp" aria-label="Lo importante de hoy"></section>
+    <section id="bat" class="bat" aria-label="Pasos y agua"></section>
     <section id="napBox" class="nap" aria-label="Descanso" hidden></section>
     <section id="tasks" class="tks" aria-label="Tareas">
       <div class="dhd"><h2>Tareas</h2><span class="c num" id="tkC"></span></div>
@@ -1038,6 +1053,23 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
         <li>Tocá <b>▶</b> para probarlo. Si te pregunta si permitís conectarse a <b>ntfy.sh</b>, tocá <b>Permitir siempre</b>. Volvé a esta app: en Pasos tiene que aparecer el número.</li>
         <li><b>Para que sea solo:</b> en Atajos, pestaña <b>Automatización</b> → <b>+</b> → <b>App</b> → elegí <b>WhatsApp</b> → marcá <b>Se abre</b> → <b>Ejecutar inmediatamente</b> y apagá <b>Notificar al ejecutarse</b> → <b>Siguiente</b> → elegí <b>Pasos Hábitos</b>. Cada vez que abrís WhatsApp, tus pasos se actualizan sin que hagas nada.</li>
       </ol><p class="sub small">Solo viaja el número de pasos, por un servicio gratuito (ntfy.sh) con un código secreto que es solo tuyo.</p></details></section>
+    <section id="wRemSec"><h2>Recordatorios de agua</h2>
+      <p class="sub small">Una app web no puede mandarte avisos a horario en el iPhone; Atajos sí. El aviso te pregunta cuánto tomaste y lo anota acá con un toque, sin abrir la app.</p>
+      <div id="wRem"></div>
+      <div class="inl"><button class="btn primary" type="button" id="wRemCopy">Copiar enlace para el atajo</button></div>
+      <details class="help"><summary>Cómo armarlo (5 minutos, una sola vez)</summary><ol>
+        <li>Acá arriba tocá <b>Copiar enlace para el atajo</b>.</li>
+        <li>Abrí <b>Atajos</b> y tocá <b>+</b> (arriba a la derecha). Tocá el nombre de arriba y poné <b>Agua</b>.</li>
+        <li>Tocá <b>Buscar acciones</b>, escribí <b>lista</b> y tocá <b>Lista</b>. Cambiá los dos elementos que trae por <b>Vaso</b> y <b>Botella</b>. Tocá <b>Añadir nuevo elemento</b> y escribí <b>Mate</b>.</li>
+        <li>Buscá <b>elegir</b> y tocá <b>Elegir de la lista</b>. (Opcional: tocá la flechita de esa acción y como pregunta escribí <b>¿Cuánta agua tomaste?</b>)</li>
+        <li>Buscá <b>URL</b> y tocá <b>Obtener contenido de URL</b>. Tocá el lugar de la URL, mantené apretado y tocá <b>Pegar</b>.</li>
+        <li>Sin cerrar el teclado, en la barra de arriba del teclado tocá <b>Elemento elegido</b>: tiene que quedar pegado al final del enlace. Tocá <b>OK</b>.</li>
+        <li id="wRemSteps"></li>
+        <li>Tocá <b>▶</b> para probarlo y elegí <b>Vaso</b>. Si pregunta por <b>ntfy.sh</b>, tocá <b>Permitir siempre</b>. Volvé a esta app: el agua tiene que subir 250 ml.</li>
+        <li><b>Los horarios:</b> en Atajos, pestaña <b>Automatización</b> → <b>+</b> → <b>Hora del día</b>. Poné el primer horario de la lista, <b>Diariamente</b>, marcá <b>Ejecutar inmediatamente</b> → <b>Siguiente</b> → elegí <b>Agua</b>. Repetilo con cada horario.</li>
+      </ol><p class="sub small">«Vaso» suma 250 ml, «Botella» 500 ml y «Mate» tu parte del mate. Tocar <b>Cancelar</b> en el aviso no anota nada. El aviso llega aunque ya hayas cumplido: Atajos no puede leer lo que anotaste en la app.</p></details>
+      <p class="sub small">Lo que anotás desde el aviso espera <b>12 horas</b> a que abras la app; si pasa más tiempo, se pierde. Con abrirla una vez a la mañana y otra a la noche alcanza.</p>
+    </section>
     <section><h2>Pantalla</h2><label class="fl"><span>Tono</span><select id="cfgTone"><option value="auto">Automático: suave antes de las 10 y desde las 21</option><option value="claro">Siempre claro</option><option value="suave">Siempre suave</option><option value="oscuro">Siempre oscuro</option></select></label>
       <p class="sub small">El tono suave es oscuro y cálido, sin luz azul fuerte: no encandila al despertarte ni antes de dormir. También lo cambiás con el ícono de la luna o el sol, arriba.</p></section>
     <section><h2>Copia de seguridad</h2>
@@ -1066,7 +1098,7 @@ nav.tabs button:active,.segtab button:active{transform:scale(.94)}
   </main>
 </div>
 
-<button type="button" id="wfab" class="wfab" aria-label="Sumar un vaso de agua"><svg viewBox="0 0 60 60" class="wring"><circle cx="30" cy="30" r="26" class="wbg"/><circle cx="30" cy="30" r="26" class="wfg" id="wfgC"/></svg><span class="wdrop"><svg viewBox="0 0 24 24"><path d="M12 3.2c-.3 0-6.2 6.6-6.2 11a6.2 6.2 0 0 0 12.4 0c0-4.4-5.9-11-6.2-11z"/></svg></span><b id="wfabT">0 L</b></button>
+
 <nav class="tabs" aria-label="Secciones"><div>
   <button type="button" data-v="hoy" aria-current="page">Hoy</button>
   <button type="button" data-v="prog">Progreso</button>
@@ -1356,11 +1388,18 @@ function openAnalisis(T){const A=analisis(T);
   SI.innerHTML=`<div><h3>Análisis de tus datos</h3><p class="sub small">Últimos 7 días. Se calcula en tu celular; nada se envía.</p></div><div class="avl">${A.length?A.map(x=>`<div class="av"><p>${x.t}</p><p class="sub small">${esc(x.why)}</p></div>`).join(''):'<p class="note">Todavía no hay suficientes datos para un análisis. Anotá tu sueño y tus hábitos unos días.</p>'}</div><button class="btn" type="button" id="avCopy">Copiar resumen para Claude</button><button class="btn primary" type="button" id="ok">Listo</button>`;
   SI.querySelector('#avCopy').onclick=async()=>{try{await navigator.clipboard.writeText(resumenClaude(T));toast('Copiado: pegalo en tu chat con Claude');}catch(e){toast('No se pudo copiar');}};
   SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
-function renderBat(T){const box=document.getElementById('bat'),b=battery(T),A=analisis(T);
-  let t=null;if(A.length&&(A[0].p>=40||!b))t=A[0].t;else if(b)t=planText(T,b);
-  box.innerHTML=(t?`<${A.length?'button type="button"':'div'} class="imp" id="avB"><span class="tx"><span class="k">Lo importante de hoy</span><span class="it"></span></span>${A.length?SVGI.arr:''}</${A.length?'button':'div'}>`:'')+quickRow(T);
-  if(t){box.querySelector('#avB .it').innerHTML=t;if(A.length)box.querySelector('#avB').onclick=()=>openAnalisis(T);}
-  wireQuick(T);}
+function renderBat(T){const box=document.getElementById('bat');box.innerHTML=quickRow(T);wireQuick(T);}
+function dayPart(){const h=curHr();return h>=5&&h<12?'m':h>=20||h<5?'n':'t';}
+function renderImp(T){const box=document.getElementById('imp'),b=battery(T),A=analisis(T),night=dayPart()==='n';
+  let t=null;if(night){const bt=A.find(x=>/a la cama a las/.test(x.t));t=A.length&&A[0].p>=70?A[0].t:bt?bt.t:A.length?A[0].t:null;}
+  else if(A.length&&(A[0].p>=40||!b))t=A[0].t;else if(b)t=planText(T,b);
+  if(!t){box.innerHTML='';return;}
+  box.innerHTML=`<${A.length?'button type="button"':'div'} class="hoyimp" id="avB"><span class="tx"><span class="k">${night?'Esta noche':'Lo importante de hoy'}</span><span class="it"></span></span>${A.length?SVGI.arr:''}</${A.length?'button':'div'}>`;
+  box.querySelector('.it').innerHTML=night?t.replace('<b>Esta noche, a la cama','<b>A la cama'):t;if(A.length)box.querySelector('#avB').onclick=()=>openAnalisis(T);}
+/* Hoy cambia con el día: a la mañana el sueño primero; a la noche, la hora de acostarte primero */
+function arrangeHoy(){const v=document.getElementById('v-hoy'),$=id=>document.getElementById(id),dp=dayPart();
+  const ord=dp==='m'?['slpBox','day','imp','bat']:dp==='n'?['imp','day','bat','slpBox']:['day','imp','bat','slpBox'];
+  ord.concat(['napBox','tasks','expBox','revRow']).forEach(id=>{const e=$(id);if(e)v.appendChild(e);});}
 function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Tiempo en cama contra tu meta','Gimnasio, pádel y correr esta semana','Estudio y proyecto de hoy'];
   SI.innerHTML=`<div><h3>Tus 3 anillos</h3><p class="sub small">Se llenan solos con lo que marcás.</p></div><div class="rgl">${R.map((r,i)=>`<div class="spread rowx"><span class="rgn"><i class="dot ${cols[i]}"></i><span><b>${r[0]}</b><br><span class="sub small">${dsc[i]}</span></span></span><b class="num">${r[2]}</b></div>`).join('')}</div><button class="btn primary" type="button" id="ok">Listo</button>`;
   SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
@@ -1376,7 +1415,7 @@ function wireSwipe(r,label,onDel){const b=document.createElement('button');b.typ
   b.onclick=e=>{e.stopPropagation();swClose(r);onDel();};r.appendChild(b);r.classList.add('swr');
   let x0=0,y0=0,dx=0,mode=0,base=0;
   r.addEventListener('pointerdown',e=>{if(e.target.closest('.hdl,.swdel'))return;x0=e.clientX;y0=e.clientY;dx=0;mode=0;base=r.classList.contains('swo')?-84:0;});
-  r.addEventListener('pointermove',e=>{if(!x0)return;const mx=e.clientX-x0,my=e.clientY-y0;if(!mode){if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3){mode=1;if(SW_OPEN&&SW_OPEN!==r)swClose(SW_OPEN);r.classList.add('swing');}else if(Math.abs(my)>10){mode=2;}}
+  r.addEventListener('pointermove',e=>{if(!x0)return;if(TK_DRAG){x0=0;return;}const mx=e.clientX-x0,my=e.clientY-y0;if(!mode){if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3){mode=1;if(SW_OPEN&&SW_OPEN!==r)swClose(SW_OPEN);r.classList.add('swing');}else if(Math.abs(my)>10){mode=2;}}
     if(mode===1){dx=Math.max(-120,Math.min(0,base+mx));r.style.setProperty('--dx',dx+'px');}});
   const end=()=>{if(mode===1){r.classList.remove('swing');if(dx<-50){r.classList.add('swo');r.style.setProperty('--dx','-84px');SW_OPEN=r;}else swClose(r);r.dataset.swiped=Date.now();}x0=0;mode=0;};
   r.addEventListener('pointerup',end);r.addEventListener('pointercancel',end);
@@ -1492,7 +1531,7 @@ function renderNap(T){const box=document.getElementById('napBox');if(!box)return
     else if(a==='si'||a==='no'||a==='nose'){cur.listo=true;cur.dormido=a==='si'?true:a==='no'?false:null;toast(a==='no'?'Anotado: descansaste sin dormir':'Anotado');}
     patchDay(T,{nap:cur});renderNap(T);});}
 setInterval(()=>{const n=(S.dias[todayStr()]||{}).nap;if(n&&n.terminaA&&!n.listo&&!document.hidden)renderNap(todayStr());},20000);
-function renderHoy(){const T=todayStr();renderBat(T);renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
+function renderHoy(){const T=todayStr();renderImp(T);renderBat(T);arrangeHoy();renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
 function rangeRatio(a,b,only){const T=todayStr();let tot=0,got=0;for(let s=a;s<=b&&s<=T;s=add(s,1)){HABS().forEach(h=>{if(only&&h!==only)return;if(!counts(h,s))return;if(s===T&&st(s,h.id)===0)return;const v=st(s,h.id);tot++;got+=v===2?1:v===1?.5:0;});}return tot?got/tot:null;}
 function renderWeek(T){const box=document.getElementById('weekBox'),d=dow(T);box.innerHTML='';
   if(d!==0&&d!==1){box.hidden=true;return;}
@@ -1834,7 +1873,8 @@ let SYNC_BUSY=false,SYNC_TAP=0;try{SYNC_TAP=Number(sessionStorage.getItem('syncT
 // Cada mensaje se aplica una sola vez (se recuerda su id). El sueño y la salud nunca viajan por acá.
 let INBOX_NOTE=[];
 function applyCmd(txt,ts){const day=dayOfTs(ts),d=S.dias[day]||{},w=String(txt||'').trim().toLowerCase().split(/\s+/),c=w[0],a=w.slice(1).join(' ');
-  if(c==='agua'){const ml=parseInt(a,10);if(ml>0&&ml<=2000){patchDay(day,{agua:(d.agua||0)+ml});return '+'+ml+' ml de agua';}}
+  if(c==='agua'&&/^mate/.test(a)){const ml=(S.salud.mate&&S.salud.mate.ml)||500;patchDay(day,{agua:(d.agua||0)+ml,mateMl:(d.mateMl||0)+ml});return 'mate +'+ml+' ml';}
+  if(c==='agua'){const ml=/^taza/.test(a)?150:/^vaso/.test(a)?250:/^botella/.test(a)?500:parseInt(a,10);if(ml>0&&ml<=2000){patchDay(day,{agua:(d.agua||0)+ml});return '+'+ml+' ml de agua';}}
   else if(c==='mate'){const ml=(S.salud.mate&&S.salud.mate.ml)||500;patchDay(day,{agua:(d.agua||0)+ml,mateMl:(d.mateMl||0)+ml});return 'mate +'+ml+' ml';}
   else if(c==='hab'){const h=HABS().find(x=>x.id===a);if(h){patchDay(day,{[h.id]:2});return h.name+' hecho';}}
   else if(c==='mas'){const h=HABS().find(x=>x.id===a);if(h&&h.num){const step=h.num.step||1,val=round1(nv(day,h.id)+step),p={['n_'+h.id]:val};if(h.num.target)p[h.id]=val>=h.num.target?2:1;else if(st(day,h.id)===0&&h.num.autoDone!==false)p[h.id]=2;patchDay(day,p);return h.name+' +'+step+(h.num.unit?' '+h.num.unit:'');}}
@@ -1861,7 +1901,15 @@ async function syncAndRender(){if(RECOVERY)return;const k=()=>JSON.stringify((S.
 function renderCmdList(){const L=document.getElementById('cmdList');if(!L)return;if(!S.salud.sync){L.innerHTML='<p class="sub small">Primero activá los pasos automáticos.</p>';return;}
   const it=[['Agua 250 ml','agua 250'],['Agua 500 ml','agua 500'],['Mate','mate']];HABS().filter(h=>h.active!==false&&!h.breath).forEach(h=>{if(h.num&&h.num.label)it.push([h.name+' +'+(h.num.step||1)+(h.num.unit?' '+h.num.unit:''),'mas '+h.id]);else it.push([h.name+': hecho','hab '+h.id]);});
   L.innerHTML='';it.forEach(([l,c])=>{const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=l;b.onclick=async()=>{const u=syncLink()+encodeURIComponent(c);try{await navigator.clipboard.writeText(u);toast('Copiado: '+l);}catch(e){toast('No se pudo copiar');}};L.appendChild(b);});}
-function renderSyncCfg(){renderCmdList();const el=document.getElementById('syncSt');if(!el)return;const L=S.salud.syncLast;
+/* 5 recordatorios repartidos entre 30 min después de levantarte y 3 h antes de acostarte */
+function waterTimes(){const wk=hm2m(S.salud.wake),bd0=hm2m(bedTarget()),bd=bd0<=wk?bd0+1440:bd0,a=wk+30,z=bd-180,n=5,q=m=>Math.round(m/15)*15;
+  if(z-a<240)return [a,q((a+z)/2),z].map(m2hm);const out=[];for(let i=0;i<n;i++)out.push(m2hm(q(a+(z-a)*i/(n-1))));return out;}
+function renderWRem(){const box=document.getElementById('wRem');if(!box)return;const L=waterTimes(),g=waterGoal(),per=Math.round(g/L.length/50)*50;
+  box.innerHTML=`<div class="wrem">${L.map((t,i)=>`<div class="wr"><span>${i===0?'Al levantarte':i===L.length-1?'El último del día':'Recordatorio '+(i+1)}</span><b>${t}</b></div>`).join('')}</div><p class="sub small">Calculado con tu hora de levantarte (${S.salud.wake}) y de acostarte (${bedTarget()}). Con unos ${per} ml en cada aviso llegás a tu meta de ${fmtL(g)}. El último va 3 horas antes de dormir para no despertarte a la noche.</p>`;
+  const st=document.getElementById('wRemSteps');if(st)st.innerHTML=S.salud.syncLast?'<b>Para que de paso mande tus pasos:</b> buscá <b>ejecutar</b>, tocá <b>Ejecutar atajo</b> y elegí <b>Pasos Hábitos</b>.':'Cuando tengas funcionando los <b>Pasos automáticos</b> (sección de arriba), agregá al final <b>Ejecutar atajo</b> → <b>Pasos Hábitos</b>: así cada aviso también actualiza tus pasos.';
+  const cp=document.getElementById('wRemCopy');if(cp){cp.disabled=!S.salud.sync;cp.textContent=S.salud.sync?'Copiar enlace para el atajo':'Primero activá los pasos automáticos';
+    cp.onclick=async()=>{const u=syncLink()+encodeURIComponent('agua ');try{await navigator.clipboard.writeText(u);toast('Enlace copiado: pegalo en el atajo Agua');}catch(e){toast('No se pudo copiar');}};}}
+function renderSyncCfg(){renderCmdList();renderWRem();const el=document.getElementById('syncSt');if(!el)return;const L=S.salud.syncLast;
   el.innerHTML=L?'<b style="color:var(--olive)">Funcionando.</b> Último dato: '+(dayOfTs(L)===todayStr()?'hoy':fmt(dayOfTs(L),{weekday:'long'}))+' a las '+hmOfTs(L)+'.':'Todavía no llegó ningún dato del atajo.';}
 
 
@@ -1878,15 +1926,15 @@ function taskMeta(T,x){if(x.done)return [['ok','Hecha']];const m=[];if(x.hm)m.pu
 function renderTasks(T){const L=document.getElementById('tkList'),c=document.getElementById('tkC');if(!L||TK_DRAG)return;
   const all=tasksOf(),pend=all.filter(x=>tkVisible(x,T)),fut=all.filter(x=>!x.done&&x.due&&x.due>T).sort((p,q)=>p.due<q.due?-1:p.due>q.due?1:0),dnT=all.filter(x=>x.done===T);L.innerHTML='';
   c.textContent=pend.length?pend.length+(pend.length===1?' pendiente':' pendientes'):(dnT.length?'Al día ✓':'');c.classList.toggle('ok',!pend.length&&dnT.length>0);
-  const MAXT=4,vis=TK_ALL?pend:pend.slice(0,MAXT);vis.forEach(x=>L.appendChild(taskRow(T,x,true)));
+  const MAXT=3,vis=TK_ALL?pend:pend.slice(0,MAXT);vis.forEach(x=>L.appendChild(taskRow(T,x,true)));
   if(pend.length>MAXT){const m=document.createElement('button');m.type='button';m.className='tkmore';m.innerHTML=`<span>${TK_ALL?'Ver menos':'Ver '+(pend.length-MAXT)+' más'}</span>${SVGI.chev}`;m.classList.toggle('open',TK_ALL);m.onclick=()=>{TK_ALL=!TK_ALL;renderTasks(T);};L.appendChild(m);}
   if(dnT.length){const m=document.createElement('button');m.type='button';m.className='tkmore';m.innerHTML=`<span>Hechas hoy · ${dnT.length}</span>${SVGI.chev}`;m.classList.toggle('open',TK_DN);m.onclick=()=>{TK_DN=!TK_DN;renderTasks(T);};L.appendChild(m);if(TK_DN)dnT.forEach(x=>L.appendChild(taskRow(T,x,false)));}
   if(!pend.length&&!dnT.length&&!fut.length)L.innerHTML='<p class="tkh">Escribí lo que tenés que hacer y tocá <b>+</b>. Cuando lo hacés, lo tildás.</p>';
   if(fut.length){const g=document.createElement('button');g.type='button';g.className='tkmore';g.innerHTML=`<span>Próximas · ${fut.length}</span>${SVGI.chev}`;g.classList.toggle('open',TK_FUT);
     g.onclick=()=>{TK_FUT=!TK_FUT;renderTasks(T);};L.appendChild(g);if(TK_FUT)fut.forEach(x=>L.appendChild(taskRow(T,x,false)));}
   wireTaskDrag(L,T);}
-function taskRow(T,x,drag){const r=document.createElement('div'),v=!!x.done;r.className='hrw tkr'+(v?' done':'')+(x.imp?' imp':'');r.dataset.id=x.id;
-  r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b>${x.imp&&!v?TK_FLAG:''}<span class="tt"></span></b></button>${drag?`<span class="hdl" role="button" aria-label="Mantené apretado para mover">${TK_HDL}</span>`:'<span></span>'}`;
+function taskRow(T,x,drag){const r=document.createElement('div'),v=!!x.done;r.className='hrw tkr'+(v?' done':'')+(x.imp?' imp':'')+(drag?' dragok':'');r.dataset.id=x.id;
+  r.innerHTML=`<button class="ck2" type="button"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button><button class="info" type="button"><b>${x.imp&&!v?TK_FLAG:''}<span class="tt"></span></b></button>`;
   r.querySelector('.tt').textContent=x.t;
   const mt=taskMeta(T,x);if(mt.length){const sp=document.createElement('span');sp.className='tmeta';mt.forEach(([cls,txt],i)=>{if(i){sp.appendChild(document.createTextNode(' · '));}const e=document.createElement('em');if(cls)e.className=cls;e.textContent=txt;sp.appendChild(e);});r.querySelector('.info').appendChild(sp);}
   const ck=r.querySelector('.ck2');ck.setAttribute('aria-label',x.t+(v?': hecha, tocá para desmarcar':': tocá para marcar hecha'));
@@ -1895,19 +1943,25 @@ function taskRow(T,x,drag){const r=document.createElement('div'),v=!!x.done;r.cl
   wireSwipe(r,x.t,()=>{const i=S.tareas.indexOf(x);if(i<0)return;S.tareas.splice(i,1);save();renderTasks(T);vib(12);toast('Tarea borrada',()=>{S.tareas.splice(Math.min(i,S.tareas.length),0,x);save();renderTasks(T);});});
   return r;}
 /* arrastrar para ordenar (como en Recordatorios) */
-function wireTaskDrag(L,T){L.querySelectorAll('.tkr .hdl').forEach(h=>{h.onpointerdown=e=>{const row=h.closest('.tkr');if(!row)return;e.preventDefault();
-  const rows=[...L.querySelectorAll('.tkr')].filter(x=>x.querySelector('.hdl')),idx=rows.indexOf(row);if(idx<0)return;
-  try{h.setPointerCapture(e.pointerId);}catch(err){}TK_DRAG=true;vib(10);
-  const y0=e.clientY,rh=row.getBoundingClientRect().height,mids=rows.map(x=>{const q=x.getBoundingClientRect();return q.top+q.height/2;});let to=idx;
-  row.classList.add('drag');rows.forEach(x=>{if(x!==row)x.classList.add('shift');});
-  const mv=ev=>{const dy=ev.clientY-y0;row.style.transform=`translateY(${dy}px)`;const cy=mids[idx]+dy;
-    to=0;mids.forEach((m,i)=>{if(i!==idx&&cy>m)to++;});
-    rows.forEach((x,i)=>{if(x===row)return;let sh=0;if(idx<to&&i>idx&&i<=to)sh=-rh;else if(to<idx&&i>=to&&i<idx)sh=rh;x.style.transform=sh?`translateY(${sh}px)`:'';});};
-  const end=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',end);h.removeEventListener('pointercancel',end);TK_DRAG=false;
-    if(to!==idx){const ids=rows.map(x=>x.dataset.id);const [m]=ids.splice(idx,1);ids.splice(to,0,m);
-      const all=tasksOf(),byId=Object.fromEntries(all.map(x=>[x.id,x])),set=new Set(ids);let k=0;S.tareas=all.map(x=>set.has(x.id)?byId[ids[k++]]:x);save();vib(8);}
-    renderTasks(T);};
-  h.addEventListener('pointermove',mv);h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);};});}
+function wireTaskDrag(L,T){L.querySelectorAll('.tkr.dragok').forEach(row=>{let tm=null,x0=0,y0=0;
+  const cancel=()=>{clearTimeout(tm);tm=null;};
+  row.addEventListener('pointerdown',e=>{if(e.target.closest('.ck2,.swdel')||row.classList.contains('swo'))return;x0=e.clientX;y0=e.clientY;cancel();tm=setTimeout(()=>{tm=null;startDrag(row,e.pointerId,y0);},420);});
+  row.addEventListener('pointermove',e=>{if(tm&&(Math.abs(e.clientX-x0)>8||Math.abs(e.clientY-y0)>8))cancel();});
+  ['pointerup','pointercancel','pointerleave'].forEach(n=>row.addEventListener(n,cancel));
+  row.addEventListener('contextmenu',e=>e.preventDefault());});
+  function startDrag(row,pid,y0){const rows=[...L.querySelectorAll('.tkr.dragok')],idx=rows.indexOf(row);if(idx<0)return;
+    try{row.setPointerCapture(pid);}catch(err){}TK_DRAG=true;vib(12);row.dataset.swiped=Date.now();
+    const rh=row.getBoundingClientRect().height,mids=rows.map(x=>{const q=x.getBoundingClientRect();return q.top+q.height/2;});let to=idx;
+    row.classList.add('drag','lift');rows.forEach(x=>{if(x!==row)x.classList.add('shift');});
+    const stop=ev=>{if(TK_DRAG&&ev.cancelable)ev.preventDefault();};document.addEventListener('touchmove',stop,{passive:false});
+    const mv=ev=>{const dy=ev.clientY-y0;row.style.transform=`translateY(${dy}px) scale(1.02)`;const cy=mids[idx]+dy;
+      to=0;mids.forEach((m,i)=>{if(i!==idx&&cy>m)to++;});
+      rows.forEach((x,i)=>{if(x===row)return;let sh=0;if(idx<to&&i>idx&&i<=to)sh=-rh;else if(to<idx&&i>=to&&i<idx)sh=rh;x.style.transform=sh?`translateY(${sh}px)`:'';});};
+    const end=()=>{row.removeEventListener('pointermove',mv);row.removeEventListener('pointerup',end);row.removeEventListener('pointercancel',end);document.removeEventListener('touchmove',stop);TK_DRAG=false;row.dataset.swiped=Date.now();
+      if(to!==idx){const ids=rows.map(x=>x.dataset.id);const [m]=ids.splice(idx,1);ids.splice(to,0,m);
+        const all=tasksOf(),byId=Object.fromEntries(all.map(x=>[x.id,x])),set=new Set(ids);let k=0;S.tareas=all.map(x=>set.has(x.id)?byId[ids[k++]]:x);save();vib(8);}
+      renderTasks(T);};
+    row.addEventListener('pointermove',mv);row.addEventListener('pointerup',end);row.addEventListener('pointercancel',end);}}
 /* personalizar: día, hora, importante y nota */
 function openTask(T,x){let due=x.due||null,imp=!!x.imp;
   SI.innerHTML=`<div><h3>Tarea</h3></div><input id="tkEd" class="tkin2" type="text" maxlength="140" enterkeyhint="done" autocapitalize="sentences">
@@ -1948,7 +2002,7 @@ function quickRow(T){const x=slp(T),d=(S.dias[T]||{}).pasosHoy,w=waterOf(T),g=wa
   return `<div class="qrow${slOn?'':' q2'}">${
     slOn?tile('qSl','En cama',fmtH(slH(x)),x.b+' → '+x.w,slH(x)/S.salud.meta*100,'','var(--olive)'):''}${
     tile('qSt','Pasos',d?fmtN(d.n):'—',stSub,d?d.n/8000*100:0,PEND?'pend':stale?'warn':'','var(--sand)')}${
-    tile('qWa','Agua',fmtL(w),'de '+fmtL(g),w/g*100,'','var(--water)')}</div>`;}
+    tile('qWa','Agua',fmtL(w),'de '+fmtL(g),w/g*100,w>=g?'full':'','var(--water)').replace('</button>','<span class="qplus" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></button>')}</div>`;}
 function stepsRun(){SYNC_TAP=Math.floor(Date.now()/1000);try{sessionStorage.setItem('syncTap',String(SYNC_TAP));}catch(e){}if(!S.salud.syncLast){PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);}
 async function stepsPaste(T){try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else if(String(t).trim())toast('Lo copiado no es un número de pasos. Revisá el atajo.');else openStepsHelp();}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();}
 function openStepsHelp(){SI.innerHTML=`<div><h3>Los pasos no llegan</h3><p class="sub small">Casi siempre es porque Atajos no tiene permiso para leer tus pasos. Se arregla una sola vez:</p></div>
@@ -1959,7 +2013,11 @@ function openStepsHelp(){SI.innerHTML=`<div><h3>Los pasos no llegan</h3><p class
 function wireQuick(T){const q=id=>document.getElementById(id);
   const sl=q('qSl');if(sl)sl.onclick=()=>{slEdit=true;renderAll();window.scrollTo({top:0,behavior:'smooth'});};
   q('qSt').onclick=()=>PEND?stepsPaste(T):stepsStale(T)?openStepsHelp():stepsRun();
-  q('qWa').onclick=()=>openWaterSheet();}
+  const wa=q('qWa');wa.setAttribute('aria-label','Agua: tocá para sumar un vaso, mantené apretado para más opciones');let lt=null,long=false;
+  wa.addEventListener('pointerdown',()=>{long=false;clearTimeout(lt);lt=setTimeout(()=>{long=true;vib(15);openWaterSheet();},450);});
+  ['pointerup','pointerleave','pointercancel'].forEach(e=>wa.addEventListener(e,()=>clearTimeout(lt)));
+  wa.addEventListener('contextmenu',e=>e.preventDefault());
+  wa.onclick=()=>{if(long){long=false;return;}if(!tapOk('agua'))return;addWater(250);};}
 
 
 /* ---------- cardio de la semana (bici al trabajo automática + pádel + correr) ---------- */
@@ -2151,8 +2209,8 @@ document.getElementById('prioForm').onsubmit=e=>{e.preventDefault();const i=docu
 function renderFab(){const T=todayStr(),w=waterOf(T),g=waterGoal(),c=document.getElementById('wfgC'),t=document.getElementById('wfabT');if(!c)return;const C=2*Math.PI*26;
   c.style.strokeDasharray=C.toFixed(1);c.style.strokeDashoffset=(C*(1-Math.min(1,w/g))).toFixed(1);t.textContent=fmtL(w);document.getElementById('wfab').classList.toggle('done',w>=g);}
 function addWater(ml){const T=todayStr(),prev=Object.assign({},S.dias[T]||{}),was=waterOf(T)>=waterGoal();patchDay(T,{agua:((S.dias[T]||{}).agua||0)+ml});vib(10);
-  const f=document.getElementById('wfab');f.classList.remove('splash');void f.offsetWidth;f.classList.add('splash');renderFab();renderBat(T);
-  const now=waterOf(T);if(!was&&now>=waterGoal()){confetti();toast('Meta de agua cumplida · '+fmtL(now),()=>{restore(T,prev);renderFab();});}else toast('+'+ml+' ml · '+fmtL(now)+' de '+fmtL(waterGoal()),()=>{restore(T,prev);renderFab();});}
+  renderBat(T);const nh=S.wHint||0;if(nh<3){S.wHint=nh+1;save();}
+  const now=waterOf(T);if(!was&&now>=waterGoal()){toast('Meta de agua cumplida · '+fmtL(now),()=>{restore(T,prev);renderBat(T);});}else toast(nh<3?'+'+ml+' ml (mantené para más)':'+'+ml+' ml · '+fmtL(now)+' de '+fmtL(waterGoal()),()=>{restore(T,prev);renderBat(T);});}
 function addMate(T){const m=S.salud.mate;if(!m)return;const prev=Object.assign({},S.dias[T]||{}),d=S.dias[T]||{};patchDay(T,{agua:(d.agua||0)+m.ml,mateMl:(d.mateMl||0)+m.ml});vib(10);renderFab();renderBat(T);toast('Mate: +'+m.ml+' ml (estimado) · '+fmtL(waterOf(T)),()=>{restore(T,prev);renderFab();});}
 function openWaterSheet(){const T=todayStr(),draw=()=>{const w=waterOf(T),g=waterGoal();
   SI.innerHTML=`<div><h3>Agua de hoy</h3><p class="sub small">${fmtL(w)} de ${fmtL(g)}${S.salud.agua==='auto'&&waterExtra(T).length?' (incluye '+waterExtra(T).map(x=>'+'+fmtL(x[0])+' por '+esc(x[1])).join(', ')+')':''} · el mate también cuenta</p></div><div class="track" style="height:8px"><i style="width:${Math.min(100,Math.round(w/g*100))}%;background:var(--water)"></i></div>
