@@ -1162,9 +1162,10 @@ function shapeErr(d){if(!isObj(d))return 'no son un objeto';
   for(const k of ['dias','semanas','salud'])if(d[k]!=null&&!isObj(d[k]))return '"'+k+'" no tiene el formato esperado';
   return '';}
 // Lectura segura: si lo guardado no se puede leer, no se reemplaza por la plantilla y no se escribe nada.
+let FRESH=false;
 function load(){let r=null;
   try{r=localStorage.getItem(KEY);}catch(e){return enterRecovery(null,'No se pudo acceder al almacenamiento del celular ('+((e&&e.name)||'error')+').');}
-  if(r===null)S=JSON.parse(JSON.stringify(SEED));
+  if(r===null){S=JSON.parse(JSON.stringify(SEED));FRESH=true;}
   else{let d;try{d=JSON.parse(r);}catch(e){return enterRecovery(r,'El texto guardado está incompleto o dañado ('+((e&&e.message)||'no es JSON')+').');}
     const why=shapeErr(d);if(why)return enterRecovery(r,'Los datos guardados '+why+'.');
     S=d;}
@@ -1238,6 +1239,8 @@ try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}c
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const todayStr=()=>new Date().toLocaleDateString('en-CA',{timeZone:TZ});
+/* instalación nueva: los hábitos empiezan hoy (si no, el análisis cuenta como fallados días en que la app no existía) */
+if(FRESH){const T0=todayStr();S.habitos.forEach(h=>{h.from=T0;delete h.hist;});save();}
 const toD=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d));};
 const toS=d=>d.toISOString().slice(0,10);
 const add=(s,n)=>{const d=toD(s);d.setUTCDate(d.getUTCDate()+n);return toS(d);};
