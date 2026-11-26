@@ -1,5 +1,5 @@
 // Hábitos App: funciona sin internet. Cambiá VERSION cuando actualices la app.
-const VERSION = 'habitos-app-v57';
+const VERSION = 'habitos-app-v58';
 const AV_CACHE = 'habitos-avisos'; // horarios de los avisos (agua y hora de dormir): no se borra al actualizar
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
@@ -50,10 +50,10 @@ self.addEventListener('push', e => {
     // hora de dormir: se muestra y se programa el de mañana (si este era el pendiente)
     if (tags.includes('noche')) {
       const cfg = await avGet(), now = Math.floor(Date.now() / 1000), b = cfg.bed || {};
-      const shown = self.registration.showNotification(m.title || 'Cierre del día', { ...NOTI, body: m.message || 'Celular afuera y a preparar la cama.', tag: 'noche', data: { kind: 'info' } });
+      const shown = self.registration.showNotification('Cierre del día', { ...NOTI, body: m.message || 'Celular afuera y a preparar la cama.', tag: 'noche', data: { kind: 'info' } });
       if (b.on && b.hm && cfg.topic && (!b.nextAt || b.nextAt <= now + 60)) {
         const n = avNext([b.hm], now, '');
-        if (n) { try { const r = await fetch('https://ntfy.sh/' + cfg.topic, { method: 'POST', headers: { 'X-At': String(n.at), 'X-Title': 'Cierre del día', 'X-Tags': 'noche' }, body: 'Celular afuera y a preparar la cama.' }); if (r.ok) { const cur = await avGet(); cur.bed = Object.assign({}, cur.bed || {}); cur.bed.nextAt = Math.max(cur.bed.nextAt || 0, n.at); await avPut(cur); } } catch (_) {} }
+        if (n) { try { const r = await fetch('https://ntfy.sh/' + cfg.topic + '?title=' + encodeURIComponent('Cierre del día'), { method: 'POST', headers: { 'X-At': String(n.at), 'X-Tags': 'noche' }, body: 'Celular afuera y a preparar la cama.' }); if (r.ok) { const cur = await avGet(); cur.bed = Object.assign({}, cur.bed || {}); cur.bed.nextAt = Math.max(cur.bed.nextAt || 0, n.at); await avPut(cur); } } catch (_) {} }
       }
       return shown;
     }

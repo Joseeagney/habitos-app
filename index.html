@@ -1919,7 +1919,8 @@ async function avPut(o){try{const c=await caches.open(AV_CACHE);await c.put('./a
 function avPub(topic,at){return fetch(NTFY+'/'+topic,{method:'POST',headers:{'X-At':String(at),'X-Title':'Hora del agua','X-Tags':'agua'},body:'Tocá para sumar un vaso (250 ml).'});}
 /* aviso de la hora de dormir: 45 min antes de tu hora ideal (sale de Metas de salud, no de cómo dormiste) */
 const avBedHm=()=>m2hm(hm2m(bedTarget())-45);
-function avPubBed(topic,at){return fetch(NTFY+'/'+topic,{method:'POST',headers:{'X-At':String(at),'X-Title':'Cierre del día','X-Tags':'noche'},body:'Celular afuera y a preparar la cama.'});}
+/* el título va en la URL: en un encabezado, la «í» llega rota */
+function avPubBed(topic,at){return fetch(NTFY+'/'+topic+'?title='+encodeURIComponent('Cierre del día'),{method:'POST',headers:{'X-At':String(at),'X-Tags':'noche'},body:'Celular afuera y a preparar la cama.'});}
 const avW=()=>!!(S.push&&S.push.on)&&S.push.agua!==false,avB=()=>!!(S.push&&S.push.on)&&S.push.cama!==false;
 const avSupport=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
 const avStandalone=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
