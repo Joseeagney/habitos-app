@@ -1,6 +1,6 @@
 // Hábitos App: funciona sin internet. Cambiá VERSION cuando actualices la app.
-const VERSION = 'habitos-app-v56';
-const AV_CACHE = 'habitos-avisos'; // horarios de los avisos de agua: no se borra al actualizar
+const VERSION = 'habitos-app-v57';
+const AV_CACHE = 'habitos-avisos'; // horarios de los avisos (agua y hora de dormir): no se borra al actualizar
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -45,8 +45,18 @@ self.addEventListener('push', e => {
   e.waitUntil((async () => {
     let p = {}; try { p = e.data ? e.data.json() : {}; } catch (_) {}
     if (p.event === 'subscription_expiring')
-      return self.registration.showNotification('Avisos de agua', { ...NOTI, body: 'Abrí la app para que los avisos sigan llegando.', tag: 'agua-exp', data: { kind: 'info' } });
+      return self.registration.showNotification('Avisos', { ...NOTI, body: 'Abrí la app para que los avisos sigan llegando.', tag: 'agua-exp', data: { kind: 'info' } });
     const m = p.message || {}, tags = m.tags || [];
+    // hora de dormir: se muestra y se programa el de mañana (si este era el pendiente)
+    if (tags.includes('noche')) {
+      const cfg = await avGet(), now = Math.floor(Date.now() / 1000), b = cfg.bed || {};
+      const shown = self.registration.showNotification(m.title || 'Cierre del día', { ...NOTI, body: m.message || 'Celular afuera y a preparar la cama.', tag: 'noche', data: { kind: 'info' } });
+      if (b.on && b.hm && cfg.topic && (!b.nextAt || b.nextAt <= now + 60)) {
+        const n = avNext([b.hm], now, '');
+        if (n) { try { const r = await fetch('https://ntfy.sh/' + cfg.topic, { method: 'POST', headers: { 'X-At': String(n.at), 'X-Title': 'Cierre del día', 'X-Tags': 'noche' }, body: 'Celular afuera y a preparar la cama.' }); if (r.ok) { const cur = await avGet(); cur.bed = Object.assign({}, cur.bed || {}); cur.bed.nextAt = Math.max(cur.bed.nextAt || 0, n.at); await avPut(cur); } } catch (_) {} }
+      }
+      return shown;
+    }
     if (!tags.includes('agua'))
       return self.registration.showNotification(m.title || 'Hábitos', { ...NOTI, body: m.message || '', tag: tags.includes('prueba') ? 'prueba' : 'hab', data: { kind: 'info' } });
     const cfg = await avGet(), now = Math.floor(Date.now() / 1000), met = cfg.metDay === avDay(now);

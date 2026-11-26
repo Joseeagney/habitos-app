@@ -180,6 +180,8 @@ dialog .grab{width:40px;height:4px;border-radius:9px;background:var(--line);marg
 .lst{display:flex;flex-direction:column}
 .lst button.r{display:flex;justify-content:space-between;gap:10px;align-items:center;border:0;border-top:1px solid var(--line);background:transparent;padding:14px 0;text-align:left;cursor:pointer;width:100%}
 .lst button.r:first-child{border-top:0}
+.lst button.r>svg{width:18px;height:18px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+#avOpts .tko>span{font-weight:600;min-width:0}#avOpts .sw{flex:0 0 46px}#avOpts .tko .sub{font-weight:500}#avOpts{margin:4px 0 2px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:11px 16px;border-radius:14px;font-weight:600;font-size:14px;z-index:30;display:flex;align-items:center;width:max-content;max-width:calc(100vw - 40px);animation:tin .3s ease}
 .toast span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .toast .undo{border:0;background:transparent;color:var(--olive-s);font-weight:800;margin-left:14px;cursor:pointer;flex:0 0 auto}
@@ -1035,6 +1037,22 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
     <button class="back" type="button" id="backBtn">‹ Hoy</button>
     <h1>Ajustes</h1>
     <section><div class="spread"><h2>Hábitos</h2><button class="link" type="button" id="newHab">Nuevo hábito</button></div><div class="lst" id="habs"></div></section>
+    <section id="wRemSec"><h2>Avisos</h2>
+      <p class="sub small">Te llegan al celular aunque la app esté cerrada. El de agua lo tocás y suma un vaso (250 ml); cuando llegás a tu meta, deja de insistir hasta el día siguiente.</p>
+      <div class="tkopt" id="avOpts">
+        <button type="button" class="tko tkimp" data-av="agua" aria-pressed="true"><span><b>Agua</b><br><span class="sub small"></span></span><i class="sw" aria-hidden="true"></i></button>
+        <button type="button" class="tko tkimp" data-av="cama" aria-pressed="true"><span><b>Hora de dormir</b><br><span class="sub small"></span></span><i class="sw" aria-hidden="true"></i></button>
+      </div>
+      <p class="sub small" id="avSt"></p>
+      <div class="inl"><button class="btn primary" type="button" id="avBtn">Activar avisos</button><button class="btn" type="button" id="avTest" hidden>Probar</button></div>
+      <details class="help"><summary>Horarios del agua</summary><div id="wRem"></div></details>
+      <details class="help"><summary>Si no te llegan</summary><ol>
+        <li>Abrí la app desde su ícono en la pantalla de inicio (no desde Safari).</li>
+        <li>En <b>Ajustes del iPhone → Notificaciones → Hábitos</b>, activá <b>Permitir notificaciones</b>.</li>
+        <li>Si tenés un modo de concentración activo (No molestar, Dormir), los avisos esperan a que termine.</li>
+        <li>Tocá <b>Probar</b>: tiene que llegarte un aviso en unos segundos.</li>
+      </ol><p class="sub small">Los avisos pasan por ntfy.sh, el mismo servicio de los pasos, con un código que es solo tuyo. Solo viaja la hora de cada aviso, que sale de tus horarios de <b>Metas de salud</b>. Cuánta agua tomás y cómo dormís no salen del celular.</p></details>
+    </section>
     <section><h2>Metas de salud</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p><label class="fl" style="margin-top:12px"><span>Meta de agua (bebidas, el mate cuenta)</span><select id="cfgAgua"><option value="auto">Automática: según tu peso y lo que hacés</option><option value="1500">1,5 L</option><option value="2000">2 L</option><option value="2500">2,5 L (días de calor)</option><option value="3000">3 L (calor + ejercicio)</option></select></label><label class="fl" id="pesoL" style="margin-top:12px"><span>Tu peso en kg (para la meta automática)</span><input id="cfgPeso" inputmode="decimal" placeholder="Ej: 72"></label><p class="sub small" id="aguaInfo"></p><label class="fl" style="margin-top:12px"><span>Bici al trabajo, ida y vuelta (se suma sola al cardio)</span><select id="cfgBici"><option value="0">No voy en bici</option><option value="20">20 min</option><option value="30">30 min</option><option value="40">40 min</option><option value="60">1 h</option></select></label></section>
     <section><div class="spread"><h2>Bloques fijos del día</h2><button class="link" type="button" id="newFix">Nuevo bloque</button></div><p class="sub small">Tus horarios fijos (trabajo, facultad). La app los usa para sumar la bici al cardio.</p><div class="lst" id="fixes"></div></section>
     <section><h2>Pasos automáticos</h2>
@@ -1053,18 +1071,6 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
         <li>Tocá <b>▶</b> para probarlo. Si te pregunta si permitís conectarse a <b>ntfy.sh</b>, tocá <b>Permitir siempre</b>. Volvé a esta app: en Pasos tiene que aparecer el número.</li>
         <li><b>Para que sea solo:</b> en Atajos, pestaña <b>Automatización</b> → <b>+</b> → <b>App</b> → elegí <b>WhatsApp</b> → marcá <b>Se abre</b> → <b>Ejecutar inmediatamente</b> y apagá <b>Notificar al ejecutarse</b> → <b>Siguiente</b> → elegí <b>Pasos Hábitos</b>. Cada vez que abrís WhatsApp, tus pasos se actualizan sin que hagas nada.</li>
       </ol><p class="sub small">Solo viaja el número de pasos, por un servicio gratuito (ntfy.sh) con un código secreto que es solo tuyo.</p></details></section>
-    <section id="wRemSec"><h2>Avisos de agua</h2>
-      <p class="sub small">Te llega un aviso en cada horario. Lo tocás y suma un vaso (250 ml). Cuando llegás a tu meta, la app deja de insistir hasta el día siguiente.</p>
-      <div id="wRem"></div>
-      <p class="sub small" id="avSt"></p>
-      <div class="inl"><button class="btn primary" type="button" id="avBtn">Activar avisos</button><button class="btn" type="button" id="avTest" hidden>Probar</button></div>
-      <details class="help"><summary>Si no te llegan</summary><ol>
-        <li>Abrí la app desde su ícono en la pantalla de inicio (no desde Safari).</li>
-        <li>En <b>Ajustes del iPhone → Notificaciones → Hábitos</b>, activá <b>Permitir notificaciones</b>.</li>
-        <li>Si tenés un modo de concentración activo (No molestar, Dormir), los avisos esperan a que termine.</li>
-        <li>Tocá <b>Probar</b>: tiene que llegarte un aviso en unos segundos.</li>
-      </ol><p class="sub small">Los avisos pasan por ntfy.sh, el mismo servicio de los pasos, con un código que es solo tuyo. Solo viaja la hora del aviso: cuánta agua tomás no sale del celular.</p></details>
-    </section>
     <section><h2>Pantalla</h2><label class="fl"><span>Tono</span><select id="cfgTone"><option value="auto">Automático: suave antes de las 10 y desde las 21</option><option value="claro">Siempre claro</option><option value="suave">Siempre suave</option><option value="oscuro">Siempre oscuro</option></select></label>
       <p class="sub small">El tono suave es oscuro y cálido, sin luz azul fuerte: no encandila al despertarte ni antes de dormir. También lo cambiás con el ícono de la luna o el sol, arriba.</p></section>
     <section><h2>Copia de seguridad</h2>
@@ -1074,22 +1080,12 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
       <div class="inl"><button class="btn" type="button" id="expBtn">Guardar copia</button><button class="btn" type="button" id="impBtn">Restaurar copia</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>
       <p class="sub small" id="lastBk"></p>
       <button class="btn danger" type="button" id="resetBtn" style="margin-top:6px">Empezar de cero (borra los registros)</button><p class="sub small">Borra días, sueño, agua, pasos, tareas, repasos y experimentos. Conserva tus hábitos, objetivos, ajustes y el atajo de pasos. Antes guarda una copia en este celular por si te arrepentís.</p></section>
-    <section><h2>Recordatorios</h2>
-      <p class="sub small">El iPhone no deja que esta app mande avisos sola. La forma gratis y confiable es con la app <b>Atajos</b> (5 minutos, una sola vez):</p>
-      <details class="help"><summary>Ver los pasos</summary><ol>
-        <li>Abrí <b>Atajos</b> → pestaña <b>Automatización</b> → <b>+</b> → <b>Hora del día</b>.</li>
-        <li>Elegí la hora (ej. <b>08:45</b>), <b>Diariamente</b> y <b>Ejecutar inmediatamente</b>. Tocá <b>Siguiente</b>.</li>
-        <li><b>Nueva automatización en blanco</b> → buscá la acción <b>Mostrar notificación</b>.</li>
-        <li>Escribí el texto: <b>"Anotá cómo dormiste (10 s)"</b> y tocá <b>OK</b>.</li>
-        <li><b>Pasos:</b> mirá la sección <b>Pasos automáticos</b>, más arriba.</li>
-        <li>Repetí con <b>13:30</b> "Después de almorzar: 10 min caminando" y <b>23:45</b> "Cierre del día: gastos, baño, celular afuera".</li>
-      </ol><p class="sub small">Tip: tocá la notificación y abrí la app desde el ícono de inicio.</p></details></section>
     <section><h2>Ayuda</h2><details class="help"><summary>¿Cómo funciona la app?</summary><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)">
       <li><b style="color:var(--fg)">Nunca fallar dos veces seguidas.</b> Si ayer no salió, hoy va aunque sea el mínimo.</li>
       <li><b style="color:var(--fg)">Día malo = versión mínima.</b> Cuenta igual.</li>
       <li><b style="color:var(--fg)">Imprevisto real = libre.</b> No suma ni resta.</li>
       <li><b style="color:var(--fg)">Domingo a la noche:</b> 15 min para mirar la semana y elegir 3 prioridades.</li><li><b style="color:var(--fg)">Antes de dormir:</b> gastos, baño, celular afuera, lectura y a dormir.</li><li><b style="color:var(--fg)">Horario parejo:</b> levantarte siempre a la misma hora (±30 min), también el fin de semana. Es lo que más ordena el sueño.</li></ol>
-      <p class="sub small" style="margin-top:10px"><b>Batería (Alta, Media o Baja):</b> resume tu tiempo en cama, cuántas noches de la semana quedaron por debajo de tu meta, qué tan parejo es tu horario, si tuviste dolor de cabeza y si entrenaste dos días seguidos. Es orientativa, no un dato médico.</p><p class="sub small"><b>Experimento de 14 días:</b> elegís un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Muestra relaciones, no prueba causas.</p>
+      <p class="sub small" style="margin-top:10px"><b>Experimento de 14 días:</b> elegís un cambio y la app compara tus 14 días anteriores con los 14 del experimento. Muestra relaciones, no prueba causas.</p>
       <p class="sub small"><b>Constancia de un hábito:</b> sube con cada día que lo cumplís (el mínimo cuenta) y baja de a poco si fallás. Mide qué tan seguido lo hacés, no si ya es automático.</p></details></section>
   </main>
 </div>
@@ -1247,7 +1243,11 @@ const nowHM=()=>new Date().toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit
 const HABS=()=>S.habitos,GOALS=()=>S.objetivos;
 const st=(s,k)=>{const v=S.dias[s]&&S.dias[s][k];return typeof v==='number'?v:0;};
 const nv=(s,k)=>{const v=S.dias[s]&&S.dias[s]['n_'+k];return typeof v==='number'?v:0;};
-const started=(h,s)=>h.active!==false&&(!h.from||s>=h.from);
+// En pausa: desde pausedAt no cuenta (sin pausedAt, pausas viejas: no cuenta ningún día). h.off guarda pausas terminadas.
+const offOn=(h,s)=>{if(h.active===false)return !h.pausedAt||s>=h.pausedAt;const O=h.off;if(O)for(const o of O)if(s>=o.a&&s<o.b)return true;return false;};
+const started=(h,s)=>(!h.from||s>=h.from)&&!offOn(h,s);
+function setActive(h,on,T){T=T||todayStr0();if(on){if(h.active===false){const a=h.pausedAt||(S.foco&&S.foco.at)||T;if(a<T)(h.off=h.off||[]).push({a,b:T});}h.active=true;delete h.pausedAt;}
+  else if(h.active!==false){h.active=false;h.pausedAt=T;}}
 // Configuración vigente en una fecha: h.hist guarda las anteriores, cada una válida hasta 'hasta' (sin incluir).
 const cfgAt=(h,s)=>{const H=h.hist;if(H&&H.length)for(const c of H)if(s<c.hasta)return c;return h;};
 const sched=(h,s)=>started(h,s)&&(cfgAt(h,s).days||[]).includes(dow(s));
@@ -1257,7 +1257,7 @@ const quotaFree=(h,s)=>{const pw=cfgAt(h,s).perWeek;if(!pw||st(s,h.id)>0)return 
 const counts=(h,s)=>!h.opt&&sched(h,s)&&st(s,h.id)!==-1&&!quotaFree(h,s);
 const goalById=id=>GOALS().find(g=>g.id===id);
 const uid=p=>p+Math.random().toString(36).slice(2,8);
-const round1=x=>Math.round(x*10)/10;
+const round1=x=>Math.round(x*10)/10,dec=x=>String(round1(x)).replace('.',',');
 const firstDate=()=>{const k=Object.keys(S.dias).sort();return k.length?k[0]:todayStr();};
 const planMonday=()=>{const t=todayStr();return dow(t)===0?add(t,1):mondayOf(t);};
 const htime=h=>h.time||(MOMENTS.find(m=>m[0]===(h.moment||'manana'))||MOMENTS[0])[2];
@@ -1332,14 +1332,14 @@ function recBed(T){T=T||todayStr();const meta=S.salud.meta,wake=S.salud.wake,ax=
 // Un termo entero de mate (30 g de yerba, 15 cebadas) tiene unos 250 mg (Fragale 2026); se escala por tu parte.
 function mateCut(bed){const parte=(S.salud.mate&&S.salud.mate.parte)||50,mg=Math.round(260*parte/100),h=Math.min(13.2,Math.max(8.8,8.8+(mg-107)*(4.4/110.5))),hh=Math.ceil(h*2)/2;
   return {hm:m2hm(hm2m(bed||recBed().hm)-hh*60),h:hh,mg};}
-function planText(T,b){const bed=recBed(T).hm,mate=mateCut(bed).hm,hr=curHr(),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
+function planText(T,b){const bed=recBed(T).hm,mate=mateCut(bed).hm,hr=curHr(),ml=hm2m(nowHM())<hm2m(mate),gy=HABS().find(h=>h.id==='gym'),gT=gy&&sched(gy,T)&&counts(gy,T),gD=gy&&st(T,gy.id)>0;
   if(!b)return 'Anotá cómo dormiste y te armo el plan del día.';
-  if(hr>=20||hr<5)return b.lvl==='Baja'?`Hoy la batería estuvo baja: priorizá dormir. <b>A la cama a las ${bed}</b>, con el celular afuera.`:`Cerrá bien el día: <b>a dormir a las ${bed}</b> para llegar a ${fmtH(S.salud.meta)}.`;
+  if(hr>=20||hr<5)return b.lvl==='Baja'?`Dormiste poco: hoy priorizá dormir. <b>A la cama a las ${bed}</b>, con el celular afuera.`:`Cerrá bien el día: <b>a dormir a las ${bed}</b> para llegar a ${fmtH(S.salud.meta)}.`;
   const L=b.lvl==='Baja'?[gT&&!gD?'gimnasio en versión mínima':null,`<b>a dormir a las ${bed}</b>`]
-   :b.lvl==='Media'?[gT&&!gD?'entrená sin forzar':null,hr<13?'lo más difícil de estudio a la mañana':null,hr<16?`<b>último mate a las ${mate}</b>`:`<b>a dormir a las ${bed}</b>`]
-   :[gT&&!gD?'<b>entrená fuerte</b>':null,hr<13?'lo más difícil de estudio ahora, que es tu mejor momento':'aprovechá la tarde para <b>'+esc((HABS().find(h=>h.id==='innova')||{name:'tu proyecto'}).name)+'</b>',hr<16?`último mate a las ${mate}`:null];
+   :b.lvl==='Media'?[gT&&!gD?'entrená sin forzar':null,hr<13?'lo más difícil de estudio a la mañana':null,ml?`<b>último mate a las ${mate}</b>`:`<b>a dormir a las ${bed}</b>`]
+   :[gT&&!gD?'<b>entrená fuerte</b>':null,hr<13?'lo más difícil de estudio ahora, que es tu mejor momento':'aprovechá la tarde para <b>'+esc((HABS().find(h=>h.id==='innova')||{name:'tu proyecto'}).name)+'</b>',ml?`último mate a las ${mate}`:null];
   const x=L.filter(Boolean),txt=x.length>1?x.slice(0,-1).join(', ')+' y '+x[x.length-1]:x[0];
-  return (b.lvl==='Baja'?'Batería baja: ':b.lvl==='Media'?'Batería media: ':'Batería alta: ')+txt+'.';}
+  return (b.lvl==='Baja'?'Dormiste poco: ':b.lvl==='Media'?'Descanso a medias: ':'Descansaste bien: ')+txt+'.';}
 function fitRings(R){const sz=132,c=sz/2,sw=11,gap=4,cols=['var(--olive)','var(--sand)','var(--graph)'];let o='';
   R.forEach((r,i)=>{const rad=c-sw/2-i*(sw+gap),C=2*Math.PI*rad,off=C*(1-Math.max(0,Math.min(1,r[1])));
     o+=`<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-opacity=".12" stroke-width="${sw}"/><circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${cols[i]}" stroke-width="${sw}" stroke-linecap="round" class="rfg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-o="${off.toFixed(1)}"/>`;});
@@ -1368,7 +1368,7 @@ function analisis(T){const A=[],hr=curHr(),meta=S.salud.meta,RB=recBed(T),bed=RB
   const w=waterOf(T),g=waterGoal();if(hr>=15&&hr<22&&w<g*.4)add1(45,`<b>Vas ${fmtL(w)} de ${fmtL(g)} de agua.</b> Sumá una botella ahora.`,'A esta hora ya deberías ir por la mitad de tu meta.');
   const d=S.dias[T]||{},pt=d.pasosHoy&&d.pasosHoy.n,as=avgSteps(a7,y);if(hr>=17&&hr<22&&pt!=null&&pt<4000&&as!=null&&as<6000)add1(40,`<b>${fmtN(pt)} pasos hoy.</b> Una caminata de 15 min te acerca a tu meta.`,`Tu promedio de la semana: ${fmtN(Math.round(as))} pasos por día.`);
   add1(hr>=21||hr<5?57:hr>=19?42:25,`<b>Esta noche, a la cama a las ${bed}.</b>`,RB.why);
-  {const mc=mateCut(bed);if(hr<16)add1(hr>=12?47:22,`<b>Último mate o café a las ${mc.hm}.</b>`,`Con tu parte del termo tomás unos ${mc.mg} mg de cafeína. Un metaanálisis de 2023 encontró que para no perder sueño, 107 mg (un café) van al menos 8,8 h antes de dormir y 217 mg, 13,2 h antes. Por eso te dejo ${String(mc.h).replace('.',',')} h antes de las ${bed}.`);}
+  {const mc=mateCut(bed),nm=hm2m(nowHM()),cm=hm2m(mc.hm);if(hr>=5&&nm<cm)add1(cm-nm<=180?47:22,`<b>Último mate o café a las ${mc.hm}.</b>`,`Con tu parte del termo tomás unos ${mc.mg} mg de cafeína. Un metaanálisis de 2023 encontró que para no perder sueño, 107 mg (un café) van al menos 8,8 h antes de dormir y 217 mg, 13,2 h antes. Por eso te dejo ${String(mc.h).replace('.',',')} h antes de las ${bed}.`);}
   // lo que va bien (para no mostrar solo lo flojo)
   if(noches>=5&&cortas===0)add1(20,`<b>Venís durmiendo bien:</b> ${noches} noches sin quedar cortas. Mantené el horario.`,'Todas las noches de la semana cerca de tu meta.');
   if(r7!=null&&r7>=.85)add1(15,`<b>Constancia de ${Math.round(r7*100)}% esta semana.</b> Buen ritmo: no sumes nada nuevo todavía.`,'Cuando un ritmo funciona, conviene sostenerlo antes de agregar más.');
@@ -1477,10 +1477,10 @@ function openFoco(){const T=todayStr(),FP=(S.foco&&S.foco.paused)||[],L=HABS().f
     const box=SI.querySelector('.fcl');L.forEach(h=>{const on=sel.has(h.id),off=!on&&sel.size>=4,r=document.createElement('label');r.className='fcr'+(off?' off':'');r.innerHTML=`<input type="checkbox" ${on?'checked':''} ${off?'disabled':''}><span><b></b><br><span class="sub small"></span></span>`;
       r.querySelector('b').textContent=h.name;r.querySelector('.sub').textContent=h.min?'Mínimo: '+h.min:'';r.querySelector('input').onchange=e=>{if(e.target.checked)sel.add(h.id);else sel.delete(h.id);draw();};box.appendChild(r);});
     SI.querySelector('#fcn').textContent=sel.size+' de 4 elegidos';SI.querySelector('#cx').onclick=()=>sheet.close();
-    const ok=SI.querySelector('#ok');ok.disabled=!sel.size;ok.onclick=()=>{const before=S.habitos.map(h=>[h.id,h.active]),prevF=S.foco,paused=[];
-      L.forEach(h=>{const on=sel.has(h.id);if(!on&&h.active!==false)paused.push(h.id);h.active=on;});
+    const ok=SI.querySelector('#ok');ok.disabled=!sel.size;ok.onclick=()=>{const before=JSON.stringify(S.habitos),prevF=S.foco,paused=[];
+      L.forEach(h=>{const on=sel.has(h.id);if(!on&&h.active!==false)paused.push(h.id);setActive(h,on,T);});
       S.foco={at:T,paused:[...new Set(FP.filter(id=>!sel.has(id)).concat(paused))]};save();sheet.close();renderAll();vib();
-      toast(paused.length?sel.size+' hábitos clave · '+paused.length+' en pausa':'Hábitos clave guardados',()=>{before.forEach(([id,a])=>{const h=S.habitos.find(x=>x.id===id);if(h)h.active=a;});S.foco=prevF;save();renderAll();});};
+      toast(paused.length?sel.size+' hábitos clave · '+paused.length+' en pausa':'Hábitos clave guardados',()=>{S.habitos=JSON.parse(before);S.foco=prevF;save();renderAll();});};
     if(!sheet.open)sheet.showModal();};draw();}
 function renderRevRow(T){const el=document.getElementById('revRow'),d=dow(T),PM=planMonday(),PP=(S.semanas[PM]&&S.semanas[PM].prio)||[],hot=d===0||d===1&&!(S.semanas[add(mondayOf(T),-7)]||{}).feel&&d===1;
   const done=PP.filter(p=>p.done).length;
@@ -1585,7 +1585,7 @@ function sleepStats(a,b){const xs=[];for(let s=a;s<=b;s=add(s,1)){const x=slp(s)
   const hs=xs.map(slH),avg=hs.reduce((p,c)=>p+c,0)/hs.length,ws=xs.map(x=>hm2m(x.w)),wm=ws.reduce((p,c)=>p+c,0)/ws.length,sd=Math.sqrt(ws.reduce((p,c)=>p+(c-wm)**2,0)/ws.length);
   const hd=xs.filter(x=>x.hd).length;return {n:xs.length,avg,sd,hd,hdp:hd/xs.length};}
 function sleepEditor(s,onDone){const x=slp(s),T=todayStr(),hr=curHr(),L=lastSleep(s);
-  let b=x?x.b:(L?L.b:'01:30'),w=x?x.w:(L?L.w:S.salud.wake),stv=(S.dias[add(s,-1)]||{}).pasos||(((S.dias[add(s,-1)]||{}).pasosHoy||{}).n)||'';
+  let b=x?x.b:(L?L.b:bedTarget()),w=x?x.w:(L?L.w:S.salud.wake),stv=(S.dias[add(s,-1)]||{}).pasos||(((S.dias[add(s,-1)]||{}).pasosHoy||{}).n)||'';
   const el=document.createElement('div');el.className='slpEd';
   const tb=(lbl,k,v)=>`<div class="tbox"><span>${lbl}</span><div class="tv"><button type="button" data-k="${k}" data-d="-15" aria-label="${lbl}: 15 minutos antes">−</button><label class="tin"><b class="num">${v}</b><input type="time" step="900" data-k="${k}" value="${v}" aria-label="${lbl}"></label><button type="button" data-k="${k}" data-d="15" aria-label="${lbl}: 15 minutos después">+</button></div></div>`;
   const paint=()=>{const h=slH({b,w});el.innerHTML=`<div class="times">${tb('Me acosté','b',b)}${tb('Me levanté','w',w)}</div><p class="sub small num" style="text-align:center" id="slHrs">${fmtH(h)} en cama</p><button class="btn primary" type="button" data-h="0">Guardar</button><button class="link hdlink" type="button" data-h="1">Me desperté con dolor de cabeza</button>`;
@@ -1624,7 +1624,7 @@ function renderSleep(T){const box=document.getElementById('slpBox'),x=slp(T);box
   box.querySelector('#slEditB').onclick=()=>{slEdit=true;renderAll();};}
 function feelOf(a,b){const v=[];for(const m in S.semanas){if(m>=mondayOf(a)&&m<=b&&typeof S.semanas[m].feel==='number')v.push(S.semanas[m].feel);}return v.length?v.reduce((p,c)=>p+c,0)/v.length:null;}
 function gymWeek(a,b){const g=HABS().find(h=>h.id==='gym');if(!g)return null;let n=0,d=0;for(let s=a;s<=b&&s<=todayStr();s=add(s,1)){d++;if(st(s,g.id)>0)n++;}return d?n/d*7:null;}
-function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.start;box.innerHTML='';
+function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.start||Object.keys(S.dias).filter(s=>S.dias[s]&&S.dias[s].sl&&s<=T).sort()[0]||null;box.innerHTML='';
   const day=st0?Math.round((toD(T)-toD(st0))/864e5)+1:0;
   box.innerHTML=`<div class="spread"><h2>Antes y después</h2><span class="sub small num">${st0?'Día '+day+' de 90':'Sin empezar'}</span></div>`;
   if(!st0){box.insertAdjacentHTML('beforeend','<p class="note">Registrá cómo dormiste cada mañana (lo hacés en <b>Hoy</b>, tarda 10 segundos). Tus primeros 7 días son tu punto de partida: el "antes".</p>');return;}
@@ -1644,9 +1644,9 @@ function renderSalud(T){const box=document.getElementById('salud'),st0=S.salud.s
   html+=row('Horario de levantarte',sa&&sa.sd,sn&&sn.sd,v=>'±'+Math.round(v)+' min',(n,a)=>n<a);
   html+=row('Días con dolor de cabeza',sa&&sa.hdp,sn&&sn.hdp,pct,(n,a)=>n<a);
   html+=row('Constancia de hábitos',rA,rN,pct,(n,a)=>n>a);
-  html+=row('Gimnasio por semana',gymWeek(A[0],A[1]),sep?gymWeek(N[0],N[1]):null,v=>round1(v)+'',(n,a)=>n>a);
+  html+=row('Gimnasio por semana',gymWeek(A[0],A[1]),sep?gymWeek(N[0],N[1]):null,dec,(n,a)=>n>a);
   {const pa=avgSteps(A[0],A[1]),pn=sep?avgSteps(N[0],N[1]):null;if(pa!==null||pn!==null)html+=row('Pasos por día',pa,pn,fmtN,(n,a)=>n>a);}
-  {const fa=avgFyv(A[0],A[1]),fn=sep?avgFyv(N[0],N[1]):null;if(fa!==null||fn!==null)html+=row('Frutas y verduras/día',fa,fn,v=>round1(v)+'',(n,a)=>n>a);}
+  {const fa=avgFyv(A[0],A[1]),fn=sep?avgFyv(N[0],N[1]):null;if(fa!==null||fn!==null)html+=row('Frutas y verduras/día',fa,fn,dec,(n,a)=>n>a);}
   if(feelOf(A[0],A[1])!==null||(sep&&feelOf(N[0],N[1])!==null))html+=row('Cómo te sentiste',feelOf(A[0],A[1]),sep?feelOf(N[0],N[1]):null,feelL,(n,a)=>n>a);
   html+='</div>';box.insertAdjacentHTML('beforeend',html);
   const note=!sep?'La columna "Ahora" aparece desde el día 14, cuando ya no se pisa con tu primera semana.':'Verde = mejor que al principio · rojo = peor. El cambio real se ve a los 30, 60 y 90 días.';
@@ -1772,7 +1772,7 @@ function renderExpProg(T){const box=document.getElementById('expP');box.innerHTM
     const b=document.createElement('button');b.type='button';b.className='btn';b.textContent='Guardar resultado y elegir otro';b.onclick=()=>{S.expHist=(S.expHist||[]).concat([{title:E.title,start:E.start,res}]);S.exp=null;save();renderAll();};box.appendChild(b);}
   else{const c=document.createElement('button');c.type='button';c.className='link';c.textContent='Cancelar experimento';c.onclick=()=>{if(c.dataset.sure){S.exp=null;save();renderAll();}else{c.dataset.sure='1';c.textContent='¿Seguro? Tocá otra vez';}};box.appendChild(c);}}
 function renderMetas(T){const box=document.getElementById('campo');const a=add(T,-6),sl=sleepStats(a,T),stp=avgSteps(a,add(T,-1)),fv=avgFyv(a,T),M=mondayOf(T);
-  const wa=avgWater(a,T);const rows=[['En cama',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'por noche'],['Agua',wa,waterGoal(),fmtL,'por día'],['Pasos',stp,8000,fmtN,'por día'],['Frutas y verduras',fv,5,v=>round1(v)+'','porciones/día'],['Cardio (estimado)',cardioWeek(T),150,v=>v+'','min esta semana']];
+  const wa=avgWater(a,T),fh=HABS().find(x=>x.id==='fyv');const rows=[['En cama',sl?sl.avg:null,S.salud.meta,v=>fmtH(v),'por noche'],['Agua',wa,waterGoal(),fmtL,'por día'],['Pasos',stp,8000,fmtN,'por día'],fh&&fh.active!==false?['Frutas y verduras',fv,5,dec,'porciones/día']:null,['Cardio (estimado)',cardioWeek(T),150,v=>v+'','min esta semana']].filter(Boolean);
   const el=document.createElement('div');el.className='metas';el.innerHTML=`<p class="gsub">Metas de salud · últimos 7 días</p>`+rows.map(([l,v,t,f,u])=>`<div class="mt2"><div class="spread"><span>${l}</span><span class="num"><b>${v==null?'—':f(v)}</b> / ${f(t)} <small>${u}</small></span></div><div class="track ol"><i style="width:${v==null?0:Math.min(100,Math.round(v/t*100))}%"></i></div></div>`).join('');
   box.appendChild(el);}
 const SB=[['Ronquidos','¿Roncás fuerte (se escucha con la puerta cerrada o alguien te lo dijo)?'],['Cansancio','¿Te sentís cansado o con sueño durante el día seguido?'],['Pausas','¿Alguien te vio dejar de respirar o ahogarte mientras dormías?'],['Presión','¿Tenés presión alta o la estás tratando?'],['Peso','¿Tu índice de masa corporal es mayor a 35? (peso ÷ altura²)'],['Edad','¿Tenés más de 50 años?'],['Cuello','¿Tu cuello mide más de 40 cm de contorno?'],['Sexo','¿Sos varón?']];
@@ -1904,7 +1904,7 @@ function renderCmdList(){const L=document.getElementById('cmdList');if(!L)return
 function waterTimes(){const wk=hm2m(S.salud.wake),bd0=hm2m(bedTarget()),bd=bd0<=wk?bd0+1440:bd0,a=wk+30,z=bd-180,n=5,q=m=>Math.round(m/15)*15;
   if(z-a<240)return [a,q((a+z)/2),z].map(m2hm);const out=[];for(let i=0;i<n;i++)out.push(m2hm(q(a+(z-a)*i/(n-1))));return out;}
 function renderWRem(){const box=document.getElementById('wRem');if(!box)return;const L=waterTimes();
-  box.innerHTML=`<div class="wrem">${L.map((t,i)=>`<div class="wr"><span>${i===0?'Al levantarte':i===L.length-1?'El último del día':'Aviso '+(i+1)}</span><b>${t}</b></div>`).join('')}</div><p class="sub small">Según tu hora de levantarte (${S.salud.wake}) y de acostarte (${bedTarget()}). El último va 3 horas antes de dormir para no despertarte a la noche. Si cambiás esas horas, los avisos se mueven solos.</p>`;
+  box.innerHTML=`<div class="wrem">${L.map((t,i)=>`<div class="wr"><span>${i===0?'Al levantarte':i===L.length-1?'El último del día':'Aviso '+(i+1)}</span><b>${t}</b></div>`).join('')}</div><p class="sub small">Según tu hora de levantarte (${S.salud.wake}) y de acostarte (${bedTarget()}). El último va 3 horas antes de dormir para no despertarte a la noche. Si cambiás esas horas en Metas de salud, los avisos se mueven solos.</p>`;
   avRender();}
 /* ---------- avisos de agua (web push vía ntfy.sh, sin servidor propio) ----------
    Siempre hay como mucho UN aviso programado. Al llegar, el service worker programa el siguiente;
@@ -1917,6 +1917,10 @@ function avNext(times,now,metDay){const T=[...times].sort();for(let k=0;k<3;k++)
 async function avGet(){try{const c=await caches.open(AV_CACHE),r=await c.match('./avisos-cfg');return r?await r.json():{};}catch(e){return {};}}
 async function avPut(o){try{const c=await caches.open(AV_CACHE);await c.put('./avisos-cfg',new Response(JSON.stringify(o),{headers:{'Content-Type':'application/json'}}));}catch(e){}}
 function avPub(topic,at){return fetch(NTFY+'/'+topic,{method:'POST',headers:{'X-At':String(at),'X-Title':'Hora del agua','X-Tags':'agua'},body:'Tocá para sumar un vaso (250 ml).'});}
+/* aviso de la hora de dormir: 45 min antes de tu hora ideal (sale de Metas de salud, no de cómo dormiste) */
+const avBedHm=()=>m2hm(hm2m(bedTarget())-45);
+function avPubBed(topic,at){return fetch(NTFY+'/'+topic,{method:'POST',headers:{'X-At':String(at),'X-Title':'Cierre del día','X-Tags':'noche'},body:'Celular afuera y a preparar la cama.'});}
+const avW=()=>!!(S.push&&S.push.on)&&S.push.agua!==false,avB=()=>!!(S.push&&S.push.on)&&S.push.cama!==false;
 const avSupport=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
 const avStandalone=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
 const b64u=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -1927,15 +1931,19 @@ let AV_LAST='',AV_BUSY=false;
 /* se llama en cada render: guarda horarios y meta en el celular; si la cadena se cortó, programa el próximo */
 async function avTick(){if(!(S.push&&S.push.on)||AV_BUSY)return;AV_BUSY=true;try{
   const T=todayStr(),now=Math.floor(Date.now()/1000),cfg=await avGet(),met=waterOf(T)>=waterGoal(T);
-  const nx=Object.assign({},cfg,{on:true,topic:avTopic(),times:waterTimes(),metDay:met?T:(cfg.metDay===T?'':cfg.metDay||'')});
-  if(S.push.regDay!==T&&avSupport()){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){await avRegister(sub);S.push.regDay=T;save();}else{S.push.on=false;nx.on=false;save();}}catch(e){}}
+  const nx=Object.assign({},cfg,{on:avW(),topic:avTopic(),times:waterTimes(),metDay:met?T:(cfg.metDay===T?'':cfg.metDay||'')}),bd=nx.bed=Object.assign({},cfg.bed||{},{on:avB(),hm:avBedHm()});
+  if(S.push.regDay!==T&&avSupport()){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){await avRegister(sub);S.push.regDay=T;save();}else{S.push.on=false;nx.on=false;bd.on=false;save();}}catch(e){}}
   if(nx.on&&(!nx.nextAt||nx.nextAt<now-20*60)){const n=avNext(nx.times,now,nx.metDay);if(n){try{const r=await avPub(nx.topic,n.at);if(r.ok)nx.nextAt=n.at;}catch(e){}}}
-  {const cur=await avGet();if((cur.nextAt||0)>(nx.nextAt||0))nx.nextAt=cur.nextAt;}
+  if(bd.on&&(!bd.nextAt||bd.nextAt<now-20*60)){const n=avNext([bd.hm],now,'');if(n){try{const r=await avPubBed(nx.topic,n.at);if(r.ok)bd.nextAt=n.at;}catch(e){}}}
+  {const cur=await avGet();if((cur.nextAt||0)>(nx.nextAt||0))nx.nextAt=cur.nextAt;const cb=(cur.bed||{}).nextAt||0;if(cb>(bd.nextAt||0))bd.nextAt=cb;}
   const js=JSON.stringify(nx);if(js!==AV_LAST){AV_LAST=js;await avPut(nx);}
   avRender(nx);}finally{AV_BUSY=false;}}
-async function avRender(cfg){const st=document.getElementById('avSt'),bt=document.getElementById('avBtn'),te=document.getElementById('avTest');if(!st||!bt)return;
-  const on=!!(S.push&&S.push.on);te.hidden=!on;bt.className='btn'+(on?'':' primary');bt.textContent=on?'Desactivar avisos':'Activar avisos';bt.disabled=false;
-  if(on){cfg=cfg||await avGet();const n=cfg.nextAt;st.textContent=n?'Activados · próximo aviso '+(avDay(n)===todayStr()?'hoy':'mañana')+' a las '+new Date(n*1000).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}):'Activados';}
+async function avRender(cfg){const st=document.getElementById('avSt'),bt=document.getElementById('avBtn'),te=document.getElementById('avTest'),op=document.getElementById('avOpts');if(!st||!bt)return;
+  const on=!!(S.push&&S.push.on),P=S.push||{};te.hidden=!on;bt.className='btn'+(on?'':' primary');bt.textContent=on?'Desactivar avisos':'Activar avisos';bt.disabled=false;
+  if(op){const L=waterTimes();op.querySelectorAll('[data-av]').forEach(b=>b.setAttribute('aria-pressed',P[b.dataset.av]!==false));
+    op.querySelector('[data-av=agua] .sub').textContent=L.length+' por día, de '+L[0]+' a '+L[L.length-1];op.querySelector('[data-av=cama] .sub').textContent='Cada noche a las '+avBedHm()+', 45 min antes de acostarte';}
+  if(on){cfg=cfg||await avGet();const now=Date.now()/1000,c=[avW()&&cfg.nextAt,avB()&&(cfg.bed||{}).nextAt].filter(x=>x&&x>now-60),n=c.length?Math.min(...c):0;
+    st.textContent=!avW()&&!avB()?'Activados, pero los dos avisos están apagados.':n?'Activados · próximo aviso '+(avDay(n)===todayStr()?'hoy':'mañana')+' a las '+hmOfTs(n):'Activados';}
   else if(!avSupport()&&!avStandalone())st.textContent='Para activarlos, abrí la app desde su ícono en la pantalla de inicio.';
   else if(!avSupport())st.textContent='Este celular no permite avisos de apps web: hace falta iOS 16.4 o más nuevo.';
   else if(Notification.permission==='denied')st.textContent='Están bloqueados. Ajustes del iPhone → Notificaciones → Hábitos → Permitir notificaciones.';
@@ -1947,14 +1955,14 @@ async function avOn(){if(!avSupport()){avRender();toast(avStandalone()?'Este cel
     const reg=await navigator.serviceWorker.ready;let key=NTFY_VAPID;try{const c=await fetch(NTFY+'/v1/config').then(r=>r.json());if(c.web_push_public_key)key=c.web_push_public_key;}catch(e){}
     let sub=await reg.pushManager.getSubscription();if(sub&&b64u(sub.options&&sub.options.applicationServerKey||new ArrayBuffer(0))!==key){await sub.unsubscribe();sub=null;}
     if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(key)});
-    await avRegister(sub);S.push={on:true,regDay:todayStr(),at:Date.now()};save();
-    {const c0=await avGet(),n0=Math.floor(Date.now()/1000);await avPut(Object.assign(c0,{on:true,nextAt:c0.nextAt>n0?c0.nextAt:0}));}AV_LAST='';await avTick();const cfg=await avGet();
-    const nx=cfg.nextAt?new Date(cfg.nextAt*1000).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}):'';
-    await fetch(NTFY+'/'+avTopic(),{method:'POST',headers:{'X-Title':'Avisos de agua activados','X-Tags':'prueba'},body:'Así te van a llegar.'+(nx?' El próximo: '+nx+'.':'')});
+    await avRegister(sub);S.push=Object.assign({},S.push||{},{on:true,regDay:todayStr(),at:Date.now()});save();
+    {const c0=await avGet(),n0=Math.floor(Date.now()/1000),b0=c0.bed||{};c0.bed=Object.assign({},b0,{nextAt:b0.nextAt>n0?b0.nextAt:0});await avPut(Object.assign(c0,{on:avW(),nextAt:c0.nextAt>n0?c0.nextAt:0}));}AV_LAST='';await avTick();const cfg=await avGet();
+    const nq=[avW()&&cfg.nextAt,avB()&&(cfg.bed||{}).nextAt].filter(Boolean),nx=nq.length?hmOfTs(Math.min(...nq)):'';
+    await fetch(NTFY+'/'+avTopic(),{method:'POST',headers:{'X-Title':'Avisos activados','X-Tags':'prueba'},body:'Así te van a llegar.'+(nx?' El próximo: '+nx+'.':'')});
     vib();toast('Avisos activados');}
-  catch(e){S.push={on:false};save();avRender();toast('No se pudo activar. Probá de nuevo con internet.');}}
+  catch(e){S.push=Object.assign({},S.push||{},{on:false});save();avRender();toast('No se pudo activar. Probá de nuevo con internet.');}}
 async function avOff(){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){fetch(NTFY+'/v1/webpush',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})}).catch(()=>{});await sub.unsubscribe();}}catch(e){}
-  S.push={on:false};save();await avPut(Object.assign(await avGet(),{on:false,nextAt:0}));AV_LAST='';avRender();toast('Avisos desactivados');}
+  S.push=Object.assign({},S.push||{},{on:false});save();{const c=await avGet();c.on=false;c.nextAt=0;c.bed=Object.assign({},c.bed||{},{on:false,nextAt:0});await avPut(c);}AV_LAST='';avRender();toast('Avisos desactivados');}
 /* tocar un aviso de agua: el service worker deja una marca y la app suma el vaso una sola vez */
 let AV_CONS=null;
 function avConsume(){if(!AV_CONS)AV_CONS=avConsume1().finally(()=>{AV_CONS=null;});return AV_CONS;}
@@ -2039,7 +2047,7 @@ function openTask(T,x){let due=x.due||null,imp=!!x.imp;
 (function(){const f=document.getElementById('tkForm'),i=document.getElementById('tkIn');if(!f)return;
   f.onsubmit=e=>{e.preventDefault();const v=i.value.trim();if(!v)return;const T=todayStr();
     S.tareas=tasksOf().filter(x=>!x.done||x.done>=add(T,-30));S.tareas.push({id:Date.now().toString(36),t:v.slice(0,140),d:T,done:null});
-    save();i.value='';vib(8);renderTasks(T);i.focus();if(!S.tkTip){S.tkTip=1;save();setTimeout(()=>toast('Tip: tocá una tarea para ponerle día, hora o nota. Para moverla, arrastrá las tres rayitas.'),900);}};})();
+    save();i.value='';vib(8);renderTasks(T);i.focus();if(!S.tkTip){S.tkTip=1;save();setTimeout(()=>toast('Tip: tocá una tarea para ponerle día, hora o nota. Para moverla, mantenela apretada y arrastrala.'),900);}};})();
 
 /* ---------- fila rápida: Sueño · Pasos · Agua ---------- */
 const QICO={qSl:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',qSt:'<svg viewBox="0 0 24 24"><path d="M8 3.5c1.7 0 2.6 2 2.6 4.4S9.4 12.3 8 12.3 5.4 10.2 5.4 7.9 6.3 3.5 8 3.5zM6.4 15.2h3.2M16 8.7c1.7 0 2.6 2 2.6 4.4s-1.2 4.4-2.6 4.4-2.6-2.1-2.6-4.4.9-4.4 2.6-4.4zM14.4 20.4h3.2"/></svg>',qWa:'<svg viewBox="0 0 24 24"><path d="M12 3.2c-.3 0-6.2 6.6-6.2 11a6.2 6.2 0 0 0 12.4 0c0-4.4-5.9-11-6.2-11z"/></svg>'};
@@ -2058,11 +2066,11 @@ function stepsRun(){SYNC_TAP=Math.floor(Date.now()/1000);try{sessionStorage.setI
 async function stepsPaste(T){try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else if(String(t).trim())toast('Lo copiado no es un número de pasos. Revisá el atajo.');else openStepsHelp();}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();}
 function openStepsHelp(){SI.innerHTML=`<div><h3>Los pasos no llegan</h3><p class="sub small">Casi siempre es porque Atajos no tiene permiso para leer tus pasos. Se arregla una sola vez:</p></div>
 <ol class="stepl"><li>Abrí la app <b>Salud</b> y tocá tu foto, arriba a la derecha.</li><li>En <b>Privacidad</b>, tocá <b>Apps</b> y elegí <b>Atajos</b>.</li><li>Activá <b>Pasos</b>.</li><li>Volvé acá y tocá <b>Probar ahora</b>.</li></ol>
-<p class="sub small">Si Atajos no aparece en esa lista o el permiso ya estaba: abrí <b>Atajos</b>, tocá <b>${SC_NAME}</b> una vez y aceptá lo que te pregunte. Si sigue igual, mandame una captura del atajo abierto en modo Editar.</p>
+<p class="sub small">Si Atajos no aparece en esa lista o el permiso ya estaba: abrí <b>Atajos</b>, tocá <b>${SC_NAME}</b> una vez y aceptá lo que te pregunte. Si sigue igual, revisá la guía de <b>Ajustes → Pasos automáticos</b>.</p>
 <button class="btn primary" type="button" id="ok">Probar ahora</button><button class="link" type="button" id="cx">Cerrar</button>`;
   SI.querySelector('#ok').onclick=()=>{sheet.close();stepsRun();};SI.querySelector('#cx').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
 function wireQuick(T){const q=id=>document.getElementById(id);
-  const sl=q('qSl');if(sl)sl.onclick=()=>{slEdit=true;renderAll();window.scrollTo({top:0,behavior:'smooth'});};
+  const sl=q('qSl');if(sl)sl.onclick=()=>{slEdit=true;renderAll();const bx=document.getElementById('slpBox');if(bx)bx.scrollIntoView({behavior:'smooth',block:'center'});};
   q('qSt').onclick=()=>PEND?stepsPaste(T):stepsStale(T)?openStepsHelp():stepsRun();
   const wa=q('qWa');wa.setAttribute('aria-label','Agua: tocá para sumar un vaso, mantené apretado para más opciones');let lt=null,long=false;
   wa.addEventListener('pointerdown',()=>{long=false;clearTimeout(lt);lt=setTimeout(()=>{long=true;vib(15);openWaterSheet();},450);});
@@ -2110,7 +2118,7 @@ function openDay(s){const draw=()=>{const list=HABS().filter(h=>sched(h,s));
     SI.querySelector('#ok').onclick=()=>sheet.close();};draw();if(!sheet.open)sheet.showModal();}
 function goalKey(g){const T=todayStr();let dl='Sin fecha límite';if(g.deadline){const d=Math.round((toD(g.deadline)-toD(T))/864e5);dl=d>=0?`Faltan ${d} días`:'Fecha cumplida';}
   const m=(g.metrics||[]).find(x=>x.type!=='log'&&Number(x.target)>0)||(g.metrics||[]).find(x=>x.type!=='log');let ml='';
-  if(m){const v=metricValue(m),tg=Number(m.target)||0;ml=`${round1(v)}${tg?' / '+tg:''} ${String(m.label).replace(/\s*\(.*\)$/,'').toLowerCase()}`;}
+  if(m){const v=metricValue(m),tg=Number(m.target)||0;ml=`${dec(v)}${tg?' / '+tg:''} ${String(m.label).replace(/\s*\(.*\)$/,'').toLowerCase()}`;}
   const H=g.hitos||[];return {dl,ml,hl:H.length?H.filter(x=>x.done).length+'/'+H.length+' hitos':''};}
 function renderGoals(){const box=document.getElementById('goals');box.innerHTML='';if(!GOALS().length){box.innerHTML='<p class="empty">Sin objetivos todavía.</p>';return;}
   const HS=['g_fisico','g_mente'],gs=GOALS().filter(g=>HS.includes(g.id)),gv=GOALS().filter(g=>!HS.includes(g.id));let tgt=box;
@@ -2125,13 +2133,13 @@ function openGoalDetail(g){const draw=()=>{if(!GOALS().includes(g)){sheet.close(
     el.querySelector('h3').textContent=g.title;if(g.why)el.querySelector('.why').textContent=g.why;
     (g.metrics||[]).forEach(m=>{const v=metricValue(m),tg=Number(m.target)||0,md=document.createElement('div');md.className='metric';
       if(m.type==='log'){const l=m.log||[],f0=l.length?l[0].v:null,df=f0!==null&&l.length>1?round1(v-f0):null;
-        md.innerHTML=`<div class="spread"><span>${esc(m.label)}</span><span>${v===null?'—':esc(v)+' '+esc(m.unit||'')}${df!==null?` (${df>0?'+':''}${df})`:''}</span></div><div class="inl"><input inputmode="decimal" placeholder="Nuevo registro (${esc(m.unit||'valor')})" aria-label="Nuevo registro"><button class="btn" type="button">Guardar</button></div>`;
+        md.innerHTML=`<div class="spread"><span>${esc(m.label)}</span><span>${v===null?'—':dec(v)+' '+esc(m.unit||'')}${df!==null?` (${df>0?'+':''}${dec(df)})`:''}</span></div><div class="inl"><input inputmode="decimal" placeholder="Nuevo registro (${esc(m.unit||'valor')})" aria-label="Nuevo registro"><button class="btn" type="button">Guardar</button></div>`;
         const r2=md.querySelector('.inl');r2.querySelector('.btn').onclick=()=>{const x=parseFloat(r2.querySelector('input').value.replace(',','.'));if(isNaN(x))return;m.log=(m.log||[]).filter(e=>e.d!==T).concat([{d:T,v:x}]);rer();toast('Registrado: '+x+' '+(m.unit||''));};}
-      else if(m.type==='counter'){md.innerHTML=`<div class="spread"><span>${esc(m.label)}</span><span class="step"><button type="button" aria-label="Restar">−</button><span>${round1(v)}${tg?' / '+tg:''}</span><button type="button" aria-label="Sumar">+</button></span></div>`;
+      else if(m.type==='counter'){md.innerHTML=`<div class="spread"><span>${esc(m.label)}</span><span class="step"><button type="button" aria-label="Restar">−</button><span>${dec(v)}${tg?' / '+tg:''}</span><button type="button" aria-label="Sumar">+</button></span></div>`;
         const bs=md.querySelectorAll('.step button');bs[0].onclick=()=>{m.cur=Math.max(0,(Number(m.cur)||0)-1);rer();};bs[1].onclick=()=>{m.cur=(Number(m.cur)||0)+1;rer();toast('+1 '+m.label);};}
-      else{md.innerHTML=`<div class="spread"><span>${esc(m.label)}</span><span>${round1(v)}${tg?' / '+tg:''} ${esc(m.unit||'')}</span></div>`;
+      else{md.innerHTML=`<div class="spread"><span>${esc(m.label)}</span><span>${dec(v)}${tg?' / '+tg:''} ${esc(m.unit||'')}</span></div>`;
         if(tg){const p=document.createElement('div');p.className='track ol';p.style.height='5px';p.innerHTML=`<i style="width:${Math.min(100,Math.round(v/tg*100))}%"></i>`;md.appendChild(p);}
-        if(tg&&g.deadline){const wl=Math.max(1,(toD(g.deadline)-toD(T))/864e5/7),need=Math.max(0,tg-v),p=document.createElement('p');p.className='sub small';p.textContent=need>0?`Ritmo necesario: ${round1(need/wl)} ${m.unit||''} por semana`:'Meta alcanzada';md.appendChild(p);}}
+        if(tg&&g.deadline){const wl=Math.max(1,(toD(g.deadline)-toD(T))/864e5/7),need=Math.max(0,tg-v),p=document.createElement('p');p.className='sub small';p.textContent=need>0?`Ritmo necesario: ${dec(need/wl)} ${m.unit||''} por semana`:'Meta alcanzada';md.appendChild(p);}}
       el.appendChild(md);});
     const H=g.hitos=g.hitos||[],hb=document.createElement('div');hb.style.cssText='display:flex;flex-direction:column;gap:2px';
     hb.innerHTML=`<div class="spread"><h2>Hitos</h2><span class="sub small num">${H.length?H.filter(x=>x.done).length+'/'+H.length:''}</span></div><div class="plist"></div><form class="inl" style="margin-top:6px"><input maxlength="120" placeholder="Nuevo hito" aria-label="Nuevo hito"><button class="btn" type="submit">Agregar</button></form>`;
@@ -2205,7 +2213,7 @@ function openHab(h){const isNew=!h,old=h?{days:(h.days||[]).slice(),perWeek:h.pe
      <label class="fl"><span>Cuánto suma cada +</span><input id="ns" inputmode="decimal" value="${esc(h.num&&h.num.step||1)}"></label>
      <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="ad" ${!h.num||h.num.autoDone!==false?'checked':''}> Anotar un número lo marca como hecho</label></div></details>
    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ac" ${h.active!==false?'checked':''}> Activo (destildá para pausarlo)</label>${foot(isNew)}</form>`;
-  const f=SI.querySelector('#f');f.onsubmit=e=>{e.preventDefault();const q=id=>f.querySelector('#'+id);h.name=q('nm').value.trim()||'Hábito';h.days=[...f.querySelectorAll('input[name=d]:checked')].map(x=>Number(x.value));h.time=q('tm').value||'';h.moment=q('mo').value;h.from=q('fr').value||'';h.goal=q('go').value;h.min=q('mi').value.trim();const sp=q('stp').value.split(',').map(x=>x.trim()).filter(Boolean);h.steps=sp.length?sp:null;const pw=parseInt(q('pw').value,10);h.perWeek=pw>0&&pw<h.days.length?pw:null;h.active=q('ac').checked;
+  const f=SI.querySelector('#f');f.onsubmit=e=>{e.preventDefault();const q=id=>f.querySelector('#'+id);h.name=q('nm').value.trim()||'Hábito';h.days=[...f.querySelectorAll('input[name=d]:checked')].map(x=>Number(x.value));h.time=q('tm').value||'';h.moment=q('mo').value;h.from=q('fr').value||'';h.goal=q('go').value;h.min=q('mi').value.trim();const sp=q('stp').value.split(',').map(x=>x.trim()).filter(Boolean);h.steps=sp.length?sp:null;const pw=parseInt(q('pw').value,10);h.perWeek=pw>0&&pw<h.days.length?pw:null;setActive(h,q('ac').checked);
     const nl=q('nl').value.trim();h.num=nl?{label:nl,unit:q('nu').value.trim(),step:parseFloat(q('ns').value.replace(',','.'))||1,autoDone:q('ad').checked}:null;
     let past=false;const T0=todayStr();if(old&&h.from&&h.from<T0&&(old.days.slice().sort().join()!==h.days.slice().sort().join()||old.perWeek!==(h.perWeek||null))){h.hist=(h.hist||[]).filter(c=>c.hasta<T0).concat([{hasta:T0,days:old.days,perWeek:old.perWeek}]);past=true;}
     const i=HABS().findIndex(x=>x.id===h.id);if(i>=0)S.habitos[i]=h;else S.habitos.push(h);save();sheet.close();toast(isNew?'Hábito creado':past?'Guardado · vale desde hoy, los días anteriores no cambian':'Guardado');};
@@ -2289,7 +2297,7 @@ function addMate(T){const m=S.salud.mate;if(!m)return;const prev=Object.assign({
 function openWaterSheet(){const T=todayStr(),draw=()=>{const w=waterOf(T),g=waterGoal();
   SI.innerHTML=`<div><h3>Agua de hoy</h3><p class="sub small">${fmtL(w)} de ${fmtL(g)}${S.salud.agua==='auto'&&waterExtra(T).length?' (incluye '+waterExtra(T).map(x=>'+'+fmtL(x[0])+' por '+esc(x[1])).join(', ')+')':''} · el mate también cuenta</p></div><div class="track" style="height:8px"><i style="width:${Math.min(100,Math.round(w/g*100))}%;background:var(--water)"></i></div>
    <div class="wopts">${[[150,'Taza','150 ml'],[250,'Vaso','250 ml'],[500,'Botella','500 ml'],[750,'Botella grande','750 ml']].map(([ml,l,sub])=>`<button class="btn" type="button" data-ml="${ml}"><b>${l}</b><small>${sub}</small></button>`).join('')}</div>
-   <p class="sub small" style="margin:0">Último mate o café hoy: <b>${mateCut().hm}</b> para no perder sueño.</p><button class="btn" type="button" id="wMate" style="width:100%"><b>Mate</b><small style="display:block;font-size:11.5px;color:var(--muted);font-weight:600">${S.salud.mate?'tu parte: '+S.salud.mate.ml+' ml (estimado)':'configuralo una vez'}</small></button><div id="mateCfg" hidden></div>
+   <p class="sub small" style="margin:0">${(()=>{const c=mateCut().hm;return hm2m(nowHM())<hm2m(c)?'Último mate o café hoy: <b>'+c+'</b> para no perder sueño.':'Tu horario de mate o café de hoy terminó a las <b>'+c+'</b>: lo que tomes ahora puede costarte sueño.';})()}</p><button class="btn" type="button" id="wMate" style="width:100%"><b>Mate</b><small style="display:block;font-size:11.5px;color:var(--muted);font-weight:600">${S.salud.mate?'tu parte: '+S.salud.mate.ml+' ml (estimado)':'configuralo una vez'}</small></button><div id="mateCfg" hidden></div>
    <div class="inl"><button class="btn" type="button" id="wUndo" ${((S.dias[T]||{}).agua||0)>0?'':'disabled'}>Quitar 250 ml</button><button class="btn primary" type="button" id="ok" style="flex:1">Listo</button></div>`;
   SI.querySelectorAll('[data-ml]').forEach(b=>b.onclick=()=>{addWater(Number(b.dataset.ml));draw();});
   SI.querySelector('#wMate').onclick=()=>{if(S.salud.mate){if(!tapOk('mate'))return;addMate(T);draw();return;}const c=SI.querySelector('#mateCfg');c.hidden=false;
@@ -2329,6 +2337,8 @@ syncAndRender();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){avConsume();renderAll();applyTone();syncAndRender();if(SYNC_TAP){setTimeout(syncAndRender,2500);setTimeout(syncAndRender,6000);}}});
 if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='agua-click')avConsume();});}
 avConsume();
+{const op=document.getElementById('avOpts');if(op)op.querySelectorAll('[data-av]').forEach(b=>b.onclick=async()=>{const k=b.dataset.av;S.push=Object.assign({on:false},S.push||{});S.push[k]=S.push[k]===false;save();vib(8);avRender();
+  if(S.push.on){if(S.push[k]!==false){/* al volver a prender: si su aviso pendiente ya pasó, se programa uno ahora */const c=await avGet(),n=Date.now()/1000;if(k==='agua'&&(c.nextAt||0)<n)c.nextAt=0;if(k==='cama'&&c.bed&&(c.bed.nextAt||0)<n)c.bed.nextAt=0;await avPut(c);}AV_LAST='';avTick();}toast((k==='agua'?'Avisos de agua':'Aviso de la hora de dormir')+(S.push[k]!==false?': activado':': apagado'));});}
 {const ab=document.getElementById('avBtn');if(ab)ab.onclick=()=>(S.push&&S.push.on)?avOff():avOn();const at=document.getElementById('avTest');if(at)at.onclick=async()=>{try{const r=await fetch(NTFY+'/'+avTopic(),{method:'POST',headers:{'X-Title':'Prueba','X-Tags':'prueba'},body:'Si ves esto, los avisos de agua funcionan.'});toast(r.ok?'Enviado: llega en unos segundos':'No se pudo enviar');}catch(e){toast('Sin internet');}};}
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});// busca una versión nueva del service worker en cada apertura
 
