@@ -616,6 +616,8 @@ details.help p{margin-top:8px}
 .bc span{position:relative}
 .bc span{font-weight:700;font-size:19px;letter-spacing:-.01em;color:var(--fg)}
 #goals .help{margin-top:10px}
+#goals details.help{border-top:0}
+#bkHoy .bkrow{flex-direction:column;align-items:stretch;gap:12px;cursor:default}#bkHoy .bkrow .inl{align-items:center}
 .tiny{font-size:11px;color:var(--muted);letter-spacing:.04em}
 .stpw{display:grid;grid-template-columns:1fr auto;gap:8px}.stpw .btn{min-height:44px;padding:8px 16px}
 .stl{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center;padding-bottom:4px}.stl-t{display:flex;flex-direction:column;gap:1px}.stl-t .k{font-size:12px;color:var(--muted);font-weight:600}.stl-t b{font-size:26px;font-weight:700;letter-spacing:-.03em}.stl .btn{min-height:42px;padding:8px 16px}
@@ -993,6 +995,7 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
         <div id="tkList" class="rows flat"></div>
       </div>
     </section>
+    <section id="bkHoy" aria-label="Copia de seguridad" hidden></section>
     <section id="expBox" aria-label="Experimento"></section>
     <button type="button" class="revrow" id="revRow"></button>
   </main>
@@ -1398,7 +1401,7 @@ function renderImp(T){const box=document.getElementById('imp'),b=battery(T),A=an
 /* Hoy cambia con el día: a la mañana el sueño primero; a la noche, la hora de acostarte primero */
 function arrangeHoy(){const v=document.getElementById('v-hoy'),$=id=>document.getElementById(id),dp=dayPart();
   const ord=dp==='m'?['slpBox','day','imp','bat']:dp==='n'?['imp','day','bat','slpBox']:['day','imp','bat','slpBox'];
-  ord.concat(['napBox','tasks','expBox','revRow']).forEach(id=>{const e=$(id);if(e)v.appendChild(e);});}
+  ord.concat(['napBox','tasks','bkHoy','expBox','revRow']).forEach(id=>{const e=$(id);if(e)v.appendChild(e);});}
 function openRings(T){const R=ringsData(T),cols=['olive','sand','graph'],dsc=['Tiempo en cama contra tu meta','Gimnasio, pádel y correr esta semana','Estudio y proyecto de hoy'];
   SI.innerHTML=`<div><h3>Tus 3 anillos</h3><p class="sub small">Se llenan solos con lo que marcás.</p></div><div class="rgl">${R.map((r,i)=>`<div class="spread rowx"><span class="rgn"><i class="dot ${cols[i]}"></i><span><b>${r[0]}</b><br><span class="sub small">${dsc[i]}</span></span></span><b class="num">${r[2]}</b></div>`).join('')}</div><button class="btn primary" type="button" id="ok">Listo</button>`;
   SI.querySelector('#ok').onclick=()=>sheet.close();if(!sheet.open)sheet.showModal();}
@@ -1476,8 +1479,8 @@ function openFoco(){const T=todayStr(),FP=(S.foco&&S.foco.paused)||[],L=HABS().f
   const draw=()=>{SI.innerHTML=`<div><h3>Tus hábitos clave</h3><p class="sub small">Elegí hasta 4: los que más te importan ahora. Los demás quedan en pausa, con su historial guardado. Los volvés a activar cuando quieras.</p></div><div class="fcl"></div><p class="sub small num" id="fcn"></p><button class="btn primary" type="button" id="ok">Guardar</button><button class="link" type="button" id="cx">Cancelar</button>`;
     const box=SI.querySelector('.fcl');L.forEach(h=>{const on=sel.has(h.id),off=!on&&sel.size>=4,r=document.createElement('label');r.className='fcr'+(off?' off':'');r.innerHTML=`<input type="checkbox" ${on?'checked':''} ${off?'disabled':''}><span><b></b><br><span class="sub small"></span></span>`;
       r.querySelector('b').textContent=h.name;r.querySelector('.sub').textContent=h.min?'Mínimo: '+h.min:'';r.querySelector('input').onchange=e=>{if(e.target.checked)sel.add(h.id);else sel.delete(h.id);draw();};box.appendChild(r);});
-    SI.querySelector('#fcn').textContent=sel.size+' de 4 elegidos';SI.querySelector('#cx').onclick=()=>sheet.close();
-    const ok=SI.querySelector('#ok');ok.disabled=!sel.size;ok.onclick=()=>{const before=JSON.stringify(S.habitos),prevF=S.foco,paused=[];
+    SI.querySelector('#fcn').textContent=sel.size>4?'Tenés '+sel.size+' activos: destildá hasta dejar 4':sel.size+' de 4 elegidos';SI.querySelector('#cx').onclick=()=>sheet.close();
+    const ok=SI.querySelector('#ok');ok.disabled=!sel.size||sel.size>4;ok.onclick=()=>{const before=JSON.stringify(S.habitos),prevF=S.foco,paused=[];
       L.forEach(h=>{const on=sel.has(h.id);if(!on&&h.active!==false)paused.push(h.id);setActive(h,on,T);});
       S.foco={at:T,paused:[...new Set(FP.filter(id=>!sel.has(id)).concat(paused))]};save();sheet.close();renderAll();vib();
       toast(paused.length?sel.size+' hábitos clave · '+paused.length+' en pausa':'Hábitos clave guardados',()=>{S.habitos=JSON.parse(before);S.foco=prevF;save();renderAll();});};
@@ -1530,7 +1533,12 @@ function renderNap(T){const box=document.getElementById('napBox');if(!box)return
     else if(a==='si'||a==='no'||a==='nose'){cur.listo=true;cur.dormido=a==='si'?true:a==='no'?false:null;toast(a==='no'?'Anotado: descansaste sin dormir':'Anotado');}
     patchDay(T,{nap:cur});renderNap(T);});}
 setInterval(()=>{const n=(S.dias[todayStr()]||{}).nap;if(n&&n.terminaA&&!n.listo&&!document.hidden)renderNap(todayStr());},20000);
-function renderHoy(){const T=todayStr();renderImp(T);renderBat(T);arrangeHoy();renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
+function renderHoy(){const T=todayStr();renderBkHoy(T);renderImp(T);renderBat(T);arrangeHoy();renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
+/* copia de seguridad: si pasaron 7 días sin copia, una línea en Hoy para guardarla con un toque */
+function renderBkHoy(T){const el=document.getElementById('bkHoy');if(!el)return;const n=Object.keys(S.dias).length,since=S.backup?Math.round((toD(T)-toD(S.backup))/864e5):null;
+  const show=n>=3&&(since===null||since>=7)&&!(S.bkSnz&&T<S.bkSnz);el.hidden=!show;if(!show){el.innerHTML='';return;}
+  el.innerHTML=`<div class="revrow bkrow"><div><b>${since===null?'Todavía no guardaste una copia de tus datos':'Hace '+since+' días que no guardás una copia'}</b><br><span>Tus datos están solo en este celular. Tocá Guardar copia y elegí Guardar en Archivos → iCloud Drive.</span></div><div class="inl"><button class="btn primary" type="button" id="bkGo">Guardar copia</button><button class="link" type="button" id="bkLater">Más tarde</button></div></div>`;
+  el.querySelector('#bkGo').onclick=()=>document.getElementById('expBtn').click();el.querySelector('#bkLater').onclick=()=>{S.bkSnz=add(T,3);save();renderBkHoy(T);};}
 function rangeRatio(a,b,only){const T=todayStr();let tot=0,got=0;for(let s=a;s<=b&&s<=T;s=add(s,1)){HABS().forEach(h=>{if(only&&h!==only)return;if(!counts(h,s))return;if(s===T&&st(s,h.id)===0)return;const v=st(s,h.id);tot++;got+=v===2?1:v===1?.5:0;});}return tot?got/tot:null;}
 function renderWeek(T){const box=document.getElementById('weekBox'),d=dow(T);box.innerHTML='';
   if(d!==0&&d!==1){box.hidden=true;return;}
@@ -2247,9 +2255,10 @@ function openGoal(g){const isNew=!g;g=g?JSON.parse(JSON.stringify(g)):{id:uid('g
   draw();if(!sheet.open)sheet.showModal();}
 
 /* ---------- copia de seguridad ---------- */
-document.getElementById('expBtn').onclick=async()=>{S.backup=todayStr();save();const name='habitos-copia-'+todayStr()+'.json',blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});
-  try{const file=new File([blob],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Copia de Hábitos App'});renderAll();return;}}catch(e){if(e&&e.name==='AbortError'){return;}}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);renderAll();toast('Copia guardada');};
+document.getElementById('expBtn').onclick=async()=>{const T=todayStr(),name='habitos-copia-'+T+'.json',blob=new Blob([JSON.stringify(Object.assign({},S,{backup:T}),null,1)],{type:'application/json'});
+  const done=()=>{S.backup=T;delete S.bkSnz;save();renderAll();toast('Copia guardada');};
+  try{const file=new File([blob],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Copia de Hábitos App'});done();return;}}catch(e){if(e&&e.name==='AbortError'){return;}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);done();};
 document.getElementById('bkNow').onclick=()=>document.getElementById('expBtn').click();
 document.getElementById('impBtn').onclick=()=>document.getElementById('impFile').click();
 document.getElementById('saveRetry').onclick=()=>{if(writeNow())toast('Guardado');else toast('Todavía no se pudo guardar');};
