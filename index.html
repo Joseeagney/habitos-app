@@ -1053,22 +1053,17 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
         <li>Tocá <b>▶</b> para probarlo. Si te pregunta si permitís conectarse a <b>ntfy.sh</b>, tocá <b>Permitir siempre</b>. Volvé a esta app: en Pasos tiene que aparecer el número.</li>
         <li><b>Para que sea solo:</b> en Atajos, pestaña <b>Automatización</b> → <b>+</b> → <b>App</b> → elegí <b>WhatsApp</b> → marcá <b>Se abre</b> → <b>Ejecutar inmediatamente</b> y apagá <b>Notificar al ejecutarse</b> → <b>Siguiente</b> → elegí <b>Pasos Hábitos</b>. Cada vez que abrís WhatsApp, tus pasos se actualizan sin que hagas nada.</li>
       </ol><p class="sub small">Solo viaja el número de pasos, por un servicio gratuito (ntfy.sh) con un código secreto que es solo tuyo.</p></details></section>
-    <section id="wRemSec"><h2>Recordatorios de agua</h2>
-      <p class="sub small">Una app web no puede mandarte avisos a horario en el iPhone; Atajos sí. El aviso te pregunta cuánto tomaste y lo anota acá con un toque, sin abrir la app.</p>
+    <section id="wRemSec"><h2>Avisos de agua</h2>
+      <p class="sub small">Te llega un aviso en cada horario. Lo tocás y suma un vaso (250 ml). Cuando llegás a tu meta, la app deja de insistir hasta el día siguiente.</p>
       <div id="wRem"></div>
-      <div class="inl"><button class="btn primary" type="button" id="wRemCopy">Copiar enlace para el atajo</button></div>
-      <details class="help"><summary>Cómo armarlo (5 minutos, una sola vez)</summary><ol>
-        <li>Acá arriba tocá <b>Copiar enlace para el atajo</b>.</li>
-        <li>Abrí <b>Atajos</b> y tocá <b>+</b> (arriba a la derecha). Tocá el nombre de arriba y poné <b>Agua</b>.</li>
-        <li>Tocá <b>Buscar acciones</b>, escribí <b>lista</b> y tocá <b>Lista</b>. Cambiá los dos elementos que trae por <b>Vaso</b> y <b>Botella</b>. Tocá <b>Añadir nuevo elemento</b> y escribí <b>Mate</b>.</li>
-        <li>Buscá <b>elegir</b> y tocá <b>Elegir de la lista</b>. (Opcional: tocá la flechita de esa acción y como pregunta escribí <b>¿Cuánta agua tomaste?</b>)</li>
-        <li>Buscá <b>URL</b> y tocá <b>Obtener contenido de URL</b>. Tocá el lugar de la URL, mantené apretado y tocá <b>Pegar</b>.</li>
-        <li>Sin cerrar el teclado, en la barra de arriba del teclado tocá <b>Elemento elegido</b>: tiene que quedar pegado al final del enlace. Tocá <b>OK</b>.</li>
-        <li id="wRemSteps"></li>
-        <li>Tocá <b>▶</b> para probarlo y elegí <b>Vaso</b>. Si pregunta por <b>ntfy.sh</b>, tocá <b>Permitir siempre</b>. Volvé a esta app: el agua tiene que subir 250 ml.</li>
-        <li><b>Los horarios:</b> en Atajos, pestaña <b>Automatización</b> → <b>+</b> → <b>Hora del día</b>. Poné el primer horario de la lista, <b>Diariamente</b>, marcá <b>Ejecutar inmediatamente</b> → <b>Siguiente</b> → elegí <b>Agua</b>. Repetilo con cada horario.</li>
-      </ol><p class="sub small">«Vaso» suma 250 ml, «Botella» 500 ml y «Mate» tu parte del mate. Tocar <b>Cancelar</b> en el aviso no anota nada. El aviso llega aunque ya hayas cumplido: Atajos no puede leer lo que anotaste en la app.</p></details>
-      <p class="sub small">Lo que anotás desde el aviso espera <b>12 horas</b> a que abras la app; si pasa más tiempo, se pierde. Con abrirla una vez a la mañana y otra a la noche alcanza.</p>
+      <p class="sub small" id="avSt"></p>
+      <div class="inl"><button class="btn primary" type="button" id="avBtn">Activar avisos</button><button class="btn" type="button" id="avTest" hidden>Probar</button></div>
+      <details class="help"><summary>Si no te llegan</summary><ol>
+        <li>Abrí la app desde su ícono en la pantalla de inicio (no desde Safari).</li>
+        <li>En <b>Ajustes del iPhone → Notificaciones → Hábitos</b>, activá <b>Permitir notificaciones</b>.</li>
+        <li>Si tenés un modo de concentración activo (No molestar, Dormir), los avisos esperan a que termine.</li>
+        <li>Tocá <b>Probar</b>: tiene que llegarte un aviso en unos segundos.</li>
+      </ol><p class="sub small">Los avisos pasan por ntfy.sh, el mismo servicio de los pasos, con un código que es solo tuyo. Solo viaja la hora del aviso: cuánta agua tomás no sale del celular.</p></details>
     </section>
     <section><h2>Pantalla</h2><label class="fl"><span>Tono</span><select id="cfgTone"><option value="auto">Automático: suave antes de las 10 y desde las 21</option><option value="claro">Siempre claro</option><option value="suave">Siempre suave</option><option value="oscuro">Siempre oscuro</option></select></label>
       <p class="sub small">El tono suave es oscuro y cálido, sin luz azul fuerte: no encandila al despertarte ni antes de dormir. También lo cambiás con el ícono de la luna o el sol, arriba.</p></section>
@@ -1908,12 +1903,64 @@ function renderCmdList(){const L=document.getElementById('cmdList');if(!L)return
 /* 5 recordatorios repartidos entre 30 min después de levantarte y 3 h antes de acostarte */
 function waterTimes(){const wk=hm2m(S.salud.wake),bd0=hm2m(bedTarget()),bd=bd0<=wk?bd0+1440:bd0,a=wk+30,z=bd-180,n=5,q=m=>Math.round(m/15)*15;
   if(z-a<240)return [a,q((a+z)/2),z].map(m2hm);const out=[];for(let i=0;i<n;i++)out.push(m2hm(q(a+(z-a)*i/(n-1))));return out;}
-function renderWRem(){const box=document.getElementById('wRem');if(!box)return;const L=waterTimes(),g=waterGoal(),per=Math.round(g/L.length/50)*50;
-  box.innerHTML=`<div class="wrem">${L.map((t,i)=>`<div class="wr"><span>${i===0?'Al levantarte':i===L.length-1?'El último del día':'Recordatorio '+(i+1)}</span><b>${t}</b></div>`).join('')}</div><p class="sub small">Calculado con tu hora de levantarte (${S.salud.wake}) y de acostarte (${bedTarget()}). Con unos ${per} ml en cada aviso llegás a tu meta de ${fmtL(g)}. El último va 3 horas antes de dormir para no despertarte a la noche.</p>`;
-  const st=document.getElementById('wRemSteps');if(st)st.innerHTML=S.salud.syncLast?'<b>Para que de paso mande tus pasos:</b> buscá <b>ejecutar</b>, tocá <b>Ejecutar atajo</b> y elegí <b>Pasos Hábitos</b>.':'Cuando tengas funcionando los <b>Pasos automáticos</b> (sección de arriba), agregá al final <b>Ejecutar atajo</b> → <b>Pasos Hábitos</b>: así cada aviso también actualiza tus pasos.';
-  const cp=document.getElementById('wRemCopy');if(cp){cp.disabled=!S.salud.sync;cp.textContent=S.salud.sync?'Copiar enlace para el atajo':'Primero activá los pasos automáticos';
-    cp.onclick=async()=>{const u=syncLink()+encodeURIComponent('agua ');try{await navigator.clipboard.writeText(u);toast('Enlace copiado: pegalo en el atajo Agua');}catch(e){toast('No se pudo copiar');}};}}
-function renderSyncCfg(){renderCmdList();renderWRem();const el=document.getElementById('syncSt');if(!el)return;const L=S.salud.syncLast;
+function renderWRem(){const box=document.getElementById('wRem');if(!box)return;const L=waterTimes();
+  box.innerHTML=`<div class="wrem">${L.map((t,i)=>`<div class="wr"><span>${i===0?'Al levantarte':i===L.length-1?'El último del día':'Aviso '+(i+1)}</span><b>${t}</b></div>`).join('')}</div><p class="sub small">Según tu hora de levantarte (${S.salud.wake}) y de acostarte (${bedTarget()}). El último va 3 horas antes de dormir para no despertarte a la noche. Si cambiás esas horas, los avisos se mueven solos.</p>`;
+  avRender();}
+/* ---------- avisos de agua (web push vía ntfy.sh, sin servidor propio) ----------
+   Siempre hay como mucho UN aviso programado. Al llegar, el service worker programa el siguiente;
+   si ya cumpliste la meta, el siguiente es mañana. La meta se mira en el celular: no viaja. */
+const NTFY='https://ntfy.sh',AV_CACHE='habitos-avisos',AR=-3*3600;
+const avTopic=()=>S.salud.sync+'-agua';
+const avDay=ts=>new Date((ts+AR)*1000).toISOString().slice(0,10);
+const avTs=(day,hm)=>{const [y,m,d]=day.split('-').map(Number),[h,mi]=hm.split(':').map(Number);return Date.UTC(y,m-1,d,h,mi)/1000-AR;};
+function avNext(times,now,metDay){const T=[...times].sort();for(let k=0;k<3;k++){const day=avDay(now+k*86400);if(k===0&&metDay===day)continue;for(const t of T){const ts=avTs(day,t);if(ts>now+60)return {at:ts,hm:t,day};}}return null;}
+async function avGet(){try{const c=await caches.open(AV_CACHE),r=await c.match('./avisos-cfg');return r?await r.json():{};}catch(e){return {};}}
+async function avPut(o){try{const c=await caches.open(AV_CACHE);await c.put('./avisos-cfg',new Response(JSON.stringify(o),{headers:{'Content-Type':'application/json'}}));}catch(e){}}
+function avPub(topic,at){return fetch(NTFY+'/'+topic,{method:'POST',headers:{'X-At':String(at),'X-Title':'Hora del agua','X-Tags':'agua'},body:'Tocá para sumar un vaso (250 ml).'});}
+const avSupport=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+const avStandalone=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+const b64u=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const u8=b=>{b=b.replace(/-/g,'+').replace(/_/g,'/');const r=atob(b+'==='.slice((b.length+3)%4));return Uint8Array.from(r,c=>c.charCodeAt(0));};
+const NTFY_VAPID='BEMjM0sNxh41x0a6Lz3YaqkJ7AUhZefxsOQgw-at69i0fM1CybVBcj7-QQXf4N_tPCgFnOXdRbQ5jrSrr9Yg9Lc';
+async function avRegister(sub){const k=sub.toJSON().keys||{};const r=await fetch(NTFY+'/v1/webpush',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint,auth:k.auth,p256dh:k.p256dh,topics:[avTopic()]})});if(!r.ok)throw new Error('registro '+r.status);}
+let AV_LAST='',AV_BUSY=false;
+/* se llama en cada render: guarda horarios y meta en el celular; si la cadena se cortó, programa el próximo */
+async function avTick(){if(!(S.push&&S.push.on)||AV_BUSY)return;AV_BUSY=true;try{
+  const T=todayStr(),now=Math.floor(Date.now()/1000),cfg=await avGet(),met=waterOf(T)>=waterGoal(T);
+  const nx=Object.assign({},cfg,{on:true,topic:avTopic(),times:waterTimes(),metDay:met?T:(cfg.metDay===T?'':cfg.metDay||'')});
+  if(S.push.regDay!==T&&avSupport()){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){await avRegister(sub);S.push.regDay=T;save();}else{S.push.on=false;nx.on=false;save();}}catch(e){}}
+  if(nx.on&&(!nx.nextAt||nx.nextAt<now-20*60)){const n=avNext(nx.times,now,nx.metDay);if(n){try{const r=await avPub(nx.topic,n.at);if(r.ok)nx.nextAt=n.at;}catch(e){}}}
+  {const cur=await avGet();if((cur.nextAt||0)>(nx.nextAt||0))nx.nextAt=cur.nextAt;}
+  const js=JSON.stringify(nx);if(js!==AV_LAST){AV_LAST=js;await avPut(nx);}
+  avRender(nx);}finally{AV_BUSY=false;}}
+async function avRender(cfg){const st=document.getElementById('avSt'),bt=document.getElementById('avBtn'),te=document.getElementById('avTest');if(!st||!bt)return;
+  const on=!!(S.push&&S.push.on);te.hidden=!on;bt.className='btn'+(on?'':' primary');bt.textContent=on?'Desactivar avisos':'Activar avisos';bt.disabled=false;
+  if(on){cfg=cfg||await avGet();const n=cfg.nextAt;st.textContent=n?'Activados · próximo aviso '+(avDay(n)===todayStr()?'hoy':'mañana')+' a las '+new Date(n*1000).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}):'Activados';}
+  else if(!avSupport()&&!avStandalone())st.textContent='Para activarlos, abrí la app desde su ícono en la pantalla de inicio.';
+  else if(!avSupport())st.textContent='Este celular no permite avisos de apps web: hace falta iOS 16.4 o más nuevo.';
+  else if(Notification.permission==='denied')st.textContent='Están bloqueados. Ajustes del iPhone → Notificaciones → Hábitos → Permitir notificaciones.';
+  else st.textContent='Desactivados.';}
+async function avOn(){if(!avSupport()){avRender();toast(avStandalone()?'Este celular no permite avisos de apps web':'Abrí la app desde el ícono de la pantalla de inicio');return;}
+  const perm=Notification.requestPermission();/* tiene que pedirse en el mismo toque */
+  const bt=document.getElementById('avBtn');bt.disabled=true;bt.textContent='Activando…';
+  try{if(await perm!=='granted'){avRender();toast('Sin permiso no te pueden llegar avisos');return;}
+    const reg=await navigator.serviceWorker.ready;let key=NTFY_VAPID;try{const c=await fetch(NTFY+'/v1/config').then(r=>r.json());if(c.web_push_public_key)key=c.web_push_public_key;}catch(e){}
+    let sub=await reg.pushManager.getSubscription();if(sub&&b64u(sub.options&&sub.options.applicationServerKey||new ArrayBuffer(0))!==key){await sub.unsubscribe();sub=null;}
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(key)});
+    await avRegister(sub);S.push={on:true,regDay:todayStr(),at:Date.now()};save();
+    {const c0=await avGet(),n0=Math.floor(Date.now()/1000);await avPut(Object.assign(c0,{on:true,nextAt:c0.nextAt>n0?c0.nextAt:0}));}AV_LAST='';await avTick();const cfg=await avGet();
+    const nx=cfg.nextAt?new Date(cfg.nextAt*1000).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}):'';
+    await fetch(NTFY+'/'+avTopic(),{method:'POST',headers:{'X-Title':'Avisos de agua activados','X-Tags':'prueba'},body:'Así te van a llegar.'+(nx?' El próximo: '+nx+'.':'')});
+    vib();toast('Avisos activados');}
+  catch(e){S.push={on:false};save();avRender();toast('No se pudo activar. Probá de nuevo con internet.');}}
+async function avOff(){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){fetch(NTFY+'/v1/webpush',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})}).catch(()=>{});await sub.unsubscribe();}}catch(e){}
+  S.push={on:false};save();await avPut(Object.assign(await avGet(),{on:false,nextAt:0}));AV_LAST='';avRender();toast('Avisos desactivados');}
+/* tocar un aviso de agua: el service worker deja una marca y la app suma el vaso una sola vez */
+let AV_CONS=null;
+function avConsume(){if(!AV_CONS)AV_CONS=avConsume1().finally(()=>{AV_CONS=null;});return AV_CONS;}
+async function avConsume1(){try{const c=await caches.open(AV_CACHE),r=await c.match('./agua-click');if(!r)return;const o=await r.json();await c.delete('./agua-click');
+  if(o.kind==='agua'&&Date.now()-o.ts<15*60*1000)addWater(250);}catch(e){}}
+function renderSyncCfg(){renderCmdList();renderWRem();avTick();const el=document.getElementById('syncSt');if(!el)return;const L=S.salud.syncLast;
   el.innerHTML=L?'<b style="color:var(--olive)">Funcionando.</b> Último dato: '+(dayOfTs(L)===todayStr()?'hoy':fmt(dayOfTs(L),{weekday:'long'}))+' a las '+hmOfTs(L)+'.':'Todavía no llegó ningún dato del atajo.';}
 
 
@@ -2279,7 +2326,10 @@ document.getElementById('themeBtn').onclick=()=>{const c=toneCfg(),t=effTone(),t
 renderAll();
 let lastDay=todayStr(),SYNC_TICK=0;setInterval(()=>{const t=todayStr();if(t!==lastDay){lastDay=t;}renderHeader();renderHoy();renderSleep(todayStr());applyTone();if(++SYNC_TICK%3===0&&!document.hidden)syncAndRender();},60000);
 syncAndRender();
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){renderAll();applyTone();syncAndRender();if(SYNC_TAP){setTimeout(syncAndRender,2500);setTimeout(syncAndRender,6000);}}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){avConsume();renderAll();applyTone();syncAndRender();if(SYNC_TAP){setTimeout(syncAndRender,2500);setTimeout(syncAndRender,6000);}}});
+if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='agua-click')avConsume();});}
+avConsume();
+{const ab=document.getElementById('avBtn');if(ab)ab.onclick=()=>(S.push&&S.push.on)?avOff():avOn();const at=document.getElementById('avTest');if(at)at.onclick=async()=>{try{const r=await fetch(NTFY+'/'+avTopic(),{method:'POST',headers:{'X-Title':'Prueba','X-Tags':'prueba'},body:'Si ves esto, los avisos de agua funcionan.'});toast(r.ok?'Enviado: llega en unos segundos':'No se pudo enviar');}catch(e){toast('Sin internet');}};}
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});// busca una versión nueva del service worker en cada apertura
 
 /* barra compacta al deslizar, como los títulos grandes de iOS */
