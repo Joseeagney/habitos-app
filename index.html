@@ -1075,6 +1075,7 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
     <section><h2>Copia de seguridad</h2>
       <p class="sub small">Tus datos se guardan en este celular. Hacé una copia de vez en cuando por si cambiás de teléfono o borrás Safari.</p>
       <p class="sub small num" id="dataLine"></p>
+      <div id="bkUndo"></div>
       <div class="inl"><button class="btn" type="button" id="expBtn">Guardar copia</button><button class="btn" type="button" id="impBtn">Restaurar copia</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>
       <p class="sub small" id="lastBk"></p>
       <button class="btn danger" type="button" id="resetBtn" style="margin-top:6px">Empezar de cero (borra los registros)</button><p class="sub small">Borra días, sueño, agua, pasos, tareas, repasos y experimentos. Conserva tus hábitos, objetivos, ajustes y el atajo de pasos. Antes guarda una copia en este celular por si te arrepentís.</p></section>
@@ -1166,7 +1167,7 @@ let FRESH=false;
 function load(){let r=null;
   try{r=localStorage.getItem(KEY);}catch(e){return enterRecovery(null,'No se pudo acceder al almacenamiento del celular ('+((e&&e.name)||'error')+').');}
   if(r===null){S=JSON.parse(JSON.stringify(SEED));FRESH=true;}
-  else{let d;try{d=JSON.parse(r);}catch(e){return enterRecovery(r,'El texto guardado está incompleto o dañado ('+((e&&e.message)||'no es JSON')+').');}
+  else{let d;try{d=JSON.parse(r);}catch(e){return enterRecovery(r,'El texto guardado está incompleto o dañado: no se puede leer como datos de la app.');}
     const why=shapeErr(d);if(why)return enterRecovery(r,'Los datos guardados '+why+'.');
     S=d;}
   ['habitos','objetivos','fijos'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(SEED[k]));});S.dias=S.dias||{};S.semanas=S.semanas||{};}
@@ -2121,7 +2122,7 @@ function compactIns(){const w=document.querySelector('#insights .ins');if(!w||w.
 function saludWarn(T){const box=document.getElementById('salud'),wk=sleepStats(add(T,-6),T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7');
   if(!(wk&&wk.hd>=3&&!(turno&&turno.done)))return;const n=document.createElement('div');n.className='note warnx';n.innerHTML=`<b>${wk.hd} de ${wk.n} días con dolor de cabeza esta semana.</b> Si se mantiene varias semanas, vale una consulta con un clínico.`;box.children[0].after(n);}
 
-function renderAll(){const T=todayStr();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();renderSyncCfg();compactExp(T);compactIns();saludWarn(T);renderPTab();renderDataLine();}
+function renderAll(){const T=todayStr();renderBkUndo();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();renderSyncCfg();compactExp(T);compactIns();saludWarn(T);renderPTab();renderDataLine();}
 
 /* ---------- hojas y formularios ---------- */
 const sheet=document.getElementById('sheet'),SI=document.getElementById('SI');
@@ -2197,7 +2198,30 @@ document.getElementById('bkNow').onclick=()=>document.getElementById('expBtn').c
 document.getElementById('impBtn').onclick=()=>document.getElementById('impFile').click();
 document.getElementById('saveRetry').onclick=()=>{if(writeNow())toast('Guardado');else toast('Todavía no se pudo guardar');};
 document.getElementById('saveExp').onclick=()=>document.getElementById('expBtn').click();
-document.getElementById('impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.habitos)||typeof d.dias!=='object')throw 0;localStorage.setItem(KEY,JSON.stringify(d));load();renderAll();toast('Copia restaurada');}catch(err){toast('Ese archivo no es una copia de Hábitos App');}e.target.value='';};r.readAsText(f);};
+/* Restaurar copia: primero se valida y se muestra qué trae; lo actual se guarda aparte antes de reemplazarlo */
+const BK_PRE=[[':antes-de-restaurar:','restaurar una copia'],[':antes-de-cero:','empezar de cero']];
+function bkList(){const L=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);BK_PRE.forEach(([p,why])=>{if(k&&k.startsWith(KEY+p)){const ts=Number(k.slice((KEY+p).length));if(ts)L.push({k,ts,why});}});}}catch(e){}return L.sort((x,y)=>y.ts-x.ts);}
+function keepAside(){/* guarda lo actual; deja una sola copia de este tipo para no llenar el almacenamiento */
+  try{bkList().filter(x=>x.why==='restaurar una copia').forEach(x=>localStorage.removeItem(x.k));localStorage.setItem(KEY+':antes-de-restaurar:'+Date.now(),localStorage.getItem(KEY)||JSON.stringify(S));return true;}catch(e){return false;}}
+function bkSum(d){const pl=(n,a,b)=>n+' '+(n===1?a:b),dd=Object.keys(d.dias||{}).sort();return pl(dd.length,'día','días')+(dd.length?' · hasta el '+dd[dd.length-1].split('-').reverse().slice(0,2).join('/'):'');}
+function confirmReplace(d,title,note){const cur=Object.keys(S.dias||{}).length,nw=Object.keys(d.dias||{}).length;
+  SI.innerHTML=`<div><h3></h3><p class="sub small"></p></div><div class="wrem"><div class="wr"><span>Va a quedar</span><b class="c1"></b></div><div class="wr"><span>Lo que tenés ahora</span><b class="c2"></b></div></div><p class="sub small">${nw<cur?'<b>Ojo: tiene menos días que lo que tenés ahora.</b> ':''}Lo que tenés ahora se guarda aparte: si te equivocás, lo recuperás desde Ajustes → Copia de seguridad.</p><button class="btn primary" type="button" id="ok">Reemplazar</button><button class="link" type="button" id="cx">Cancelar</button>`;
+  SI.querySelector('h3').textContent=title;SI.querySelector('h3+p').textContent=note;SI.querySelector('.c1').textContent=bkSum(d);SI.querySelector('.c2').textContent=bkSum(S);
+  SI.querySelector('#cx').onclick=()=>sheet.close();
+  SI.querySelector('#ok').onclick=()=>{flushSave();if(!keepAside()){toast('No hay lugar para guardar lo actual. Exportá una copia primero.');return;}
+    S=d;clearTimeout(saveT);saveT=null;if(!writeNow()){toast('No se pudo guardar. No se cambió nada.');return;}sheet.close();location.reload();};
+  if(!sheet.open)sheet.showModal();}
+document.getElementById('impFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const fr=new FileReader();
+  fr.onload=()=>{let d=null;try{d=JSON.parse(fr.result);}catch(_){}
+    if(!d||shapeErr(d)||!Array.isArray(d.habitos)||!isObj(d.dias)){toast('Ese archivo no es una copia de Hábitos App. No se tocó nada.');return;}
+    const bk=typeof d.backup==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d.backup)?'Copia del '+d.backup.split('-').reverse().join('/')+'.':'Copia sin fecha.';
+    confirmReplace(d,'¿Restaurar esta copia?',bk+' '+d.habitos.length+' hábitos, '+(Array.isArray(d.tareas)?d.tareas.length:0)+' tareas.');};
+  fr.onerror=()=>toast('No se pudo leer el archivo.');fr.readAsText(f);};
+function renderBkUndo(){const el=document.getElementById('bkUndo');if(!el)return;const b=bkList()[0];if(!b){el.innerHTML='';return;}
+  const dt=new Date(b.ts),when=dt.toLocaleDateString('es-AR',{timeZone:TZ,day:'2-digit',month:'2-digit'})+' a las '+dt.toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'});
+  el.innerHTML='<button class="link" type="button"></button>';const bt=el.firstChild;bt.textContent='Volver a como estaba antes de '+b.why+' (el '+when+')';
+  bt.onclick=()=>{let d=null;try{d=JSON.parse(localStorage.getItem(b.k));}catch(e){}if(!d||shapeErr(d)||!Array.isArray(d.habitos)){toast('Esa copia interna no se puede leer.');return;}
+    confirmReplace(d,'¿Volver a como estaba?','Así estaban tus datos antes de '+b.why+', el '+when+'.');};}
 
 /* ---------- navegación ---------- */
 function show(v){const hd=document.querySelector('header.top');if(hd)hd.hidden=!(v==='hoy'||v==='prog');if(v==='hoy'){ANIM.hoy=true;}if(v==='prog'){ANIM.prog=true;}document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!=='v-'+v);document.querySelectorAll('nav.tabs button').forEach(b=>{if(b.dataset.v===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});document.querySelector('nav.tabs').hidden=v==='aj'||v==='rev'||v==='hist';{const f=document.getElementById('wfab');if(f)f.hidden=v==='aj'||v==='rev'||v==='hist';}window.scrollTo(0,0);}
