@@ -1063,6 +1063,7 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
       <p class="sub small" id="syncSt"></p>
       <div class="inl"><button class="btn primary" type="button" id="syncCopy">Copiar enlace para el atajo</button><button class="btn" type="button" id="syncTest">Probar</button></div>
       <p class="mono tiny synclk" id="syncLinkTxt" hidden></p>
+      <details class="help" id="codeBox"><summary>Ya tengo un código (después de reinstalar)</summary><p class="sub small">Si el atajo ya manda los pasos con un código, pegalo acá y la app lo usa en vez de crear uno nuevo. Así no tenés que tocar el atajo.</p><div class="inl"><input type="text" id="codeIn" placeholder="hab-…" autocapitalize="off" autocomplete="off" spellcheck="false" style="flex:1;min-width:0"><button class="btn primary" type="button" id="codeBtn">Usar</button></div><p class="sub small" id="codeMsg"></p></details>
       <details class="help" id="cmdBox"><summary>Cargar sin abrir la app (agua, mate, hábitos)</summary><p class="sub small">Cada botón copia un enlace. En Atajos usás la acción <b>Obtener contenido de URL</b> con ese enlace: al tocar el atajo, el dato llega a la app aunque no la abras. Se suma la próxima vez que la abras (dentro de las 12 h). El sueño no viaja por acá.</p><div class="cmdl" id="cmdList"></div></details>
       <details class="help"><summary>Cómo configurarlo (2 minutos)</summary><ol>
         <li>Acá arriba tocá <b>Copiar enlace para el atajo</b>.</li>
@@ -1977,6 +1978,10 @@ let AV_CONS=null;
 function avConsume(){if(!AV_CONS)AV_CONS=avConsume1().finally(()=>{AV_CONS=null;});return AV_CONS;}
 async function avConsume1(){try{const c=await caches.open(AV_CACHE),r=await c.match('./agua-click');if(!r)return;const o=await r.json();await c.delete('./agua-click');
   if(o.kind==='agua'&&Date.now()-o.ts<15*60*1000)addWater(250);}catch(e){}}
+document.getElementById('codeBtn').addEventListener('click',async()=>{const i=document.getElementById('codeIn'),m=document.getElementById('codeMsg'),v=i.value.trim().toLowerCase();
+  if(!/^hab-[a-z0-9]{10,24}$/.test(v)){m.textContent='Ese código no parece correcto. Empieza con hab- y no lleva espacios.';return;}
+  S.salud.sync=v;S.salud.syncLast=0;save();i.value='';m.textContent='Listo. Buscando tus pasos…';renderSyncCfg();
+  try{await syncSteps();}catch(e){}renderAll();m.textContent=S.salud.syncLast?'Funcionando: llegaron tus datos.':'Código guardado. Si el atajo ya mandó pasos hoy, aparecen en unos segundos.';});
 function renderSyncCfg(){renderCmdList();renderWRem();avTick();const el=document.getElementById('syncSt');if(!el)return;const L=S.salud.syncLast;
   el.innerHTML=L?'<b style="color:var(--olive)">Funcionando.</b> Último dato: '+(dayOfTs(L)===todayStr()?'hoy':fmt(dayOfTs(L),{weekday:'long'}))+' a las '+hmOfTs(L)+'.':'Todavía no llegó ningún dato del atajo.';}
 
