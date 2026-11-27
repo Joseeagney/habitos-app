@@ -1,5 +1,5 @@
 // Hábitos App: funciona sin internet. Cambiá VERSION cuando actualices la app.
-const VERSION = 'habitos-app-v63';
+const VERSION = 'habitos-app-v64';
 const AV_CACHE = 'habitos-avisos'; // horarios de los avisos (agua y hora de dormir): no se borra al actualizar
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {

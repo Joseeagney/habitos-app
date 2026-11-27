@@ -969,6 +969,28 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
 .wrem .wr:last-child{border-bottom:0}
 .wrem .wr b{font-variant-numeric:tabular-nums;font-size:17px}
 .stepl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;line-height:1.4}
+
+/* ===== v64: bienvenida, Ajustes en lista, tarjeta principal ===== */
+.welc{background:var(--bg);border-radius:var(--r);box-shadow:var(--cshadow);padding:18px;display:flex;flex-direction:column;gap:10px;border:1px solid color-mix(in srgb,var(--olive) 25%,transparent)}
+.welc .inl{flex-wrap:wrap}.welc .inl .btn{flex:1 1 140px}.welc b{font-size:17px}.welc p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.45}.welc .link{align-self:flex-start}
+.bkwarn{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--warn-s);color:var(--fg);font-size:13.5px;line-height:1.45}.bkwarn b{color:var(--warn)}
+.ajidx{background:var(--bg);border-radius:var(--r);box-shadow:var(--cshadow);overflow:hidden;margin-top:6px}
+.ajr{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:13px;width:100%;padding:12px 14px 12px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ajr+.ajr .t{border-top:0}.ajr+.ajr{box-shadow:inset 0 1px 0 var(--line)}
+.ajr:active{background:var(--soft)}
+.aji{flex:0 0 auto;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(150deg,#6f8a2a,#3d4d16);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.aji svg{width:19px;height:19px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ajr .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.ajr .t b{font-size:16px;font-weight:600}.ajr .t small{font-size:13px;color:var(--muted)}.ajr .t small.w{color:var(--warn)}
+.ajr>svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:var(--faint);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#v-aj.ajsub section[data-aj]>h2,#v-aj.ajsub section[data-aj]>.spread>h2{display:none}
+#v-aj.ajsub section[data-aj]>.spread{justify-content:flex-end}
+#day .dhd2{padding:16px 18px!important;margin-bottom:12px;border-radius:var(--r);color:#fff;background:radial-gradient(90% 120% at 90% 0%,rgba(228,245,138,.5),transparent 60%),linear-gradient(135deg,#2e3b10,#56701f 55%,#8ba53c)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 12px 28px -14px rgba(46,59,16,.7)!important;gap:14px!important}
+#day .dhd2 .dtx h2{color:#fff!important;font-size:21px}#day .dhd2 .dtx .sub{color:rgba(255,255,255,.8)!important}
+#day .dhd2 .dring,#day .dhd2 .dring svg{width:58px;height:58px}
+#day .dhd2 .dring .dr0{stroke:rgba(255,255,255,.22)}#day .dhd2 .dring .dr1{stroke:#fff}
+#day .dhd2 .dring .drk{inset:15px;width:28px;height:28px;stroke:#fff}
+#day .dhd2 .drp{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff}
+.qt b .qe{font-size:17px;font-weight:600;color:var(--faint);letter-spacing:0}
 </style>
 </head>
 <body>
@@ -983,6 +1005,7 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
   </header>
 
   <main id="v-hoy" class="view">
+    <section id="welc" aria-label="Bienvenida" hidden></section>
     <section id="day" class="day" aria-label="Tu día"></section>
     <section id="slpBox" class="slp" aria-label="Sueño"></section>
     <section id="imp" aria-label="Lo importante de hoy"></section>
@@ -1038,9 +1061,10 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
 
   <main id="v-aj" class="view" hidden>
     <button class="back" type="button" id="backBtn">‹ Hoy</button>
-    <h1>Ajustes</h1>
-    <section><div class="spread"><h2>Hábitos</h2><button class="link" type="button" id="newHab">Nuevo hábito</button></div><div class="lst" id="habs"></div></section>
-    <section id="wRemSec"><h2>Avisos</h2>
+    <h1 id="ajT">Ajustes</h1>
+    <div class="ajidx" id="ajIdx"></div>
+    <section data-aj="habitos"><div class="spread"><h2>Hábitos</h2><button class="link" type="button" id="newHab">Nuevo hábito</button></div><div class="lst" id="habs"></div></section>
+    <section data-aj="avisos" id="wRemSec"><h2>Avisos</h2>
       <p class="sub small">Te llegan al celular aunque la app esté cerrada. El de agua lo tocás y suma un vaso (250 ml); cuando llegás a tu meta, deja de insistir hasta el día siguiente.</p>
       <div class="tkopt" id="avOpts">
         <button type="button" class="tko tkimp" data-av="agua" aria-pressed="true"><span><b>Agua</b><br><span class="sub small"></span></span><i class="sw" aria-hidden="true"></i></button>
@@ -1056,9 +1080,9 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
         <li>Tocá <b>Probar</b>: tiene que llegarte un aviso en unos segundos.</li>
       </ol><p class="sub small">Los avisos pasan por ntfy.sh, el mismo servicio de los pasos, con un código que es solo tuyo. Solo viaja la hora de cada aviso, que sale de tus horarios de <b>Metas de salud</b>. Cuánta agua tomás y cómo dormís no salen del celular.</p></details>
     </section>
-    <section><h2>Metas de salud</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p><label class="fl" style="margin-top:12px"><span>Meta de agua (bebidas, el mate cuenta)</span><select id="cfgAgua"><option value="auto">Automática: según tu peso y lo que hacés</option><option value="1500">1,5 L</option><option value="2000">2 L</option><option value="2500">2,5 L (días de calor)</option><option value="3000">3 L (calor + ejercicio)</option></select></label><label class="fl" id="pesoL" style="margin-top:12px"><span>Tu peso en kg (para la meta automática)</span><input id="cfgPeso" inputmode="decimal" placeholder="Ej: 72"></label><p class="sub small" id="aguaInfo"></p><label class="fl" style="margin-top:12px"><span>Bici al trabajo, ida y vuelta (se suma sola al cardio)</span><select id="cfgBici"><option value="0">No voy en bici</option><option value="20">20 min</option><option value="30">30 min</option><option value="40">40 min</option><option value="60">1 h</option></select></label></section>
-    <section><div class="spread"><h2>Bloques fijos del día</h2><button class="link" type="button" id="newFix">Nuevo bloque</button></div><p class="sub small">Tus horarios fijos (trabajo, facultad). La app los usa para sumar la bici al cardio.</p><div class="lst" id="fixes"></div></section>
-    <section><h2>Pasos automáticos</h2>
+    <section data-aj="metas"><h2>Metas de salud</h2><div class="two"><label class="fl"><span>Horas que querés dormir</span><select id="cfgMeta"><option value="7">7 h</option><option value="7.5">7 h 30</option><option value="8">8 h</option><option value="8.5">8 h 30</option><option value="9">9 h</option></select></label><label class="fl"><span>Hora para levantarte</span><input type="time" id="cfgWake" step="900"></label></div><p class="sub small" id="cfgBed"></p><label class="fl" style="margin-top:12px"><span>Meta de agua (bebidas, el mate cuenta)</span><select id="cfgAgua"><option value="auto">Automática: según tu peso y lo que hacés</option><option value="1500">1,5 L</option><option value="2000">2 L</option><option value="2500">2,5 L (días de calor)</option><option value="3000">3 L (calor + ejercicio)</option></select></label><label class="fl" id="pesoL" style="margin-top:12px"><span>Tu peso en kg (para la meta automática)</span><input id="cfgPeso" inputmode="decimal" placeholder="Ej: 72"></label><p class="sub small" id="aguaInfo"></p><label class="fl" style="margin-top:12px"><span>Bici al trabajo, ida y vuelta (se suma sola al cardio)</span><select id="cfgBici"><option value="0">No voy en bici</option><option value="20">20 min</option><option value="30">30 min</option><option value="40">40 min</option><option value="60">1 h</option></select></label></section>
+    <section data-aj="bloques"><div class="spread"><h2>Bloques fijos del día</h2><button class="link" type="button" id="newFix">Nuevo bloque</button></div><p class="sub small">Tus horarios fijos (trabajo, facultad). La app los usa para sumar la bici al cardio.</p><div class="lst" id="fixes"></div></section>
+    <section data-aj="pasos"><h2>Pasos automáticos</h2>
       <p class="sub small">La app no puede leer Salud por sí sola. El atajo <b>Pasos Hábitos</b> le manda tu número de pasos y acá aparece solo.</p>
       <p class="sub small" id="syncSt"></p>
       <div class="inl"><button class="btn primary" type="button" id="syncCopy">Copiar enlace para el atajo</button><button class="btn" type="button" id="syncTest">Probar</button></div>
@@ -1075,16 +1099,16 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
         <li>Tocá <b>▶</b> para probarlo. Si te pregunta si permitís conectarse a <b>ntfy.sh</b>, tocá <b>Permitir siempre</b>. Volvé a esta app: en Pasos tiene que aparecer el número.</li>
         <li><b>Para que sea solo:</b> en Atajos, pestaña <b>Automatización</b> → <b>+</b> → <b>App</b> → elegí <b>WhatsApp</b> → marcá <b>Se abre</b> → <b>Ejecutar inmediatamente</b> y apagá <b>Notificar al ejecutarse</b> → <b>Siguiente</b> → elegí <b>Pasos Hábitos</b>. Cada vez que abrís WhatsApp, tus pasos se actualizan sin que hagas nada.</li>
       </ol><p class="sub small">Solo viaja el número de pasos, por un servicio gratuito (ntfy.sh) con un código secreto que es solo tuyo.</p></details></section>
-    <section><h2>Pantalla</h2><label class="fl"><span>Tono</span><select id="cfgTone"><option value="auto">Automático: suave antes de las 10 y desde las 21</option><option value="claro">Siempre claro</option><option value="suave">Siempre suave</option><option value="oscuro">Siempre oscuro</option></select></label>
+    <section data-aj="pantalla"><h2>Pantalla</h2><label class="fl"><span>Tono</span><select id="cfgTone"><option value="auto">Automático: suave antes de las 10 y desde las 21</option><option value="claro">Siempre claro</option><option value="suave">Siempre suave</option><option value="oscuro">Siempre oscuro</option></select></label>
       <p class="sub small">El tono suave es oscuro y cálido, sin luz azul fuerte: no encandila al despertarte ni antes de dormir. También lo cambiás con el ícono de la luna o el sol, arriba.</p></section>
-    <section><h2>Copia de seguridad</h2>
-      <p class="sub small">Tus datos se guardan en este celular. Hacé una copia de vez en cuando por si cambiás de teléfono o borrás Safari.</p>
+    <section data-aj="copia"><h2>Copia de seguridad</h2>
+      <p class="sub small">Tus datos se guardan solo en este celular. Hacé una copia de vez en cuando y guardala en Archivos → iCloud Drive.</p><p class="bkwarn"><b>Importante:</b> si borrás la app de la pantalla de inicio, el iPhone borra también todos sus datos. Guardá una copia antes.</p>
       <p class="sub small num" id="dataLine"></p>
       <div id="bkUndo"></div>
       <div class="inl"><button class="btn" type="button" id="expBtn">Guardar copia</button><button class="btn" type="button" id="impBtn">Restaurar copia</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>
       <p class="sub small" id="lastBk"></p>
       <button class="btn danger" type="button" id="resetBtn" style="margin-top:6px">Empezar de cero (borra los registros)</button><p class="sub small">Borra días, sueño, agua, pasos, tareas, repasos y experimentos. Conserva tus hábitos, objetivos, ajustes y el atajo de pasos. Antes guarda una copia en este celular por si te arrepentís.</p></section>
-    <section><h2>Ayuda</h2><details class="help"><summary>¿Cómo funciona la app?</summary><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)">
+    <section data-aj="ayuda"><h2>Ayuda</h2><details class="help"><summary>¿Cómo funciona la app?</summary><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)">
       <li><b style="color:var(--fg)">Nunca fallar dos veces seguidas.</b> Si ayer no salió, hoy va aunque sea el mínimo.</li>
       <li><b style="color:var(--fg)">Día malo = versión mínima.</b> Cuenta igual.</li>
       <li><b style="color:var(--fg)">Imprevisto real = libre.</b> No suma ni resta.</li>
@@ -1299,7 +1323,7 @@ function confetti(){return;if(matchMedia('(prefers-reduced-motion: reduce)').mat
 
 /* ---------- HOY ---------- */
 function renderHeader(){const t=todayStr(),hr=Number(new Date().toLocaleString('en-US',{timeZone:TZ,hour:'numeric',hour12:false}));
-  document.getElementById('hello').textContent=(hr>=5&&hr<13?'Buen día':hr>=13&&hr<20?'Buenas tardes':'Buenas noches')+', José';
+  document.getElementById('hello').textContent=!document.getElementById('v-prog').hidden?'Progreso':(hr>=5&&hr<13?'Buen día':hr>=13&&hr<20?'Buenas tardes':'Buenas noches')+', José';
   document.getElementById('dateline').textContent=fmt(t,{weekday:'long',day:'numeric',month:'long'});}
 const MOMS=[['manana','Mañana'],['tarde','Tarde'],['noche','Noche']];
 const momOfTime=t=>{const m=hm2m(t);return m<5*60?'noche':m<13*60?'manana':m<20*60?'tarde':'noche';};
@@ -1449,7 +1473,7 @@ function renderDay(T){const box=document.getElementById('day'),now=momNow();box.
   HABS().filter(h=>sched(h,T)).forEach(h=>{const m=h.time?momOfTime(h.time):(h.moment||'manana');items.push({k:'h',h,m,key:mi(m)*10000+sortKey(htime(h))});});
   if(S.exp){const d=expDay(T);if(d>=1&&d<=14){const m=['mate','caminar'].includes(S.exp.k)?'tarde':'noche';items.push({k:'x',m,key:mi(m)*10000-1});}}
   const core=HABS().filter(h=>h.active!==false&&!h.opt&&!h.breath);
-  if(core.length>4&&!S.foco&&(!S.focoSkip||T>=add(S.focoSkip,7))){const f=document.createElement('div');f.className='foco';f.innerHTML=`<p><b>Tenés ${core.length} hábitos fijos.</b> Para que se vuelvan automáticos conviene arrancar con 3 o 4. Los demás quedan en pausa (no se borran) y los sumás cuando estos salgan solos.</p><div class="acts"><button class="btn primary" type="button">Elegir mis hábitos</button><button class="link" type="button">Ahora no</button></div>`;
+  if(core.length>4&&!S.foco&&(Object.keys(S.dias).length||S.welc)&&(!S.focoSkip||T>=add(S.focoSkip,7))){const f=document.createElement('div');f.className='foco';f.innerHTML=`<p><b>Tenés ${core.length} hábitos fijos.</b> Para que se vuelvan automáticos conviene arrancar con 3 o 4. Los demás quedan en pausa (no se borran) y los sumás cuando estos salgan solos.</p><div class="acts"><button class="btn primary" type="button">Elegir mis hábitos</button><button class="link" type="button">Ahora no</button></div>`;
     const bb=f.querySelectorAll('button');bb[0].onclick=openFoco;bb[1].onclick=()=>{S.focoSkip=T;save();renderDay(T);};box.appendChild(f);}
   if(!items.length){box.insertAdjacentHTML('beforeend','<p class="empty">Hoy no toca ningún hábito.</p>');return;}
   items.sort((a,b)=>a.key-b.key);
@@ -1458,7 +1482,7 @@ function renderDay(T){const box=document.getElementById('day'),now=momNow();box.
   const fresh=it=>it.k==='h'&&Date.now()-(JUST[it.h.id]||0)<1100,main=items.filter(it=>!isOpt(it)&&(!isDone(it)||fresh(it))),done=items.filter(it=>isDone(it)&&!fresh(it)),opt=items.filter(it=>isOpt(it)&&!isDone(it));
   const rowOf=it=>it.k==='h'?habRow(T,it.h):expRow(T);
   const full=reqs.length&&dn===reqs.length,fr=reqs.length?dn/reqs.length:0,R2=17,C2=2*Math.PI*R2,sk=full?dayStreak():0;
-  const hd=document.createElement('div');hd.className='dhd dhd2'+(full?' full':'');hd.innerHTML=`<div class="dring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="${R2}" class="dr0"/><circle cx="21" cy="21" r="${R2}" class="dr1" style="stroke-dasharray:${C2.toFixed(1)};stroke-dashoffset:${(C2*(1-fr)).toFixed(1)}"/></svg>${full?'<svg viewBox="0 0 24 24" class="drk"><path d="m6 12.5 4 4 8-9"/></svg>':''}</div><div class="dtx"><h2>${full?'Día completo':'Hábitos de hoy'}</h2><span class="sub small num">${reqs.length?(full?(sk>1?sk+' días seguidos':'Todo hecho por hoy'):dn+' de '+reqs.length+' hechos'):'Nada obligatorio hoy'}</span></div>`;box.appendChild(hd);
+  const hd=document.createElement('div');hd.className='dhd dhd2'+(full?' full':'');hd.innerHTML=`<div class="dring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="${R2}" class="dr0"/><circle cx="21" cy="21" r="${R2}" class="dr1" style="stroke-dasharray:${C2.toFixed(1)};stroke-dashoffset:${(C2*(1-fr)).toFixed(1)}"/></svg>${full?'<svg viewBox="0 0 24 24" class="drk"><path d="m6 12.5 4 4 8-9"/></svg>':reqs.length?'<b class="drp num">'+Math.round(fr*100)+'%</b>':''}</div><div class="dtx"><h2>${full?'Día completo':'Hábitos de hoy'}</h2><span class="sub small num">${reqs.length?(full?(sk>1?sk+' días seguidos':'Todo hecho por hoy'):dn+' de '+reqs.length+' hechos'):'Nada obligatorio hoy'}</span></div>`;box.appendChild(hd);
   const list=document.createElement('div');list.className='rows flat';let last='';
   main.forEach(it=>{if(it.m!==last){last=it.m;const l=document.createElement('p');l.className='mlab'+(it.m===now?' now':'');l.innerHTML=MICO[it.m]+'<span></span>';l.querySelector('span').textContent=MOMS[mi(it.m)][1]+(it.m===now?' · ahora':'');list.appendChild(l);}list.appendChild(rowOf(it));});
   if(main.length)box.appendChild(list);
@@ -1534,11 +1558,16 @@ function renderNap(T){const box=document.getElementById('napBox');if(!box)return
     else if(a==='si'||a==='no'||a==='nose'){cur.listo=true;cur.dormido=a==='si'?true:a==='no'?false:null;toast(a==='no'?'Anotado: descansaste sin dormir':'Anotado');}
     patchDay(T,{nap:cur});renderNap(T);});}
 setInterval(()=>{const n=(S.dias[todayStr()]||{}).nap;if(n&&n.terminaA&&!n.listo&&!document.hidden)renderNap(todayStr());},20000);
-function renderHoy(){const T=todayStr();renderBkHoy(T);renderImp(T);renderBat(T);arrangeHoy();renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
+function renderWelc(){const el=document.getElementById('welc');if(!el)return;const vis=!Object.keys(S.dias).length&&!S.welc;el.hidden=!vis;if(!vis){el.innerHTML='';return;}
+  el.innerHTML=`<div class="welc"><b>¿Reinstalaste la app?</b><p>Si tenés una copia, restaurala y vuelve todo. Si solo querés que vuelvan los pasos, pegá tu código.</p><div class="inl"><button class="btn primary" type="button" id="wcImp">Restaurar copia</button><button class="btn" type="button" id="wcCode">Tengo código de pasos</button></div><button class="link" type="button" id="wcNo">Empiezo de cero</button></div>`;
+  el.querySelector('#wcImp').onclick=()=>document.getElementById('impFile').click();
+  el.querySelector('#wcCode').onclick=()=>{show('aj');ajOpen('pasos');const b=document.getElementById('codeBox');if(b)b.open=true;setTimeout(()=>{const i=document.getElementById('codeIn');if(i){i.scrollIntoView({block:'center'});i.focus();}},250);};
+  el.querySelector('#wcNo').onclick=()=>{S.welc=1;save();renderWelc();};}
+function renderHoy(){const T=todayStr();renderWelc();renderBkHoy(T);renderImp(T);renderBat(T);arrangeHoy();renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
 /* copia de seguridad: si pasaron 7 días sin copia, una línea en Hoy para guardarla con un toque */
 function renderBkHoy(T){const el=document.getElementById('bkHoy');if(!el)return;const n=Object.keys(S.dias).length,since=S.backup?Math.round((toD(T)-toD(S.backup))/864e5):null;
-  const show=n>=3&&(since===null||since>=7)&&!(S.bkSnz&&T<S.bkSnz);el.hidden=!show;if(!show){el.innerHTML='';return;}
-  el.innerHTML=`<div class="revrow bkrow"><div><b>${since===null?'Todavía no guardaste una copia de tus datos':'Hace '+since+' días que no guardás una copia'}</b><br><span>Tus datos están solo en este celular. Tocá Guardar copia y elegí Guardar en Archivos → iCloud Drive.</span></div><div class="inl"><button class="btn primary" type="button" id="bkGo">Guardar copia</button><button class="link" type="button" id="bkLater">Más tarde</button></div></div>`;
+  const show=(since===null?n>=2:since>=7&&n>=3)&&!(S.bkSnz&&T<S.bkSnz);el.hidden=!show;if(!show){el.innerHTML='';return;}
+  el.innerHTML=`<div class="revrow bkrow"><div><b>${since===null?'Todavía no guardaste una copia de tus datos':'Hace '+since+' días que no guardás una copia'}</b><br><span>Tus datos están solo en este celular: si borrás la app, se pierden. Tocá Guardar copia y elegí Guardar en Archivos → iCloud Drive.</span></div><div class="inl"><button class="btn primary" type="button" id="bkGo">Guardar copia</button><button class="link" type="button" id="bkLater">Más tarde</button></div></div>`;
   el.querySelector('#bkGo').onclick=()=>document.getElementById('expBtn').click();el.querySelector('#bkLater').onclick=()=>{S.bkSnz=add(T,3);save();renderBkHoy(T);};}
 function rangeRatio(a,b,only){const T=todayStr();let tot=0,got=0;for(let s=a;s<=b&&s<=T;s=add(s,1)){HABS().forEach(h=>{if(only&&h!==only)return;if(!counts(h,s))return;if(s===T&&st(s,h.id)===0)return;const v=st(s,h.id);tot++;got+=v===2?1:v===1?.5:0;});}return tot?got/tot:null;}
 function renderWeek(T){const box=document.getElementById('weekBox'),d=dow(T);box.innerHTML='';
@@ -2074,7 +2103,7 @@ function quickRow(T){const x=slp(T),d=(S.dias[T]||{}).pasosHoy,w=waterOf(T),g=wa
   const stale=stepsStale(T),stSub=busy?'Actualizando…':PEND?'Tocá para pegar':d?(d.ts?agoTxt(d.ts):'a las '+d.t):stale?'No llegan':(S.salud.syncLast?'Sin datos de hoy':'Tocá para traer');
   return `<div class="qrow${slOn?'':' q2'}">${
     slOn?tile('qSl','En cama',fmtH(slH(x)),x.b+' → '+x.w,slH(x)/S.salud.meta*100,'','var(--olive)'):''}${
-    tile('qSt','Pasos',d?fmtN(d.n):'—',stSub,d?d.n/8000*100:0,PEND?'pend':stale?'warn':'','var(--sand)')}${
+    tile('qSt','Pasos',d?fmtN(d.n):'<span class="qe">Sin datos</span>',stSub,d?d.n/8000*100:0,PEND?'pend':stale?'warn':'','var(--sand)')}${
     tile('qWa','Agua',fmtL(w),'de '+fmtL(g),w/g*100,w>=g?'full':'','var(--water)').replace('</button>','<span class="qplus" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></button>')}</div>`;}
 function stepsRun(){SYNC_TAP=Math.floor(Date.now()/1000);try{sessionStorage.setItem('syncTap',String(SYNC_TAP));}catch(e){}if(!S.salud.syncLast){PEND=true;try{sessionStorage.setItem('pendPasos','1');}catch(e){}}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME);setTimeout(()=>renderBat(todayStr()),400);}
 async function stepsPaste(T){try{const t=await navigator.clipboard.readText(),parts=String(t).split('|'),num=x=>parseInt(String(x||'').split(/[,]/)[0].replace(/[^0-9]/g,''),10),n=num(parts[0]),w=parts.length>1?num(parts[1]):NaN;if(n>=0&&n<80000&&String(parts[0]).match(/[0-9]/)){const pp={pasosHoy:{n,t:nowHM(),ts:Math.floor(Date.now()/1000)}};if(w>=0&&w<20000)pp.aguaH=w;patchDay(T,pp);toast('Pasos actualizados: '+fmtN(n)+(w>0?' · agua de Salud: '+fmtL(w):''));}else if(String(t).trim())toast('Lo copiado no es un número de pasos. Revisá el atajo.');else openStepsHelp();}catch(e){toast('No se pudo pegar');}PEND=false;try{sessionStorage.removeItem('pendPasos');}catch(e){}renderAll();}
@@ -2133,7 +2162,7 @@ function openDay(s){const draw=()=>{const list=HABS().filter(h=>sched(h,s));
 function goalKey(g){const T=todayStr();let dl='Sin fecha límite';if(g.deadline){const d=Math.round((toD(g.deadline)-toD(T))/864e5);dl=d>=0?`Faltan ${d} días`:'Fecha cumplida';}
   const m=(g.metrics||[]).find(x=>x.type!=='log'&&Number(x.target)>0)||(g.metrics||[]).find(x=>x.type!=='log');let ml='';
   if(m){const v=metricValue(m),tg=Number(m.target)||0;ml=`${dec(v)}${tg?' / '+tg:''} ${String(m.label).replace(/\s*\(.*\)$/,'').toLowerCase()}`;}
-  const H=g.hitos||[];return {dl,ml,hl:H.length?H.filter(x=>x.done).length+'/'+H.length+' hitos':''};}
+  const H=g.hitos||[];return {dl,ml,hl:H.length?'Hitos: '+H.filter(x=>x.done).length+' de '+H.length:''};}
 function renderGoals(){const box=document.getElementById('goals');box.innerHTML='';if(!GOALS().length){box.innerHTML='<p class="empty">Sin objetivos todavía.</p>';return;}
   const HS=['g_fisico','g_mente'],gs=GOALS().filter(g=>HS.includes(g.id)),gv=GOALS().filter(g=>!HS.includes(g.id));let tgt=box;
   const sub=t=>{const h=document.createElement('p');h.className='gsub';h.textContent=t;box.appendChild(h);};
@@ -2191,7 +2220,7 @@ function compactIns(){const w=document.querySelector('#insights .ins');if(!w||w.
 function saludWarn(T){const box=document.getElementById('salud'),wk=sleepStats(add(T,-6),T),gm=goalById('g_mente'),turno=gm&&(gm.hitos||[]).find(h=>h.id==='t7');
   if(!(wk&&wk.hd>=3&&!(turno&&turno.done)))return;const n=document.createElement('div');n.className='note warnx';n.innerHTML=`<b>${wk.hd} de ${wk.n} días con dolor de cabeza esta semana.</b> Si se mantiene varias semanas, vale una consulta con un clínico.`;box.children[0].after(n);}
 
-function renderAll(){const T=todayStr();renderBkUndo();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();renderSyncCfg();compactExp(T);compactIns();saludWarn(T);renderPTab();renderDataLine();}
+function renderAll(){const T=todayStr();renderBkUndo();renderAjIdx();renderHeader();renderHoy();renderSleep(T);renderExpHoy(T);renderProg();renderCampo(T);renderMetas(T);renderExpProg(T);renderSalud(T);renderSaludExtras(T);renderInsights();renderAj();renderCfg();renderFab();renderSyncCfg();compactExp(T);compactIns();saludWarn(T);renderPTab();renderDataLine();}
 
 /* ---------- hojas y formularios ---------- */
 const sheet=document.getElementById('sheet'),SI=document.getElementById('SI');
@@ -2293,10 +2322,22 @@ function renderBkUndo(){const el=document.getElementById('bkUndo');if(!el)return
   bt.onclick=()=>{let d=null;try{d=JSON.parse(localStorage.getItem(b.k));}catch(e){}if(!d||shapeErr(d)||!Array.isArray(d.habitos)){toast('Esa copia interna no se puede leer.');return;}
     confirmReplace(d,'¿Volver a como estaba?','Así estaban tus datos antes de '+b.why+', el '+when+'.');};}
 
+/* ---------- Ajustes: lista y subpantallas ---------- */
+let AJSUB=null;
+const AJI={habitos:'<path d="M5 12.5l4 4 10-10"/>',avisos:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/>',metas:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',bloques:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',pasos:'<path d="M3 13h4l2-6 4 12 2-6h6"/>',pantalla:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',copia:'<path d="M4 8h16v12H4zM6 4h12l2 4H4zM9 13h6"/>',ayuda:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5M12 16.8v.2"/>'};
+function ajRows(){const H=S.habitos||[],on=H.filter(x=>x.active!==false).length,off=H.length-on,tone=(document.getElementById('cfgTone')||{}).selectedOptions,tn=tone&&tone[0]?tone[0].textContent.split(':')[0]:'';
+  const bk=S.backup?'Última copia: '+fmt(S.backup,{day:'numeric',month:'short'}):'Todavía no guardaste ninguna';
+  return [['habitos','Hábitos',on+' activos'+(off?' · '+off+' en pausa':'')],['avisos','Avisos',S.push&&S.push.on?'Activados':'Apagados',!(S.push&&S.push.on)],['metas','Metas de salud',fmtH(S.salud.meta)+' en cama · '+fmtL(waterGoal())+' de agua'],['bloques','Bloques fijos del día',(S.fijos||[]).length+' bloques'],['pasos','Pasos automáticos',S.salud.syncLast?'Funcionando':'Todavía no llegó ningún dato',!S.salud.syncLast],['pantalla','Pantalla',tn],['copia','Copia de seguridad',bk,!S.backup],['ayuda','Ayuda','Cómo funciona la app']];}
+function renderAjIdx(){const el=document.getElementById('ajIdx');if(!el)return;el.innerHTML=ajRows().map(([k,t,s,w])=>`<button type="button" class="ajr" data-k="${k}"><span class="aji"><svg viewBox="0 0 24 24">${AJI[k]}</svg></span><span class="t"><b>${t}</b><small class="${w?'w':''}"></small></span>${SVGI.arr}</button>`).join('');
+  el.querySelectorAll('.ajr').forEach((b,i)=>{b.querySelector('small').textContent=ajRows()[i][2];b.onclick=()=>{vib(6);ajOpen(b.dataset.k);};});}
+function ajOpen(k){AJSUB=k||null;const v=document.getElementById('v-aj');v.classList.toggle('ajsub',!!AJSUB);document.getElementById('ajIdx').hidden=!!AJSUB;
+  v.querySelectorAll('section[data-aj]').forEach(s=>s.hidden=s.dataset.aj!==AJSUB);
+  const r=AJSUB&&ajRows().find(x=>x[0]===AJSUB);document.getElementById('ajT').textContent=r?r[1]:'Ajustes';document.getElementById('backBtn').textContent=AJSUB?'‹ Ajustes':'‹ Hoy';
+  if(!AJSUB)renderAjIdx();window.scrollTo(0,0);}
 /* ---------- navegación ---------- */
-function show(v){const hd=document.querySelector('header.top');if(hd)hd.hidden=!(v==='hoy'||v==='prog');if(v==='hoy'){ANIM.hoy=true;}if(v==='prog'){ANIM.prog=true;}document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!=='v-'+v);document.querySelectorAll('nav.tabs button').forEach(b=>{if(b.dataset.v===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});document.querySelector('nav.tabs').hidden=v==='aj'||v==='rev'||v==='hist';{const f=document.getElementById('wfab');if(f)f.hidden=v==='aj'||v==='rev'||v==='hist';}window.scrollTo(0,0);}
+function show(v){setTimeout(renderHeader,0);const hd=document.querySelector('header.top');if(hd)hd.hidden=!(v==='hoy'||v==='prog');if(v==='hoy'){ANIM.hoy=true;}if(v==='prog'){ANIM.prog=true;}document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!=='v-'+v);document.querySelectorAll('nav.tabs button').forEach(b=>{if(b.dataset.v===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});document.querySelector('nav.tabs').hidden=v==='aj'||v==='rev'||v==='hist';{const f=document.getElementById('wfab');if(f)f.hidden=v==='aj'||v==='rev'||v==='hist';}window.scrollTo(0,0);}
 document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{show(b.dataset.v);vib(6);const T=todayStr();if(b.dataset.v==='prog'){renderCampo(T);renderMetas(T);}else renderBat(T);});
-document.getElementById('gearBtn').onclick=()=>show('aj');document.getElementById('backBtn').onclick=()=>show('hoy');document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>show(b.dataset.back||'hoy'));document.getElementById('histRow').onclick=()=>show('hist');
+document.getElementById('gearBtn').onclick=()=>{show('aj');ajOpen(null);};document.getElementById('backBtn').onclick=()=>{if(AJSUB)ajOpen(null);else show('hoy');};document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>show(b.dataset.back||'hoy'));document.getElementById('histRow').onclick=()=>show('hist');
 document.getElementById('mPrev').onclick=()=>{mOff--;renderProg();};document.getElementById('mNext').onclick=()=>{if(mOff<0){mOff++;renderProg();}};
 document.getElementById('newHab').onclick=()=>openHab(null);document.getElementById('newFix').onclick=()=>openFix(null);document.getElementById('newGoal').onclick=()=>openGoal(null);
 document.getElementById('prioAdd').onclick=()=>{document.getElementById('prioAdd').hidden=true;document.getElementById('prioForm').hidden=false;document.getElementById('prioIn').focus();};
