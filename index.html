@@ -716,6 +716,7 @@ html{background:var(--page)!important}
 /* encabezado */
 header.top{align-items:flex-start}
 header.top .eyebrow{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.lgl{width:38px;height:38px;flex:0 0 auto;border-radius:11px;box-shadow:0 2px 8px rgba(40,55,10,.25)}.lgl .lgarc{transition:stroke-dasharray .8s cubic-bezier(.2,.7,.2,1)}
 header.top h1{font-size:30px;letter-spacing:-.045em}
 header.top .ghost{width:38px;height:38px;border-radius:50%;background:var(--bg);box-shadow:var(--cshadow);color:var(--fg)}
 header.top .ghost+.ghost{margin-left:8px}
@@ -976,7 +977,24 @@ nav.tabs{padding-left:0!important;padding-right:0!important;-webkit-user-select:
   <div class="minibar" id="miniBar" aria-hidden="true"><span id="miniT">Hoy</span></div>
 <header class="top">
     <div style="min-width:0"><p class="eyebrow" id="dateline"></p><h1 id="hello">Hola, José</h1></div>
-    <div style="display:flex;gap:2px">
+    <div style="display:flex;gap:6px;align-items:center">
+      <svg id="lgLive" class="lgl" role="img" aria-label="Progreso del día" viewBox="0 0 1024 1024"><defs>
+<linearGradient id="lgbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2e3b10"/><stop offset=".55" stop-color="#5f7a22"/><stop offset="1" stop-color="#a8c24e"/></linearGradient>
+<radialGradient id="lgo1" cx=".8" cy=".12" r=".95"><stop offset="0" stop-color="#e4f58a" stop-opacity=".92"/><stop offset=".35" stop-color="#e4f58a" stop-opacity=".5"/><stop offset=".7" stop-color="#e4f58a" stop-opacity=".12"/><stop offset="1" stop-color="#e4f58a" stop-opacity="0"/></radialGradient>
+<radialGradient id="lgo2" cx=".12" cy=".98" r=".95"><stop offset="0" stop-color="#141b06" stop-opacity=".92"/><stop offset=".35" stop-color="#141b06" stop-opacity=".5"/><stop offset=".7" stop-color="#141b06" stop-opacity=".12"/><stop offset="1" stop-color="#141b06" stop-opacity="0"/></radialGradient>
+<linearGradient id="lggf" x1=".2" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".78"/><stop offset=".5" stop-color="#fff" stop-opacity=".30"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="lggs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#fff" stop-opacity=".15"/><stop offset=".6" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity=".75"/></linearGradient>
+<filter id="lgb2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+<filter id="lgsh" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="34"/><feOffset dy="42"/><feComponentTransfer><feFuncA type="linear" slope=".45"/></feComponentTransfer><feColorMatrix type="matrix" values="0 0 0 0 .08  0 0 0 0 .12  0 0 0 0 .02  0 0 0 1 0"/></filter>
+<clipPath id="lghc"><path d="M512 800 C235 615 205 395 333 318 C430 262 503 320 512 382 C521 320 594 262 691 318 C819 395 789 615 512 800Z"/></clipPath><clipPath id="lgt"><rect width="1024" height="1024" rx="230"/></clipPath></defs>
+<g clip-path="url(#lgt)"><rect width="1024" height="1024" fill="url(#lgbg)"/><rect width="1024" height="1024" fill="url(#lgo1)"/><rect width="1024" height="1024" fill="url(#lgo2)"/></g>
+<circle cx="512" cy="512" r="380" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="24"/>
+<circle class="lgarc" cx="512" cy="512" r="380" fill="none" stroke="#fff" stroke-opacity=".88" stroke-width="24" stroke-linecap="round" stroke-dasharray="@D@ 2387.6" transform="rotate(-90 512 512)"/>
+<g transform="translate(512 512) scale(.86) translate(-512 -560)"><path d="M512 800 C235 615 205 395 333 318 C430 262 503 320 512 382 C521 320 594 262 691 318 C819 395 789 615 512 800Z" filter="url(#lgsh)"/><path d="M512 800 C235 615 205 395 333 318 C430 262 503 320 512 382 C521 320 594 262 691 318 C819 395 789 615 512 800Z" fill="url(#lggf)"/>
+<g clip-path="url(#lghc)"><ellipse cx="400" cy="330" rx="210" ry="110" fill="#fff" opacity=".55" filter="url(#lgb2)" transform="rotate(-28 400 330)"/><ellipse cx="640" cy="790" rx="190" ry="70" fill="#e9f5a8" opacity=".55" filter="url(#lgb2)"/></g>
+<path d="M512 800 C235 615 205 395 333 318 C430 262 503 320 512 382 C521 320 594 262 691 318 C819 395 789 615 512 800Z" fill="none" stroke="url(#lggs)" stroke-width="7"/>
+<path d="M404 548 L487 631 L632 440" stroke="#000" stroke-opacity=".25" stroke-width="64" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="translate(0 12)" filter="url(#lgb2)"/>
+<path d="M404 548 L487 631 L632 440" stroke="#fff" stroke-width="60" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></svg>
       <button class="ghost" type="button" id="themeBtn" aria-label="Cambiar modo claro u oscuro"><svg class="i" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
       <button class="ghost" type="button" id="gearBtn" aria-label="Ajustes"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
     </div>
@@ -1533,7 +1551,8 @@ function renderNap(T){const box=document.getElementById('napBox');if(!box)return
     else if(a==='si'||a==='no'||a==='nose'){cur.listo=true;cur.dormido=a==='si'?true:a==='no'?false:null;toast(a==='no'?'Anotado: descansaste sin dormir':'Anotado');}
     patchDay(T,{nap:cur});renderNap(T);});}
 setInterval(()=>{const n=(S.dias[todayStr()]||{}).nap;if(n&&n.terminaA&&!n.listo&&!document.hidden)renderNap(todayStr());},20000);
-function renderHoy(){const T=todayStr();renderBkHoy(T);renderImp(T);renderBat(T);arrangeHoy();renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
+function renderLogo(T){const a=document.querySelector('#lgLive .lgarc');if(!a)return;const r=dayRatio(T),C=2*Math.PI*380;a.setAttribute('stroke-dasharray',(C*Math.max(0,Math.min(1,r||0))).toFixed(1)+' '+C.toFixed(1));}
+function renderHoy(){const T=todayStr();renderLogo(T);renderBkHoy(T);renderImp(T);renderBat(T);arrangeHoy();renderNap(T);renderTasks(T);renderDay(T);renderRevRow(T);renderRev(T);}
 /* copia de seguridad: si pasaron 7 días sin copia, una línea en Hoy para guardarla con un toque */
 function renderBkHoy(T){const el=document.getElementById('bkHoy');if(!el)return;const n=Object.keys(S.dias).length,since=S.backup?Math.round((toD(T)-toD(S.backup))/864e5):null;
   const show=n>=3&&(since===null||since>=7)&&!(S.bkSnz&&T<S.bkSnz);el.hidden=!show;if(!show){el.innerHTML='';return;}
